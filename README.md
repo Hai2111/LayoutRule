@@ -16,6 +16,8 @@
 - **DRC=0 là điều kiện cần, không đủ**; agent còn phải kiểm tra topology, return path, vòng dòng chuyển mạch, nhiệt, khả năng sản xuất và rủi ro EMI/SI.
 - Các giới hạn chiều rộng, clearance, via, impedance **lấy từ nhà sản xuất, stackup và từng dự án**, không khóa cứng thành một cấu hình cho mọi board.
 
+**Kiểm tra số video:** chạy `python tools/catalog_status.py --json-output report/videos.json --csv-output report/videos.csv` tại root repo. Không chứa transcript có bản quyền.
+
 ## Áp dụng vào KiCadAutoLayout
 1. Đọc netlist/schematic, footprint, datasheet, stackup và PCB constraints.
 2. Lập placement constraints, gán functional blocks và critical nets.
