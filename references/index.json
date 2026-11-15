@@ -1,8 +1,8 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "updated": "2026-11-15",
-  "count": 29,
-  "disclaimer": "Index derived from REFERENCE_DESIGN_CATALOG.md; URLs and files listed are not evidence that CAD has been downloaded or parsed. Avoid automatic trust. SOURCE_PROJECT_LINKED ≠ manufacturer qualification. This catalog is not a PCB layout benchmark.",
+  "count": 36,
+  "disclaimer": "Source index provenance: CAD_PARTIAL_PARSED means source file footprint xy/rotation and selected pad-net labels extracted, not KiCad DRC or geometry/return current validated. CAD_GEOMETRY_PARSED and electrically_verified_by_us remain false for all unless full tests performed.",
   "references": [
     {
       "id": "RD01",
@@ -388,6 +388,111 @@
       "limitations": "Chưa mở PDF screenshot; không có hình nào được xác minh trực tiếp ở bước này",
       "cad_geometry_parsed": false,
       "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD30",
+      "title": "pms67 STM32F4 Reference PCB – STM32F405 + buck MP2359 + USB",
+      "source_urls": [
+        "https://github.com/pms67/STM32F4-Reference-PCB"
+      ],
+      "evidence_status": "CAD_PARTIAL_PARSED",
+      "evidence_scope": "(Đã đọc source PCB; 54 modules, 4-layer, 245 segments, 67 vias; 14 linh kiện critical trích ref/value/xy/rot/net; pinned blob abc62424db5875d85692611bf2f9ad2ec33f148d)",
+      "pattern_hypothesis": "Đối chiếu IC nguồn MP2359–L1–CIN/COUT, ESD U3–USB J5–MCU U2; PL11 tutorial pairing; PT02/PT03/PT07",
+      "limitations": "Chưa parse toàn bộ copper zone geometry hay chạy DRC; đây là case study chưa được chứng nhận optimal PCB. Xem references/RD30_kicad_placement_sample.json",
+      "cad_placement_parsed": true,
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false,
+      "source_blob_sha": "abc62424db5875d85692611bf2f9ad2ec33f148d"
+    },
+    {
+      "id": "RD31",
+      "title": "Adafruit Feather ESP32-S3 – native USB-C + LiPo + RF",
+      "source_urls": [
+        "https://github.com/adafruit/Adafruit-Feather-ESP32-S3-PCB"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(Đã xác nhận repo có board+schematic files, không parse Eagle)",
+      "pattern_hypothesis": "Placement module antenna, USB-C charger, battery fuel gauge, USB direct MCU; PT01/PT05/PT07/PT10",
+      "limitations": "Không sao chép board content; phải kiểm tra bản 8MB/no PSRAM đúng revision và luật license.",
+      "cad_placement_parsed": false,
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false,
+      "source_blob_sha": null
+    },
+    {
+      "id": "RD32",
+      "title": "SparkFun Soft Power Switch USB-C – power gating + USB passthrough",
+      "source_urls": [
+        "https://github.com/sparkfun/SparkFun_Soft_Power_Switch_USB-C"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(Đã xác nhận project KiCad và phạm vi 5V 2A/4A peak qua README, chưa phân tích source)",
+      "pattern_hypothesis": "USB interface power-path / MOSFET / button / protection / return; PT01/PT02/PT05/PT07",
+      "limitations": "Power switching use case differs from charger or USB-PD; do not copy current limit.",
+      "cad_placement_parsed": false,
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false,
+      "source_blob_sha": null
+    },
+    {
+      "id": "RD33",
+      "title": "Libre Solar BMS-C1 – 16-cell 70–100 A battery management",
+      "source_urls": [
+        "https://github.com/LibreSolar/bms-c1"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(Official repo confirms board, BQ76952, ESP32-C3, high-side FET/shunt and CAN/RS485)",
+      "pattern_hypothesis": "Cell sense vs high-current shunt/FET and high-voltage domain grouping + thermal and safety; PT11/PT13/PT14/PT15/PT16",
+      "limitations": "Prototype with minor issues remaining; 70–100A conditional on FET and cooling, no claim layout validated by us.",
+      "cad_placement_parsed": false,
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false,
+      "source_blob_sha": null
+    },
+    {
+      "id": "RD34",
+      "title": "Libre Solar MPPT-2420-HC – buck/MPPT 20A + CAN",
+      "source_urls": [
+        "https://github.com/LibreSolar/mppt-2420-hc"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(Repo: 80V PV, 20A inductor, STM32G431, 10–32V battery, CAN)",
+      "pattern_hypothesis": "Current path, TO-220 mechanical heatsink and connector anchors, critical shunt/ADC loops; PT01/PT02/PT08/PT14",
+      "limitations": "Not a certified 20A thermal design for other cooling geometry; no CAD parse yet.",
+      "cad_placement_parsed": false,
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false,
+      "source_blob_sha": null
+    },
+    {
+      "id": "RD35",
+      "title": "Libre Solar MPPT-1210-HUS – 10A solar charge + dual USB",
+      "source_urls": [
+        "https://github.com/LibreSolar/mppt-1210-hus"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(Repo: 12V battery, 40V max PV, charge/load 10A, USB power output and protection)",
+      "pattern_hypothesis": "Two separate power domains (PV/battery/USB) with thermal and output current restrictions; PT02/PT08/PT15",
+      "limitations": "Evaluation phase only; high-current traces must be recomputed to user's copper/environment.",
+      "cad_placement_parsed": false,
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false,
+      "source_blob_sha": null
+    },
+    {
+      "id": "RD36",
+      "title": "STM32F401RE 2-layer USB-C dev board – independent student reference",
+      "source_urls": [
+        "https://github.com/colonelblacc/STM32F401RE-Dev-Board-Design"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(README claims 0 DRC/ERC, 2-layer STM32F401RE and USB-C; no independent verification)",
+      "pattern_hypothesis": "Good candidate for quality benchmark / negative test using DRC ≠ layout quality; PT03/PT04/PT07/PT09",
+      "limitations": "Self-reported review only, not manufacturer's EVM or functional/EMI validation.",
+      "cad_placement_parsed": false,
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false,
+      "source_blob_sha": null
     }
   ]
 }
