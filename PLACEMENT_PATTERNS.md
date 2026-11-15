@@ -88,6 +88,38 @@ Updated 2026-11-15. Nguồn đối chiếu: [REFERENCE_DESIGN_CATALOG.md](REFERE
 - **Nguồn:** EX11/12/20, PL09/31.
 - **Kiểm tra:** per critical signal via transition với adjacent return, resulting GND polygon neck, current/thermal rating; QFN pad via-in-pad nếu fab cho phép.
 
+## PT13 — Repeated analog channels: cấu trúc lặp và quản lý matching
+- **Khi nào:** board có 2+ channel CT, Rogowski coil, đồng pha đa kênh, multi-phase driver; yêu cầu matching channel nếu accuracy/signal integrity thực sự đòi hỏi.
+- **Reference:** RD11 TI TIDA-010986 (đã mở assembly SLURB45 trang 1): U1/U4/U6 lặp cấu trúc R/C theo pha; RD10/RD12/RD13/ RD20 là candidates **chưa phân tích geometry**.
+- **Placement:** tạo một channel template với input connector, protection/RC, gain stage, ADC path; đặt các channel cạnh nhau hoặc theo đối xứng nếu cơ khí/EMI cho phép; tách khỏi high-di/dt source.
+- **Routing:** map pairing `input_i → filter_i → amplifier_i → ADC_i`; so sánh branch lengths/vias/reference only when relevant, không bắt mọi channel có length chính xác như nhau.
+- **Check:** channel component-count, relative group order, per-channel net topology, return overlap, crosstalk aggressor.
+- **Exception:** pha/chức năng với scaling/gain khác nhau không nên ép identical geometry; assembly artwork không tự xác nhận điện trở/giá trị/timing.
+- **Status:** CONDITIONAL / evidence RD11 partial-visual.
+
+## PT14 — Isolation barrier / creepage floorplanning
+- **Khi nào:** ISO35T, isolated AFE, PoE, high-voltage input, medical/safety isolation.
+- **Reference:** RD14 (TI TIDA-010065), RD18 (TI TIDA-00057), RD10 (isolated interfaces), RD25 (PoE revision).
+- **Placement:** xác định primary vs secondary domains, boundary và nơi tín hiệu đi qua isolation component; **chừa đủ hành lang trước khi bố trí transceiver, connector, DC/DC và testpoint**.
+- **Check:** clearance, creepage along board surface, slots/cuts, copper/mask/connector and any copper crossing barrier; use applicable insulation standard, voltage, CTI, pollution degree, fab data.
+- **Safety:** không tự copy spacing từ EVM; không tự chèn GND stitching nối qua barrier; cần electrical isolation sign-off.
+- **Status:** HARD **nếu có spec cách ly xác định**, nếu chưa rõ `NEEDS_REVIEW`.
+
+## PT15 — Field bus connector/protection/transceiver chain
+- **Khi nào:** RS485 field interface, industrial external cable, optional isolated domains.
+- **Reference:** RD16 TIDA-00862, RD17 TIDA-00060, RD18 TIDA-00057 (Gerber listed only); PL32 protection tutorial.
+- **Placement:** chọn topology và hardware requirements trước: connector ↔ surge/ESD + common-mode filter nếu dùng ↔ transceiver ↔ MCU; bố trí TVS GND return ngắn và tránh surge through MCU analog ground.
+- **Check:** branch topology, stub, term/bias location, return, shield/chassis ground decision, isolated vs unisolated barrier.
+- **Caution:** 'TVS nearest connector' là heuristic về surge path, không phải min-center-distance; RS485 half/full duplex, bus bias và termination không trộn lẫn.
+- **Status:** CONDITIONAL / requires schematic + board review.
+
+## PT16 — Learn from revision diffs before encoding a rule
+- **Khi nào:** reference repository có released PCB history + ghi chú lỗi sản xuất/thermal/SI.
+- **Reference:** RD25 OLIMEX ESP32-POE revision log: I chuyển 2→4 layers để tăng cooling DCDC; H1 sửa Ethernet connection khi có tải; RD26 ESP32-GATEWAY change log về noise Ethernet clock/GPIO17.
+- **Method:** pin exact revision SHA and source state → derive before/after refdes+net+layer+board outline → link stated motivation → validate if geometry or electrical topology actually changed.
+- **Check:** source version, observed delta, claimed failure, whether fix is trace/placement/topology, evidence/test. Record outcomes rather than falsely saying 'this placement alone solved the problem'.
+- **Status:** HEURISTIC / design lessons until independent measurements and layout diff.
+
 ## Heuristic priority graph (không phải 1 luật cứng)
 ```text
 Mechanical constraints
