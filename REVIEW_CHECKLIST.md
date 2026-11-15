@@ -4,6 +4,7 @@ Mỗi check: `rule_id, status(PASS|FAIL|NEEDS_REVIEW|NA), evidence, file_hash, n
 
 | Phase | Questions | Expected evidence |
 |---|---|---|
+| 0. Source evidence | Are rules traceable to official standards, vendor IC-specific guides, and exact revision, or only general video hints? | TECHNICAL_SOURCES TSnn, reference RDnn, status and TS conflict log |
 | 1. Input integrity | Netlist vs PCB có đồng nhất? Footprint đúng MPN pin1/polarity? Constraints có nguồn? | ERC, netlist compare, fab stackup |
 | 2. Mechanical | Connectors, holes, keepouts, 3D heights, antenna clearance đúng? User-moved components có được giữ? | board outline, 3D exports, diff |
 | 2b. Vendor-specific exceptions | Crystal/clock rule, RF matching, layout current loop, USB/SDIO rules có đúng theo **đúng IC+revision**? | RDxx source + PTxx checks + measured footprint/pad distances |
