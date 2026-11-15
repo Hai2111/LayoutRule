@@ -4,6 +4,10 @@
 
 **Cập nhật:** 2026-11-15 · **Trạng thái:** research v0.3, có metadata/video chapters và một số reference PDF visual-inspected; **chưa xác minh video toàn văn; đã đọc một phần tọa độ linh kiện/net trong 1 tệp CAD, chưa parse hình học/DRC đầy đủ**.
 
+## Routing engine (bổ sung 2026-11-15)
+- [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md) — so sánh Freerouting DSN/SES và PCBWorld/CADET, luật routing + cách kiểm tra native DRC. Code thử nghiệm đã commit trong [Hai2111/Training/routing](https://github.com/Hai2111/Training/tree/main/routing).
+- KiCad 10 export/import Specctra DSN/SES được xác minh trong API chính thức. Adapter Python mới **chưa thực thi với KiCad/Java thật trên máy người dùng**, chỉ compile và plan-only test.
+
 ## Bắt đầu
 1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.
 2. [VIDEO_REVIEWS_EXTERNAL.md](VIDEO_REVIEWS_EXTERNAL.md) — **25 video review** ngoài hai kênh: Robert Feranec/FEDEVEL, EEVblog, element14.
