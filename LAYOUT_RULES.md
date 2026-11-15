@@ -75,5 +75,7 @@
 - Altium Academy decoupling routing tradeoffs: https://www.youtube.com/watch?v=1O48JZX8j5g
 - Altium Academy decoupling placement: https://www.youtube.com/watch?v=SSpyE9CP97g
 - Altium Academy AI vs human layout: https://www.youtube.com/watch?v=qX29OWSYTmI
+- Texas Instruments SPMA036B, hướng dẫn PCB trace corners (90° có thể chấp nhận; quan trọng hơn là tránh current loops): https://www.ti.com/lit/an/spma036b/spma036b.pdf
+- Altium routing settings including available corner styles: https://www.altium.com/documentation/altium-designer/pcb/routing/interactive
 
 **Nguồn hiện tại được xác minh ở mức description/chapter/site article, không phải đã xem đầy đủ tất cả video. Các diễn giải kỹ thuật là tổng hợp độc lập, không phải trích dẫn nguyên văn.**
