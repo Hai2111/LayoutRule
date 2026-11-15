@@ -1,6 +1,6 @@
 # EXTERNAL VIDEO REVIEWS — ngoài Phil's Lab và Altium Academy
 
-Updated: 2026-11-15. **20 video độc lập**, không trùng 43 video trong `VIDEO_CATALOG.md`. Chủ yếu Robert Feranec/FEDEVEL, cộng EEVblog và element14. Danh mục ưu tiên **placement, PCB review, routing**, không tính video chỉ dạy schematic.
+Updated: 2026-11-15. **25 video độc lập**, không trùng 43 video trong `VIDEO_CATALOG.md`. Chủ yếu Robert Feranec/FEDEVEL, cộng EEVblog và element14. Danh mục ưu tiên **placement, PCB review, routing**, không tính video chỉ dạy schematic.
 
 **M = metadata + mô tả/chapter đã kiểm tra; chưa xác minh toàn bộ transcript/hình ảnh. T = full transcript verified, V = full video visually reviewed; hiện đều M.** “Bài học” bên dưới là đề xuất vận dụng theo chủ đề, không gán cho tác giả thành phát ngôn nguyên văn.
 
@@ -26,6 +26,23 @@ Updated: 2026-11-15. **20 video độc lập**, không trùng 43 video trong `VI
 | EX18 | [Robert Feranec: How to Design Custom PCB in 3 Hours](https://courses.fedevel.com/blog/how-to-design-custom-pcb-in-3-hours-full-tutorial) | 45:15 PCB import; 46:33 placement; 1:23:18 routing; 3:01:20 manufacturing | Luồng CAD thực tế cho board clock: phù hợp thu thập ví dụ layout nhiều bước kèm manufacturing; ít ưu tiên hơn power/RF. | P01,P02,R01,G05; PT01 | M |
 | EX19 | [Robert Feranec: Tutorial 3 Altium Beginners PCB Layout](https://fedevel.com/blog/tutorial-3-for-altium-beginners-pcb-layout) | 03:59 stack/rules; 07:33 placement; 22:01 DRC | Ví dụ đơn giản placement + board outline + rule + DRC; nền tảng cho gate. | A02,P01,G05 | M |
 | EX20 | [Robert Feranec: Best VIA Placement for Decoupling Capacitors?](https://home.fedevel.com/blog/what-is-the-best-via-placement-for-decoupling-capacitors) | So sánh track width/via cho decoupling (nguồn thiếu chapter cụ thể) | Thách thức metric khoảng cách đơn thuần, cần xem mô phỏng/đo trước khi đưa ra threshold via. | P04,G03; PT03 | M |
+
+
+## Batch 2026-11-15 — nguồn video bổ sung (không trùng EX01–20)
+
+**Chỉ kiểm tra metadata, mô tả và chapter:** 5 video mới ở mức M; chưa có transcript/full visual verification.
+
+| ID | Video/source (link gốc) | Phần quan trọng | Ý nghĩa với placement / routing / review | Rule & Pattern | Status |
+|---|---|---|---|---|---|
+| EX21 | [Robert Feranec: How GND VIAs Improve Your PCB Layout](https://www.fedevel.com/blog/how-gnd-vias-improve-your-pcb-layout) | Video mô tả return-path transfer via; chưa có chapter đủ chi tiết | Lý do bố trí stitching via quanh signal layer/reference transition: return current phải có đường đi liên tục. Kích thước và via density theo stackup, không rải máy móc. | R05,G03,PT06,PT12 | M |
+| EX22 | [Robert Feranec + Eric Bogatin: Do You Really Need Power Planes?](https://home.fedevel.com/blog/do-you-really-need-power-planes-are-you-sure-eric-bogatin) | 03:40 stackups; 10:31 SGGS/SGPS; 37:10 measured noise; 54:55 emissions | So sánh power-plane / GND-plane arrangement trong ví dụ đo, không kết luận mọi board bỏ được power plane. | A03,R04,R05,G01 | M |
+| EX23 | [Robert Feranec + Eric Bogatin: Decoupling Capacitor Value & Placement](https://home.fedevel.com/blog/what-decoupling-capacitor-value-to-use-and-where-to-place-them-eric-bogatin) | 26:48 no-cap; 38:49 close bulk; 41:42 far bulk; 43:37 close 1µF; 46:24 placement; 55:49 100nF | Ví dụ so sánh tụ gần/xa và rise time: đo hiệu quả PDN thay vì ép một giá trị tụ hay khoảng cách cố định. | P04,R05,PT03 | M |
+| EX24 | [Robert Feranec + Rick Hartley: PCB Stackup & Layer Ordering](https://www.fedevel.com/blog/how-to-decide-on-your-pcb-layer-ordering-pouring-and-stackup-with-rick-hartley) | 15:57 change layers; 23:04 planes; 43:58 4L; 47:50 2L; 54:01 8L | Reference-plane continuity và lựa chọn stackup nên quyết định từ floorplan; không tự đồng nhất PWR plane với GND plane. | A03,R05,R06,PT06 | M |
+| EX25 | [Sierra Circuits + Rick Hartley: PCB design Q&A / layout](https://www.youtube.com/watch?v=DcninUyq0Pw) | 00:10 SMPS ground; 01:19 GND layout; 02:12 fine-pitch transition; 03:35 RF; 06:56 return; 07:26 vias; 08:03 stubs; 09:04 DFM; 11:46 copper thieving | Kết hợp placement/regulator, RF/matching, ground reference, via, thermal và trao đổi yêu cầu với fab; kỹ thuật tùy bandwidth/stackup. | A02,A03,P03,R05,R07,G05 | M |
+
+### Thư viện video review thêm cần phân tích riêng
+- [Zachariah Peterson / Altium Academy — 1-Minute PCB Design Review Series](https://www.zachariahpeterson.com/1-minute-pcb-design-reviews/): có nhiều review thực tế về BMS, isolation, ESC thermal vias, grounding, USB filter và DRC. **Chưa cộng vào số video riêng** vì chưa pin chính xác từng YouTube ID/chapter/transcript.
+- [Zachariah Peterson — Altium Academy Video Index](https://www.zachariahpeterson.com/altium-academy-video-series/): xuất hiện các video mới về nRF5340 microvia, grounding isolated amplifier, power-integrity myths và PCB courtyard. Chưa đếm riêng khi chưa có URL chính xác và đối chiếu trùng lặp.
 
 ## Chuỗi nên xem theo thứ tự để huấn luyện agent
 1. **EX08 → EX09 → EX10**: cùng một PCB, thành 3 phase placement–routing–fixes, có [repository phần cứng](https://github.com/FEDEVEL/custom-keyboard).
