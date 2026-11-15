@@ -1,0 +1,393 @@
+{
+  "schema_version": "0.1.0",
+  "updated": "2026-11-15",
+  "count": 29,
+  "disclaimer": "Index derived from REFERENCE_DESIGN_CATALOG.md; URLs and files listed are not evidence that CAD has been downloaded or parsed. Avoid automatic trust. SOURCE_PROJECT_LINKED ≠ manufacturer qualification. This catalog is not a PCB layout benchmark.",
+  "references": [
+    {
+      "id": "RD01",
+      "title": "TI TPS62933 synchronous buck 2-layer",
+      "source_urls": [
+        "https://www.ti.com/lit/ds/symlink/tps62933.pdf",
+        "https://www.ti.com/tool/TPS62933EVM"
+      ],
+      "evidence_status": "VISUAL_LAYOUT_INSPECTED",
+      "evidence_scope": "(top/bottom hình 12-2/3 + đọc §12.1)",
+      "pattern_hypothesis": "VIN bypass với VIN–GND sát IC; SW tới cuộn cảm; FB divider gần FB và xa SW; local BST/SS/RT, copper GND thấp L.",
+      "limitations": "Chỉ áp dụng topology và IC thích hợp; recommendation 2oz, 2-layer là cho TPS62933, không suy thành thông số chung.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD02",
+      "title": "TI TPS62933 single-layer EMI example",
+      "source_urls": [
+        "https://e2e.ti.com/support/power-management-group/power-management/f/power-management-forum/1064106/faq-tps62933-how-to-achieve-single-layer-pcb-layout-with-improved-emi"
+      ],
+      "evidence_status": "VISUAL_LAYOUT_INSPECTED",
+      "evidence_scope": "(hình E2E)",
+      "pattern_hypothesis": "Placement theo chân IC nhằm giảm loop và routing trên 1 lớp; đánh giá pinout trước khi tối ưu net length.",
+      "limitations": "Không kết luận board 1 lớp nào cũng đạt EMC. Cùng IC với RD01, không đếm là thiết kế độc lập.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD03",
+      "title": "Espressif ESP32-S3 chip/module",
+      "source_urls": [
+        "https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32s3/pcb-layout-design.html"
+      ],
+      "evidence_status": "VENDOR_GUIDE_READ",
+      "evidence_scope": "(power, crystal, RF, flash, USB, module)",
+      "pattern_hypothesis": "Crystal/series Rs/ground, 0201 RF CLC, RF antenna edge/keepout; USB pair + contiguous return, SPI series resistor near MCU.",
+      "limitations": "**Quan trọng**: crystal guideline hãng đề nghị khoảng cách từ clock pin **ít nhất 2.0 mm**; không dùng luật “crystal sát chân nhất”. Các số RF/USB từ S3 không mặc định cho S3-WROOM module hay MCU khác.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD04",
+      "title": "Nordic nRF54L15 DK PCA10156",
+      "source_urls": [
+        "https://www.nordicsemi.com/Products/Development-hardware/nRF54L15-DK/Hardware-files",
+        "https://docs.nordicsemi.com/r/bundle/ug_nrf54l15_dk/page/ug/nrf54l15_dk/intro/intro.html"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "",
+      "pattern_hypothesis": "Schematic+layout+Gerber+BOM dành cho RF/MCU, clock, supply, SWD; so sánh revision DK 1.0.0 và radio reference rev 0.8.",
+      "limitations": "DK 1.0.0 gồm nhiều circuit chỉ phục vụ debug/measurement; không sao chép toàn bộ placement sang sản phẩm pin nhỏ. ZIP chưa parse.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD05",
+      "title": "Analog Devices EVAL-AD5940BIOZ Rev B (impedance 4-wire)",
+      "source_urls": [
+        "https://wiki.analog.com/resources/eval/user-guides/eval-ad5940/hardware/eval-ad5940bioz",
+        "https://wiki.analog.com/_media/resources/eval/user-guides/eval-ad5940/hardware/08-049988-01-b.pdf"
+      ],
+      "evidence_status": "VISUAL_LAYOUT_INSPECTED",
+      "evidence_scope": "(PDF trang 1 silkscreen, trang 2 layer-1 copper; chưa xem tất cả layer)",
+      "pattern_hypothesis": "Board có các vùng connector/sensor, electrode/RTIA/CTIA/RCAL, power, MCU/interface; nên gán tuyến nhạy cảm trước bulk signal.",
+      "limitations": "Là EVAL shield cho BIA, không chứng minh mọi clearance/guard cho HoofVision; chưa tracing từng net từ schematics.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD06",
+      "title": "Analog Devices EVAL-AD5940ELCZ Rev A",
+      "source_urls": [
+        "https://wiki.analog.com/resources/eval/user-guides/eval-ad5940/hardware/eval-ad5940elcz"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "",
+      "pattern_hypothesis": "Review đường electrode CE/RE/SE/DE, BNC buffer high-Z, analog supply, cáp đo, RCAL; so sánh BIOZ.",
+      "limitations": "ADI cảnh báo cáp crocodile có ký sinh R/C ảnh hưởng đo trở kháng; layout không giải quyết toàn bộ lỗi đo.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD07",
+      "title": "Raspberry Pi RP2040 Minimal KiCad",
+      "source_urls": [
+        "https://pip.raspberrypi.com/categories/814-rp2040",
+        "https://www.raspberrypi.com/documentation/microcontrollers/microcontroller-chips.html"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "",
+      "pattern_hypothesis": "PCB KiCad mẫu 2-layer: MCU–flash–crystal–decoupling–USB/power, rất phù hợp tạo gold-standard placement test.",
+      "limitations": "ZIP trên product portal chưa đọc/parse thành tọa độ trong phiên này.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD08",
+      "title": "FEDEVEL custom keyboard (RP2040)",
+      "source_urls": [
+        "https://github.com/FEDEVEL/custom-keyboard",
+        "https://oshwlab.com/robertferanec/custom-keyboard",
+        "https://home.fedevel.com/blog/tutorial-custom-diy-keyboard-design-and-build-part-3-pcb-component-placement",
+        "https://fedevel.com/blog/tutorial-custom-diy-keyboard-design-and-build-part-4-pcb-layout",
+        "https://home.fedevel.com/blog/tutorial-custom-diy-keyboard-design-and-build-part-5-pcb-layout-improvement"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "",
+      "pattern_hypothesis": "Paired reference: mechanical placement→MCU periphery→fanout→critical USB→power→GND stitching→DRC; dùng so sánh before/after.",
+      "limitations": "License ghi CC BY-NC-SA 4.0: chỉ lưu liên kết và tóm tắt, không nhập file source của người khác vào repo này mà bỏ qua license.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD09",
+      "title": "Espressif development kits (ESP32-S3 and others)",
+      "source_urls": [
+        "https://github.com/espressif/esp-dev-kits"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(docs/schematics có sẵn; không xác nhận PCB source layout cho mọi board)",
+      "pattern_hypothesis": "Đối chiếu pinout, USB, EN/BOOT, regulator, module orientation.",
+      "limitations": "Repo chỉ đảm bảo hardware resources/schematic theo từng devkit, không suy ra có edit-able PCB của tất cả.",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD10",
+      "title": "TI TIDA-010243 – three-phase CT energy meter",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-010243"
+      ],
+      "evidence_status": "VISUAL_LAYOUT_INSPECTED",
+      "evidence_scope": "(assembly+BOM+Gerber+PCB artwork+schematic)",
+      "pattern_hypothesis": "Đã mở assembly PDF và artwork (top solder mask); 3 pha CT, ADS131M08 và giao tiếp cách ly; phân vùng analog/digital và safety là đề tài kiểm chứng;  Patterns PT11, PT13, PT14",
+      "limitations": "Chưa truy net; hình top mask không chứng minh isolation/return path",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD11",
+      "title": "TI TIDA-010986 – Rogowski coil active integrator (3 pha)",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-010986"
+      ],
+      "evidence_status": "VISUAL_LAYOUT_INSPECTED",
+      "evidence_scope": "(assembly+BOM+Gerber+PCB artwork+schematic)",
+      "pattern_hypothesis": "Đã xem assembly PDF trang 1: U1/U4/U6 lặp lại theo 3 pha và nhóm R/C quanh từng op amp cạnh connector J1/J2/J3; có thể xây placement template nhiều channel;  Patterns PT11, PT13",
+      "limitations": "Chưa kiểm tra các copper layers; không suy ra bằng nhau điện học giữa các pha",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD12",
+      "title": "TI TIDA-00835 – precision energy measurement CT/Rogowski",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00835"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "pattern_hypothesis": "Có dữ liệu để so sánh ảnh hưởng placement input filters và ADC/reference trong metrology;  Patterns PT11, PT13",
+      "limitations": "Cần xem board gerber trước khi suy layout thực tế",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD13",
+      "title": "TI TIDA-00454 – CT and line voltage energy meter",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00454"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "pattern_hypothesis": "Kiểm tra phân vùng mạch đo CT, voltage divider, ADC và an toàn điện áp lưới;  Patterns PT11, PT14",
+      "limitations": "Không áp dụng clearance từ board tới hệ thống khác nếu chưa xét tiêu chuẩn",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD14",
+      "title": "TI TIDA-010065 – isolated analog voltage/current input",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-010065"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "pattern_hypothesis": "Sơ đồ placement nhiều kênh isolated amplifiers, isolated power, ADC; so sánh đường nguồn sạch và rào cách ly;  Patterns PT11, PT14",
+      "limitations": "Không copy cách ly theo hình mà thiếu creepage/clearance và chứng nhận",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD15",
+      "title": "TI TIDA-01385 – CT energy harvesting + supercapacitor + boost",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-01385"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "pattern_hypothesis": "Placement đường AC CT→rectifier/harvester→supercap/boost/backup battery;  Patterns PT02, PT11",
+      "limitations": "Không đồng nhất energy-harvesting path với CT sense analog",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD16",
+      "title": "TI TIDA-00862 – RS485 full duplex 2-wire",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00862"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "pattern_hypothesis": "Phân nhóm bus transceiver, điện trở nối tiếp, mạng lọc và connector trước khi route;  Patterns PT05, PT15",
+      "limitations": "Đây là topology RS485 đặc biệt, không tự áp cho half-duplex tiêu chuẩn",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD17",
+      "title": "TI TIDA-00060 – extended-common-mode RS485",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00060"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(test report+BOM+Gerber+schematic)",
+      "pattern_hypothesis": "Đối chiếu vị trí transceiver với interface ra dây dài, test/terminal và nguồn bypass;  Patterns PT05, PT15",
+      "limitations": "Không có source CAD xác nhận; chỉ download Gerber listed",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD18",
+      "title": "TI TIDA-00057 – isolated RS485 (ISO35T)",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00057"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(test report+BOM+Gerber+schematic)",
+      "pattern_hypothesis": "Khảo sát isolation barrier, transformer/isolated supply và bus side routing;  Patterns PT14, PT15",
+      "limitations": "Tuân thủ creepage/clearance của chuẩn và vật liệu thay vì lấy hình board làm luật",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD19",
+      "title": "Microchip ADM01097 – MCP3564 precision 24-bit ADC board",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/ADM01097"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(BOM+schematic+Gerber+design files+3D PDF)",
+      "pattern_hypothesis": "Tách analog front end/reference/ADC khỏi MCU/PIC32 host, ground+reference routing;  Patterns PT03, PT11, PT13",
+      "limitations": "Board evaluation chứa nhiều mạch tùy chọn, không chứng minh mọi net đã tối ưu",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD20",
+      "title": "Microchip EV-MCP8048 – 2-layer high-current BLDC driver",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/ev-mcp8048"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(Altium+Gerber+schematic+BOM)",
+      "pattern_hypothesis": "Học placement MOSFET/driver/current shunt, 3-phase symmetry và đường công suất trên 2 lớp;  Patterns PT02, PT13",
+      "limitations": "Current loop/thermal phụ thuộc mức dòng và driver, phải tính riêng",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD21",
+      "title": "Microchip EV55U36A – MCP37D21 80Msps ADC board",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/ev55u36a"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(Gerber+schematic+BOM+user guide)",
+      "pattern_hypothesis": "Đối chiếu khoảng cách ADC/reference clocks/analog input, phân lớp signal-vs-digital bus;  Patterns PT03, PT07, PT11",
+      "limitations": "Không gán điện trở/impedance chưa có stack-up datasheet",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD22",
+      "title": "Microchip EV65D44A – USB Power Delivery framework board",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/ev65d44a"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(Altium schematic+Gerber+BOM)",
+      "pattern_hypothesis": "Khu vực USB-C, CC/PD, power path, MCU, protection và board-to-board expansion;  Patterns PT05, PT07, PT15",
+      "limitations": "PD reference có nhiều node và firmware; không suy thành USB-C default 5V sink",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD23",
+      "title": "Microchip ADM00821 – MIC4684 2A buck EVM",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/adm00821"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(Gerber+BOM+schematic)",
+      "pattern_hypothesis": "Ví dụ buck SO-8 200kHz để so sánh loop/feedback placement với TI TPS62933;  Patterns PT02",
+      "limitations": "Topology pin và switching frequency khác; so sánh quan hệ chứ không copy distances",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD24",
+      "title": "OLIMEX ESP32-S3-DevKit-LiPo – ESP32-S3 USB-C+LiPo",
+      "source_urls": [
+        "https://github.com/OLIMEX/ESP32-S3-DevKit-LiPo"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(public HARDWARE folder; KiCad files to confirm by download)",
+      "pattern_hypothesis": "Bố trí module antenna, 2 USB-C, LiPo charger, USB/battery switchover, debug và expansion;  Patterns PT01, PT05, PT07, PT10",
+      "limitations": "Kiểm tra license CERN-OHL v2 và revision; chưa parse KiCad",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD25",
+      "title": "OLIMEX ESP32-POE – KiCad ESP32 Ethernet PoE",
+      "source_urls": [
+        "https://github.com/OLIMEX/ESP32-POE"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(KiCad hardware+gerbers/revisions)",
+      "pattern_hypothesis": "Có revision history về chuyển 2→4 lớp do thermal DCDC, sửa ethernet connectivity, placement keepout; có thể học từ lỗi sửa thực tế;  Patterns PT01, PT02, PT06, PT16",
+      "limitations": "Cần chọn một revision thống nhất; không gộp file phiên bản cũ/mới",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD26",
+      "title": "OLIMEX ESP32-GATEWAY – KiCad Ethernet + Wi-Fi board",
+      "source_urls": [
+        "https://github.com/OLIMEX/ESP32-GATEWAY"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(KiCad hardware+revision changes)",
+      "pattern_hypothesis": "Changelog đề cập giảm nhiễu Ethernet clock bằng thay đổi header GPIO17; rất hữu ích để đánh dấu aggressor/victim zones;  Patterns PT06, PT07, PT10, PT16",
+      "limitations": "Đây là bằng chứng thay đổi topology thực tế, không đủ xác định nguyên nhân SI nếu thiếu đo kiểm",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD27",
+      "title": "OLIMEX LoRa-STM32WL-DevKIT – STM32WL RF+I2C sensors",
+      "source_urls": [
+        "https://github.com/OLIMEX/LoRa-STM32WL-DevKIT"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(public HARDWARE folder; board docs)",
+      "pattern_hypothesis": "Reference RF radio STM32WL, antenna matching, SWD, sensors, power/decoupling;  Patterns PT03, PT07, PT10",
+      "limitations": "Chưa parse PCB; phải tách RF keepout và module matching theo board rev",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD28",
+      "title": "OLIMEX ESP32-DevKit-LiPo – KiCad power-path board",
+      "source_urls": [
+        "https://github.com/OLIMEX/ESP32-DevKit-LiPo"
+      ],
+      "evidence_status": "SOURCE_PROJECT_LINKED",
+      "evidence_scope": "(public KiCad HARDWARE project)",
+      "pattern_hypothesis": "Reference board LiPo charging, battery/power, MCU module placement và user connectors;  Patterns PT01, PT03, PT10",
+      "limitations": "Có thể khác hoàn toàn ESP32-S3 power constraints; không coi tương đương MPN",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    },
+    {
+      "id": "RD29",
+      "title": "TI TPS62A03EVM-028 – compact buck EVM",
+      "source_urls": [
+        "https://www.ti.com/lit/ug/sluud12/sluud12.pdf"
+      ],
+      "evidence_status": "ARTIFACT_LISTED",
+      "evidence_scope": "(EVM guide with PCB top/inner layers)",
+      "pattern_hypothesis": "Ví dụ board 4-layer nhỏ, hỗ trợ so sánh placement hot loop và nhiều lớp với design TPS62933;  Patterns PT02, PT06",
+      "limitations": "Chưa mở PDF screenshot; không có hình nào được xác minh trực tiếp ở bước này",
+      "cad_geometry_parsed": false,
+      "electrically_verified_by_us": false
+    }
+  ]
+}
