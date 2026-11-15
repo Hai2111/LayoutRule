@@ -23,7 +23,7 @@
 | P02 | HEURISTIC | Đặt IC chủ chốt và khối critical trước linh kiện phụ, theo signal/power flow; tối thiểu giao cắt ratsnest sau khi bảo toàn ràng buộc. | Block map, ratsnest cost. |
 | P03 | CONDITIONAL | Với buck/boost: VIN bypass, IC, diode/FET, inductor và output tụ được đặt theo dòng vòng switching; giảm diện tích vòng có di/dt cao, nút SW nhỏ. | Visual current loop topology; area. |
 | P04 | CONDITIONAL | Decoupling: tối thiểu **loop inductance** từ power pin tới GND, không chỉ khoảng cách đo bằng thước. Cách đặt phụ thuộc loại IC, pin, stackup. | Path geometry/return path, planes, pin adjacency. |
-| P05 | CONDITIONAL | Crystal + load caps gần pin clock, bảo vệ vùng nhạy, tránh SW/power noisy xuyên qua. | Gán critical route và proximity. |
+| P05 | CONDITIONAL | Placement crystal và load caps **theo datasheet/layout guide của đúng IC**; tối ưu ký sinh, return và tránh aggressor. **Không ép sát chip vô điều kiện** (Espressif ESP32-S3 yêu cầu gap crystal–clock pin ít nhất 2.0 mm trong guide hiện hành). | Vendor-specific distance/clock no-via/ground constraints; xem RD03 / PT04. |
 | P06 | CONDITIONAL | ESD/TVS gần cổng vào; giữ đường dòng xung về chassis/GND ngắn và đúng topology, tránh dòng xung đi qua IC được bảo vệ. | Connector→TVS→IC path / return. |
 | P07 | CONDITIONAL | Antenna RF: tuân thủ ground/keepout/matching/network theo datasheet/module; ưu tiên vị trí rìa theo cấu hình phù hợp. | Vendor app note và clearance. |
 | P08 | CONDITIONAL | Analog front-end: nhóm linh kiện theo signal flow, tách nguồn nhiễu, bảo vệ đường vào high-Z/low-level; không áp dụng cấm phân vùng GND tuyệt đối. | Sensitive-to-noisy spacing, return topology. |
@@ -59,6 +59,12 @@
 | G06 | HARD | Manual edits không được bị agent ghi đè vô điều kiện; diff PCB revision và yêu cầu lý do nếu move/reroute vị trí do người dùng đã sửa. | File diff + intent log. |
 | G07 | HARD | Review G1–G5: DRC không đồng nghĩa layout đúng; mỗi fail có vị trí, evidence, recommended action và file/hash nguồn. | Signed review report. |
 
+## Quy tắc ưu tiên nguồn và conflict resolution
+- **Vendor/package-specific application note > kiểm chứng mạch đang thiết kế > ví dụ EVM cùng topology > best practices chung từ video.** Nếu hai hãng mâu thuẫn, không áp guideline của hãng này lên IC hãng khác.
+- **Crystal example:** RD03 (ESP32-S3) min 2.0 mm, trái với heuristic “càng gần càng tốt” trong bản trước. Đọc [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) PT04 trước khi agent đặt Y1.
+- **Buck example:** RD01 (TI TPS62933) §12.1–12.2 là ví dụ placement gần chân VIN/GND, thấp hot-loop inductance, FB divider tách SW.
+- **Ground example:** không tự tách AGND/DGND chỉ vì tên net, đồng thời cũng không tự short các grounds nếu isolation circuit bắt buộc phải tách.
+
 ## Quan trọng: những hiểu lầm không được biến thành luật
 1. **“Không bao giờ đi trace 90°”** → sai khi biến thành lệnh tuyệt đối. Góc vuông không tự động gây hỏng tín hiệu; cân nhắc EMI/impedance, etch và hình học ở tần số cao theo ngữ cảnh.
 2. **“Tụ decoupling lúc nào cũng sát IC nhất”** → metric đúng hơn là loop inductance, topology và planes, pin.
@@ -78,4 +84,4 @@
 - Texas Instruments SPMA036B, hướng dẫn PCB trace corners (90° có thể chấp nhận; quan trọng hơn là tránh current loops): https://www.ti.com/lit/an/spma036b/spma036b.pdf
 - Altium routing settings including available corner styles: https://www.altium.com/documentation/altium-designer/pcb/routing/interactive
 
-**Nguồn hiện tại được xác minh ở mức description/chapter/site article, không phải đã xem đầy đủ tất cả video. Các diễn giải kỹ thuật là tổng hợp độc lập, không phải trích dẫn nguyên văn.**
+**Nguồn video hiện tại được xác minh ở mức description/chapter/site article, không phải đã xem đầy đủ. Bổ sung [9 reference designs](REFERENCE_DESIGN_CATALOG.md) với mức xác minh riêng (một số nguồn đã kiểm tra trực tiếp bản PDF artwork). Các diễn giải kỹ thuật là tổng hợp độc lập.**
