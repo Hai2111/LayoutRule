@@ -1,6 +1,6 @@
-# LAYOUT RULES v0.1 — Evidence-based
+# LAYOUT RULES v0.3 — Source-backed and exception-aware
 
-**Date** 2026-11-15. Mục tiêu: quy tắc cho PCB do con người hoặc agent bố trí và đi dây; không đồng nhất thông số thiết kế cho mọi board.
+**Date** 2026-11-15. **Source register:** [TECHNICAL_SOURCES.md](TECHNICAL_SOURCES.md) (TS01–TS13), [rules/technical_checks.json](rules/technical_checks.json) (TC01–TC10, proposals only). Mục tiêu: quy tắc cho PCB do con người hoặc agent bố trí và đi dây; không đồng nhất thông số thiết kế cho mọi board.
 
 - `HARD`: vi phạm yêu cầu dự án/datasheet/DRC hoặc rủi ro đã được xác định; fail khi có bằng chứng.
 - `CONDITIONAL`: áp dụng khi điều kiện (stackup, tín hiệu, tốc độ cạnh, dòng, môi trường, fab) đúng.
@@ -59,10 +59,24 @@
 | G06 | HARD | Manual edits không được bị agent ghi đè vô điều kiện; diff PCB revision và yêu cầu lý do nếu move/reroute vị trí do người dùng đã sửa. | File diff + intent log. |
 | G07 | HARD | Review G1–G5: DRC không đồng nghĩa layout đúng; mỗi fail có vị trí, evidence, recommended action và file/hash nguồn. | Signed review report. |
 
+## Đối chiếu rule IDs với tài liệu kỹ thuật có thể tra lại
+| Rule | Tài liệu xác minh | Cách agent sử dụng |
+|---|---|---|
+| A02, R01, G02, G05 | TS01 KiCad official | Refill zones; use `.kicad_dru` to encode proper conditional DRC; DRC/net parity tied to current revision. |
+| A03, R05–R07 | TS03 TI SLLA414A (Jan 2026), TS05 ADI ADC | Differential impedance and return path conditions require **actual PHY/stackup**; do not blindly apply example 90Ω±15%. |
+| P02, P08 | TS06 ADI Practical Guide, TS07 ADI Mixed Signal | Functional floorplan and signal-flow grouping before routes; analog/digital area separation `!=` automatic GND plane split. |
+| P03, R03 | TS02 TI AN-1229 (buck), RD01 TI TPS62933 | Extract actual on/off-switch current loop and feedback quiet zone; diagram is not generic for every converter. |
+| P04, P09, G04 | TS04 ADI AN-1142 | EPAD solder/paste, bypass path and thermal vias, subject to assembly and MPN. |
+| R04, G04 | TS11 IPC-2152 title/scope | Require current, copper, thermal rise, Vdrop, placement and enclosure; no fixed amp-per-width from sample. |
+| P09, P11, G05 | TS12 IPC-7351 title/scope | Land pattern and assembly constraints; no claim edition/current full standard has been read. |
+| P08, R10 | TS04/05/07/08 ADI | Check ADC reference, clocks, noise and return by MPN + measured performance needs. |
+
+**10 proposed machine-readable checks** are in [rules/technical_checks.json](rules/technical_checks.json). They specify expected inputs and exceptions, **not an operating KiCad verification engine**.
+
 ## Quy tắc ưu tiên nguồn và conflict resolution
-- **Vendor/package-specific application note > kiểm chứng mạch đang thiết kế > ví dụ EVM cùng topology > best practices chung từ video.** Nếu hai hãng mâu thuẫn, không áp guideline của hãng này lên IC hãng khác.
+- **Applicable safety requirements + project acceptance criteria > device-specific vendor guide/datasheet > verified same-topology EVM > general technical article/standard scope > reviewed CAD > video anecdote.** A vendor note may be wrong/outdated outside its own IC: validate contradictory advice on actual hardware. Nếu hai hãng mâu thuẫn, không áp guideline của hãng này lên IC hãng khác.
 - **Crystal example:** RD03 (ESP32-S3) min 2.0 mm, trái với heuristic “càng gần càng tốt” trong bản trước. Đọc [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) PT04 trước khi agent đặt Y1.
-- **Buck example:** RD01 (TI TPS62933) §12.1–12.2 là ví dụ placement gần chân VIN/GND, thấp hot-loop inductance, FB divider tách SW.
+- **Buck example:** RD01 (TI TPS62933) §12.1–12.2 and TS02 (TI AN-1229) show topology-aware placement near VIN/GND, short hot-loop and quiet FB. Do not blindly mirror orientation across parts.
 - **Ground example:** không tự tách AGND/DGND chỉ vì tên net, đồng thời cũng không tự short các grounds nếu isolation circuit bắt buộc phải tách.
 
 ## Quan trọng: những hiểu lầm không được biến thành luật
