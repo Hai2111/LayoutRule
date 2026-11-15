@@ -14,7 +14,8 @@ This repository is a **PCB layout reference**, NOT an automatically validated st
 - Read current schematic/board, datasheets, manufacturability, stackup and **project-local** constraints.
 - Detect and respect manually edited placements and tracks; diff before applying any change.
 - Classify each candidate action with `rule_id`, net/refdes, known facts, confidence, evidence, expected tradeoff, rollback path.
-- Never substitute these generic rules for component vendor design requirements. **Vendor override first**, especially crystal: ESP32-S3 RD03 recommends >=2.0 mm from clock pin, unlike generic near-IC heuristics.
+- Never substitute these generic rules for component vendor design requirements.
+- Before treating a reference as a geometry template, check `references/index.json` and mark it NOT REVIEWED unless `cad_geometry_parsed=true` with revision/hash traceability. Use the `tools/reference_status.py` validator to detect stale entries. **Vendor override first**, especially crystal: ESP32-S3 RD03 recommends >=2.0 mm from clock pin, unlike generic near-IC heuristics.
 - **Do not claim a video was watched in full** when only metadata or chapter description is available. In the current catalog all `M` entries need transcript/visual verification.
 - Do not treat 90-degree corners as universal release blocker; prefer clean 45-degree/rounded paths for consistency unless a justified exception exists.
 - Do not use DRC=0 as proof of electrical layout correctness.
@@ -27,6 +28,8 @@ This repository is a **PCB layout reference**, NOT an automatically validated st
 Use `PASS`, `FAIL`, `NEEDS_REVIEW`, `NA` per rule. Output terse actionable review, prioritize blocked risks. A tool failure or unavailable data is NOT a PASS.
 
 ## Updating research
+When discovering new reference PCBs, update both `REFERENCE_DESIGN_CATALOG.md` and `references/index.json` (source URL, exact revision, published files, evidence status, group, potential PT patterns). Do NOT call Gerber/CAD files parsed until coordinates, nets and polygons were actually extracted. Maintain strict license boundaries.
+
 When discovering new Phil's Lab/Altium Academy videos:
 1. Check URL, author/channel, chapters and duplication.
 2. Add to its matching catalog with unique PLnn/AAnn/EXnn and `M`.
