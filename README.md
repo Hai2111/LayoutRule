@@ -5,16 +5,21 @@
 **Cập nhật:** 2026-11-15 · **Trạng thái:** v0.1, tổng hợp nguồn mở (chưa xem/nghe toàn văn tất cả video).
 
 ## Bắt đầu
-1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — thống kê **từng video đã kiểm tra nguồn**, link, chương có liên quan và bài học rút ra; phân loại rõ mức xác minh.
-2. [LAYOUT_RULES.md](LAYOUT_RULES.md) — bộ quy tắc có ID, điều kiện áp dụng, ngoại lệ và cách kiểm tra.
-3. [PLACEMENT_ROUTING_WORKFLOW.md](PLACEMENT_ROUTING_WORKFLOW.md) — thứ tự placement / routing dành cho agent.
-4. [REVIEW_CHECKLIST.md](REVIEW_CHECKLIST.md) — tiêu chí PASS/FAIL và yêu cầu bằng chứng.
+1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.
+2. [VIDEO_REVIEWS_EXTERNAL.md](VIDEO_REVIEWS_EXTERNAL.md) — **20 video review** ngoài hai kênh: Robert Feranec/FEDEVEL, EEVblog, element14.
+3. [REFERENCE_DESIGN_CATALOG.md](REFERENCE_DESIGN_CATALOG.md) — **9 nguồn reference PCB/hãng**, mức xác minh khác nhau.
+4. [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) — **12 pattern có điều kiện**, từ mechanical freeze tới source-specific crystal placement.
+5. [LAYOUT_RULES.md](LAYOUT_RULES.md) — bộ quy tắc có ID, điều kiện áp dụng, ngoại lệ và cách kiểm tra.
+6. [PLACEMENT_ROUTING_WORKFLOW.md](PLACEMENT_ROUTING_WORKFLOW.md) — thứ tự placement / routing dành cho agent.
+7. [REVIEW_CHECKLIST.md](REVIEW_CHECKLIST.md) — tiêu chí PASS/FAIL và yêu cầu bằng chứng.
 
 ## Nguyên tắc quan trọng
 - **Không coi link / chapter / description là bằng chứng đã xem toàn bộ video.** Trạng thái mặc định là `SOURCE_METADATA_REVIEWED`; khi có transcript hoặc phân tích trực tiếp mới nâng cấp và ghi URL + timestamp/đoạn hỗ trợ.
 - **Không dùng luật tuyệt đối thiếu cơ sở**, ví dụ “cấm góc 90° ở mọi trace”, “mọi tụ phải gần nhất về hình học”, hoặc “đi tất cả power trước mọi signal”.
 - **DRC=0 là điều kiện cần, không đủ**; agent còn phải kiểm tra topology, return path, vòng dòng chuyển mạch, nhiệt, khả năng sản xuất và rủi ro EMI/SI.
 - Các giới hạn chiều rộng, clearance, via, impedance **lấy từ nhà sản xuất, stackup và từng dự án**, không khóa cứng thành một cấu hình cho mọi board.
+
+**Tổng catalog hiện tại: 63 video = 37 Phil's Lab + 6 Altium Academy + 20 nguồn ngoài; trạng thái metadata/chapter M=63, transcript/video full T/V=0.** Không tuyên bố đã xem hết.
 
 **Kiểm tra số video:** chạy `python tools/catalog_status.py --json-output report/videos.json --csv-output report/videos.csv` tại root repo. Không chứa transcript có bản quyền.
 
