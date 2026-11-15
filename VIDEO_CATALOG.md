@@ -7,7 +7,7 @@
 Các “bài học” bên dưới là **tóm tắt chủ đề xác minh được + suy luận kỹ thuật vận dụng có ghi rõ**, không phải trích nguyên văn người nói. Mỗi entry có liên kết kiểm tra được, mốc chapter khi tìm thấy, rule mapping.
 
 ## Tổng quan
-- **35 nguồn video/webinar được tra cứu**: **29 Phil's Lab + 6 Altium Academy/Altium**. Trạng thái: **35 M, 0 T, 0 V**.
+- **34 video duy nhất được tra cứu**: **28 Phil's Lab + 6 Altium Academy**; thêm **1 webinar Altium** ở mục bổ trợ. Trạng thái video: **34 M, 0 T, 0 V**.
 - **Ưu tiên đọc lại:** #137 (2-layer), #60 (buck), #65 (KiCad), #41 (Altium full), #144 (QFN), Altium placement, Altium decoupling, Altium AI vs human.
 - Chưa kiểm kê toàn bộ upload của 2 kênh; đây là danh sách theo chủ đề, không phải tuyên bố “toàn bộ video trên Internet”.
 - Rule ID tham chiếu [LAYOUT_RULES.md](LAYOUT_RULES.md).
@@ -49,7 +49,6 @@ Các “bài học” bên dưới là **tóm tắt chủ đề xác minh đư�
 | PL26 | [#156 PCB Crosstalk Basics](https://fedevel.com/blog/pcb-crosstalk-basics-tips-tricks-phils-lab-156) | 16:30 measurement; 22:56 edge speed; 26:26 mitigation | Crosstalk, thực nghiệm đo, ảnh hưởng rise/fall và cách giảm bằng routing/spacing. | R10 | M |
 | PL27 | [#59 FPGA/SoC + DDR PCB Tips](https://www.fedevel.com/blog/fpga-soc-ddr-pcb-design-tips-phils-lab-59) | 07:04 stack; 13:30 BGA/caps; 16:12 timing; 22:00 DDR term | Layout FPGA/DDR phụ thuộc pinout, decoupling, fanout, timing và termination. | P09,R02,R07 | M |
 | PL28 | [#115 Interfacing FPGAs with DDR](https://www.fedevel.com/blog/interfacing-fpgas-with-ddr-memory-phils-lab-115) | 15:37 pinout; 18:51 constraints; 22:52 PCB tips | Ràng buộc từ pin banks/DDR interface nên được xác minh trước khi placement; không để router quyết định sai pin chức năng. | A01,P10 | M |
-| PL29 | [#5 STM32 + RF + USB, supplemental routing review](https://www.youtube.com/watch?v=14_jh3nLSsU) | 29:40 RF/USB; 36:53 guard; 38:45 gap | **Không phải video riêng:** đây là phần tiếp của PL04 để bookmark kiểm tra kỹ RF, guard/clearance và via-in-pad. **Không cộng là nguồn video riêng.** | R11,G03 | M |
 
 ## C. Altium Academy / Altium — placement, routing, phản biện
 
