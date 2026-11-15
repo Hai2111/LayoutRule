@@ -1,6 +1,8 @@
 # PLACEMENT → ROUTING — Workflow for KiCad agents
 
-**Use with:** `LAYOUT_RULES.md`, `VIDEO_CATALOG.md`, `REVIEW_CHECKLIST.md`.
+**Use with:** `LAYOUT_RULES.md`, `PLACEMENT_PATTERNS.md`, `REFERENCE_DESIGN_CATALOG.md`, `VIDEO_CATALOG.md`, `VIDEO_REVIEWS_EXTERNAL.md`, `REVIEW_CHECKLIST.md`.
+
+**Vendor layout guides outrank generic placement heuristics.** Do not optimize Y1 location on ESP32-S3 using an unconditional 'as-close-as-possible' constraint: see RD03/PT04.
 
 ## 0. Input contract (fail early)
 Read: schematic/netlist, board outline, all footprints, Fab constraints, number of layers/stackup, expected current, fast-edge interfaces, mechanical keepouts, antenna guidance, user-fixed components, prior PCB and hashes. If missing **critical** constraints, request human review. Do not mark PASS by assumption.
