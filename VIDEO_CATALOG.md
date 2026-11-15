@@ -7,8 +7,8 @@
 Các “bài học” bên dưới là **tóm tắt chủ đề xác minh được + suy luận kỹ thuật vận dụng có ghi rõ**, không phải trích nguyên văn người nói. Mỗi entry có liên kết kiểm tra được, mốc chapter khi tìm thấy, rule mapping.
 
 ## Tổng quan
-- **34 video duy nhất được tra cứu**: **28 Phil's Lab + 6 Altium Academy**; thêm **1 webinar Altium** ở mục bổ trợ. Trạng thái video: **34 M, 0 T, 0 V**.
-- **Ưu tiên đọc lại:** #137 (2-layer), #60 (buck), #65 (KiCad), #41 (Altium full), #144 (QFN), Altium placement, Altium decoupling, Altium AI vs human.
+- **43 video duy nhất được tra cứu**: **37 Phil's Lab + 6 Altium Academy**; thêm **1 webinar Altium** ở mục bổ trợ. Trạng thái video: **43 M, 0 T, 0 V**.
+- **Ưu tiên đọc lại:** #128 (KiCad Bluetooth 3h), #137 (2-layer), #60 (buck), #65 (KiCad), #41 (Altium full), #144 (QFN), Altium placement, Altium decoupling, Altium AI vs human.
 - Chưa kiểm kê toàn bộ upload của 2 kênh; đây là danh sách theo chủ đề, không phải tuyên bố “toàn bộ video trên Internet”.
 - Rule ID tham chiếu [LAYOUT_RULES.md](LAYOUT_RULES.md).
 
@@ -50,6 +50,16 @@ Các “bài học” bên dưới là **tóm tắt chủ đề xác minh đư�
 | PL27 | [#59 FPGA/SoC + DDR PCB Tips](https://www.fedevel.com/blog/fpga-soc-ddr-pcb-design-tips-phils-lab-59) | 07:04 stack; 13:30 BGA/caps; 16:12 timing; 22:00 DDR term | Layout FPGA/DDR phụ thuộc pinout, decoupling, fanout, timing và termination. | P09,R02,R07 | M |
 | PL28 | [#115 Interfacing FPGAs with DDR](https://www.fedevel.com/blog/interfacing-fpgas-with-ddr-memory-phils-lab-115) | 15:37 pinout; 18:51 constraints; 22:52 PCB tips | Ràng buộc từ pin banks/DDR interface nên được xác minh trước khi placement; không để router quyết định sai pin chức năng. | A01,P10 | M |
 
+| PL29 | [#128 KiCad 7 STM32 Bluetooth PCB Full Tutorial](https://www.fedevel.com/blog/kicad-7-stm32-bluetooth-hardware-design-2-2-pcb-phils-lab-128) | 30:16 initial; 46:51 fine; 52:46 caps; 1:26:15 route; 1:48:30 RF; 1:54:40 SMPS; 2:00:21 USB; 2:15:04 power/GND | **Rất ưu tiên:** case study 3 giờ KiCad 7 có sơ đồ placement từng khối và thứ tự route RF, clock, SMPS, USB, power, ground. Không coi thứ tự video là công thức cứng. | P01,P02,P03,P04,P05,P07,R02,R03,G03 | M |
+| PL30 | [#95 BGA PCB Design Tips](https://fedevel.com/blog/bga-pcb-design-tips-phils-lab-95) | 09:26 fanout; 12:00 dogbone/via; 16:06 power; 18:24 caps; 20:28 vias first | BGA: plan fanout/via sizing và power trước khi route random; phụ thuộc năng lực fab, pitch và assembly. | P09,R08,A02 | M |
+| PL31 | [#77 PCB Vias 101](https://www.fedevel.com/blog/pcb-vias-101-phils-lab-77) | 05:56 current; 07:45 placement; 11:16 return transfer; 13:07 stitching | Vai trò via, current, voiding, transfer và stitching; đặt via để giải quyết return/functional path thay vì tối thiểu số lượng vô điều kiện. | R05,G03,R04 | M |
+| PL32 | [#75 ESD Protection Basics](https://courses.fedevel.com/blog/esd-protection-basics-tvs-diode-selection-routing-phils-lab-75) | 08:28 PCB layout; 10:56 example TVS | Đặt TVS và topology đường dẫn dòng xung theo cổng vào và mức ESD, không chỉ chọn điện áp clamp. | P06 | M |
+| PL33 | [#90 ESP32 + PCB Antenna Tutorial](https://www.fedevel.com/blog/esp32-pcb-antenna-hardware-design-tutorial-phils-lab-90) | 22:15 PCB; 23:47 impedance; 24:10 caps; 25:54 matching/antenna | Ví dụ ESP32-C3 chip-down với PCB inverted-F antenna và matching; hữu ích cho board RF, không thay datasheet module khác. | P07,R11 | M |
+| PL34 | [#133 PCB Silkscreen & Solder Mask 101](https://fedevel.com/blog/pcb-silkscreen-solder-mask-101-phils-lab-133) | 11:02 clearance; 18:54 mask expansion; 21:16 slivers; 25:05 tented vias | DFM cho silkscreen/solder mask, khoảng cách, sliver và via tenting. | G05,A02 | M |
+| PL35 | [#132 I2C Hardware & PCB Design](https://www.fedevel.com/blog/i2c-hardware-pcb-design-phils-lab-132) | 07:19 bus capacitance; 11:15 pull-ups; 25:16 PCB | Topology I²C, điện dung bus, pull-up và tác động routing; không tự route bus dài theo kiểu high-speed impedance nếu không có lý do. | R02,R10 | M |
+| PL36 | [#134 SPI Hardware & PCB Design](https://fedevel.com/blog/spi-hardware-pcb-design-phils-lab-134) | 13:50 termination/impedance; 21:18 PCB; 23:07 point-to-point; 25:42 multi-node | SPI phụ thuộc clock edge, route, termination và topology 1–nhiều slave; đánh giá return path và stub theo bối cảnh. | R02,R10,R12 | M |
+| PL37 | [#110 PCB High-Speed Delay Matching](https://fedevel.com/blog/pcb-high-speed-delay-matching-phils-lab-110) | 06:30 timing margin; 08:40 layer transition; 11:25 tuning; 13:55 pairs | Length/delay matching theo propagation velocity, package delay và timing margin; tránh thêm serpentine khi không có yêu cầu. | R07,R08 | M |
+
 ## C. Altium Academy / Altium — placement, routing, phản biện
 
 | ID | Video / link | Chapter liên quan | Tóm tắt có thể xác minh từ nguồn | Rules | Status |
@@ -67,7 +77,7 @@ Các “bài học” bên dưới là **tóm tắt chủ đề xác minh đư�
 - [Phil's Lab video index](https://www.phils-lab.net/videos) — hỗ trợ tìm tiếp, không tính là video.
 
 ## Next verification queue
-1. **PL03, PL02, PL01, PL05, AA01** — xem/nghe từng chapter placement/routing, ghi ví dụ BEFORE/AFTER, con số constraint nếu xuất hiện.
+1. **PL29, PL03, PL02, PL01, PL05, AA01** — xem/nghe từng chapter placement/routing, ghi ví dụ BEFORE/AFTER, con số constraint nếu xuất hiện.
 2. **AA03, AA04, PL09** — làm rõ khi nào tụ cần sát chân pin, khi nào plane/via thay thế được.
 3. **PL14–PL16, AA05** — xác nhận những lỗi cụ thể của từng bản PCB trong video; ghi snapshot/case if permitted.
 4. **PL19–PL23** — chuyển sang các kiểm tra machine-checkable, đặc biệt return path trên board 2-layer.
