@@ -7,6 +7,7 @@ Mỗi check: `rule_id, status(PASS|FAIL|NEEDS_REVIEW|NA), evidence, file_hash, n
 | 1. Input integrity | Netlist vs PCB có đồng nhất? Footprint đúng MPN pin1/polarity? Constraints có nguồn? | ERC, netlist compare, fab stackup |
 | 2. Mechanical | Connectors, holes, keepouts, 3D heights, antenna clearance đúng? User-moved components có được giữ? | board outline, 3D exports, diff |
 | 2b. Vendor-specific exceptions | Crystal/clock rule, RF matching, layout current loop, USB/SDIO rules có đúng theo **đúng IC+revision**? | RDxx source + PTxx checks + measured footprint/pad distances |
+| 2c. Isolation + multi-channel | Domains and creepage defined? Repeated analog channels have comparable routing/return where gain/phase matching requires it? | PT13/PT14 pattern+fab standard+channel map |
 | 3. Functional placement | Đã chia block? Có sự giao cắt/đường dài bất thường giữa các khối? Buck/boost loop và decouplers đúng topology? | block annotation + loop sketches |
 | 4. Critical routing | Clocks, RF, USB/diff, AFE, clock buses có return path hợp lệ? Trace width/spacing/impedance được tính? | net-class & route report |
 | 5. Power & ground | Di/dt loops đủ nhỏ? Vdrop/trace thermal đủ? GND không bị ngắt/đảo? Via transfer hợp lý? | loop map, plane map, current analysis |
