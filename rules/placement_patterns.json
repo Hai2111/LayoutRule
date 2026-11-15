@@ -1,5 +1,5 @@
 {
-  "schema_version": "0.1.0",
+  "schema_version": "0.2.0",
   "updated": "2026-11-15",
   "note": "Decision hints and provenance, not proof of validation; null/missing thresholds must not be treated as zero. Vendor-specific constraints override generic patterns.",
   "patterns": [
@@ -209,6 +209,80 @@
         "EX12",
         "EX20"
       ]
+    },
+    {
+      "id": "PT13",
+      "scope": "matched multi-channel analog placement",
+      "priority": 88,
+      "when": [
+        "two or more measurement channels or matched multi-phase analog front ends"
+      ],
+      "relation": "replicate input-filter-gain-ADC topology and keep comparable return/noise environments only when accuracy requires matching",
+      "metric": "channel order/topological equivalence; channel length/vias and return overlap only if specified",
+      "threshold_source": "per-channel analog accuracy and gain/phase matching specification",
+      "check": "partially automatable once channel group net mapping is available",
+      "sources": [
+        "RD11",
+        "RD10",
+        "RD12",
+        "RD13",
+        "RD20"
+      ],
+      "evidence_level": "RD11 partial visual, others listed"
+    },
+    {
+      "id": "PT14",
+      "scope": "isolation barrier",
+      "priority": 100,
+      "when": [
+        "isolated RS485 or AFE, PoE, high-voltage safety domain"
+      ],
+      "relation": "floorplan domains around required isolation component, keep copper/tracks/vias across barrier only as electrically allowed",
+      "metric": "creepage, clearance, slots, coating, mask, primary/secondary copper map",
+      "threshold_source": "project safety standards, insulation material, working voltage, fab data",
+      "check": "partial geometry; hard if standards given, else NEEDS_REVIEW",
+      "sources": [
+        "RD14",
+        "RD18",
+        "RD10",
+        "RD25"
+      ],
+      "evidence_level": "manufacturer artifact listed / partial artwork"
+    },
+    {
+      "id": "PT15",
+      "scope": "field-bus connector ESD/protection transceiver",
+      "priority": 91,
+      "when": [
+        "RS485 external cable, non-isolated or isolated"
+      ],
+      "relation": "sensible surge path near entry, staged filter and transceiver chain, respect shield/chassis and termination topology",
+      "metric": "graph order connector→protection→transceiver and surge return routing; stub geometry",
+      "threshold_source": "bus topology, ESD/surge level, protection device and connector specification",
+      "check": "netlist and plane geometry when imported",
+      "sources": [
+        "RD16",
+        "RD17",
+        "RD18"
+      ],
+      "evidence_level": "manufacturer files listed"
+    },
+    {
+      "id": "PT16",
+      "scope": "revision-aware source learning",
+      "priority": 76,
+      "when": [
+        "reference board has released hardware revisions, documented issue/fix history"
+      ],
+      "relation": "pin exact revision, compare functional/nets/placement/stackup and evidence of outcome before generalizing",
+      "metric": "versioned footprint XY/rotation, netlist, layer-count, current and thermal comments",
+      "threshold_source": "referenced design changelog plus original PCB CAD revisions and measurements",
+      "check": "automatable diff; conclusions require review",
+      "sources": [
+        "RD25",
+        "RD26"
+      ],
+      "evidence_level": "official design changelog review"
     }
   ]
 }
