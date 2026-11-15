@@ -7,14 +7,16 @@
 ## Bắt đầu
 1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.
 2. [VIDEO_REVIEWS_EXTERNAL.md](VIDEO_REVIEWS_EXTERNAL.md) — **20 video review** ngoài hai kênh: Robert Feranec/FEDEVEL, EEVblog, element14.
-3. [REFERENCE_DESIGN_CATALOG.md](REFERENCE_DESIGN_CATALOG.md) — **9 nguồn reference PCB/hãng**, mức xác minh khác nhau.
-4. [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) — **12 pattern có điều kiện**, từ mechanical freeze tới source-specific crystal placement.
+3. [REFERENCE_DESIGN_CATALOG.md](REFERENCE_DESIGN_CATALOG.md) — **29 nguồn reference PCB/hãng**, mức xác minh khác nhau.
+4. [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) — **16 pattern có điều kiện**, từ mechanical freeze tới source-specific crystal placement.
 5. [LAYOUT_RULES.md](LAYOUT_RULES.md) — bộ quy tắc có ID, điều kiện áp dụng, ngoại lệ và cách kiểm tra.
 6. [PLACEMENT_ROUTING_WORKFLOW.md](PLACEMENT_ROUTING_WORKFLOW.md) — thứ tự placement / routing dành cho agent.
 7. [REVIEW_CHECKLIST.md](REVIEW_CHECKLIST.md) — tiêu chí PASS/FAIL và yêu cầu bằng chứng.
 8. [AGENTS.md](AGENTS.md) — yêu cầu Codex/Claude kế thừa và kiểm chứng quy tắc.
 9. [tools/catalog_status.py](tools/catalog_status.py) — tạo thống kê video CSV/JSON.
-10. [rules/placement_patterns.json](rules/placement_patterns.json) — dữ liệu machine-readable 12 placement patterns, chưa gắn engine kiểm tra tự động.
+10. [rules/placement_patterns.json](rules/placement_patterns.json) — dữ liệu machine-readable **16 placement patterns**, chưa gắn engine kiểm tra tự động.
+11. [references/index.json](references/index.json) — danh mục có cấu trúc cho **29 reference design**, xác minh theo cấp độ.
+12. [tools/reference_status.py](tools/reference_status.py) — kiểm tra index/MD đồng nhất và xuất CSV; chưa tự phân tích CAD.
 
 ## Nguyên tắc quan trọng
 - **Không coi link / chapter / description là bằng chứng đã xem toàn bộ video.** Trạng thái mặc định là `SOURCE_METADATA_REVIEWED`; khi có transcript hoặc phân tích trực tiếp mới nâng cấp và ghi URL + timestamp/đoạn hỗ trợ.
@@ -23,7 +25,9 @@
 - **DRC=0 là điều kiện cần, không đủ**; agent còn phải kiểm tra topology, return path, vòng dòng chuyển mạch, nhiệt, khả năng sản xuất và rủi ro EMI/SI.
 - Các giới hạn chiều rộng, clearance, via, impedance **lấy từ nhà sản xuất, stackup và từng dự án**, không khóa cứng thành một cấu hình cho mọi board.
 
-**Tổng catalog hiện tại: 63 video = 37 Phil's Lab + 6 Altium Academy + 20 nguồn ngoài; trạng thái metadata/chapter M=63, transcript/video full T/V=0.** Không tuyên bố đã xem hết.
+**Tổng catalog video: 63 video = 37 Phil's Lab + 6 Altium Academy + 20 nguồn ngoài; trạng thái metadata/chapter M=63, transcript/video full T/V=0.** Không tuyên bố đã xem hết.
+
+**Kiểm tra reference:** chạy `python tools/reference_status.py --csv-output report/references.csv` tại root repo. Các trạng thái `CAD_GEOMETRY_PARSED` hiện **0/29**; vì vậy các luật hình học còn là candidates.
 
 **Kiểm tra số video:** chạy `python tools/catalog_status.py --json-output report/videos.json --csv-output report/videos.csv` tại root repo. Không chứa transcript có bản quyền.
 
