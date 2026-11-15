@@ -5,17 +5,20 @@ This repository is a **PCB layout reference**, NOT an automatically validated st
 ## Read order
 1. `README.md`
 2. `LAYOUT_RULES.md`
-3. `REFERENCE_DESIGN_CATALOG.md` and `PLACEMENT_PATTERNS.md` (vendor-specific overrides)
-4. `PLACEMENT_ROUTING_WORKFLOW.md`
-5. `REVIEW_CHECKLIST.md`
-6. `VIDEO_CATALOG.md` + `VIDEO_REVIEWS_EXTERNAL.md` for video chapter, URLs and evidence status
+3. `TECHNICAL_SOURCES.md` (official CAD docs, vendors, IPC standard scope and contradictory advice)
+4. `REFERENCE_DESIGN_CATALOG.md`, `references/index.json`, `PLACEMENT_PATTERNS.md` (vendor-specific overrides)
+5. `PLACEMENT_ROUTING_WORKFLOW.md`
+6. `REVIEW_CHECKLIST.md`
+7. `VIDEO_CATALOG.md` + `VIDEO_REVIEWS_EXTERNAL.md` for video chapter, URLs and evidence status
 
 ## Before acting on a PCB
 - Read current schematic/board, datasheets, manufacturability, stackup and **project-local** constraints.
 - Detect and respect manually edited placements and tracks; diff before applying any change.
 - Classify each candidate action with `rule_id`, net/refdes, known facts, confidence, evidence, expected tradeoff, rollback path.
 - Never substitute these generic rules for component vendor design requirements.
-- Before treating a reference as a geometry template, check `references/index.json` and mark it NOT REVIEWED unless `cad_geometry_parsed=true` with revision/hash traceability. Use the `tools/reference_status.py` validator to detect stale entries. **Vendor override first**, especially crystal: ESP32-S3 RD03 recommends >=2.0 mm from clock pin, unlike generic near-IC heuristics.
+- Check `rules/technical_checks.json` for required inputs and evidence. **These checks are proposals, not executable or validated.** Do not mark them PASS without a board-specific test and project constraints.
+- TI TS03 USB 90 ohm +/-15 percent and other source numerical examples are conditional by protocol/PHY; never make them blanket settings for USB-C devices.
+- Before treating a reference as a geometry template, check `references/index.json` and mark it PARTIAL when `cad_placement_parsed=true`, NOT REVIEWED unless `cad_geometry_parsed=true` with revision/hash traceability. Use the `tools/reference_status.py` validator to detect stale entries. **Vendor override first**, especially crystal: ESP32-S3 RD03 recommends >=2.0 mm from clock pin, unlike generic near-IC heuristics.
 - **Do not claim a video was watched in full** when only metadata or chapter description is available. In the current catalog all `M` entries need transcript/visual verification.
 - Do not treat 90-degree corners as universal release blocker; prefer clean 45-degree/rounded paths for consistency unless a justified exception exists.
 - Do not use DRC=0 as proof of electrical layout correctness.
@@ -28,6 +31,8 @@ This repository is a **PCB layout reference**, NOT an automatically validated st
 Use `PASS`, `FAIL`, `NEEDS_REVIEW`, `NA` per rule. Output terse actionable review, prioritize blocked risks. A tool failure or unavailable data is NOT a PASS.
 
 ## Updating research
+When discovering official standards/technical papers, add a source ID TSnn in `TECHNICAL_SOURCES.md` with exact accessible edition and provenance. **Do not claim to possess the full paid IPC standards from their free sample/TOC PDFs.**
+
 When discovering new reference PCBs, update both `REFERENCE_DESIGN_CATALOG.md` and `references/index.json` (source URL, exact revision, published files, evidence status, group, potential PT patterns). Do NOT call Gerber/CAD files parsed until coordinates, nets and polygons were actually extracted. Maintain strict license boundaries.
 
 When discovering new Phil's Lab/Altium Academy videos:
