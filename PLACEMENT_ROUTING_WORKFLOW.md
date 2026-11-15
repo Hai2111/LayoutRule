@@ -2,6 +2,8 @@
 
 **Use with:** `LAYOUT_RULES.md`, `PLACEMENT_PATTERNS.md`, `REFERENCE_DESIGN_CATALOG.md`, `VIDEO_CATALOG.md`, `VIDEO_REVIEWS_EXTERNAL.md`, `REVIEW_CHECKLIST.md`.
 
+**Research benchmark:** `AI_LAYOUT_RESEARCH.md` discusses KiCad PCBWorld/CADET as optional evaluation tooling. These have **not** been integrated into this project or executed. Do not report a pass based on published paper results.
+
 **Reference policy:** read the `TECHNICAL_SOURCES.md` source hierarchy and run all applicable `rules/technical_checks.json` proposals when implementation exists; unresolved inputs mean `NEEDS_REVIEW`. RD30 demonstrates a partial real KiCad placement/net source extraction, **not** a certified golden placement.
 
 **New candidate checks:** PT13 (matched analog channels), PT14 (isolation barrier), PT15 (industrial interface protection), PT16 (revision-aware failures) are mapped to `references/index.json`. None has an automatic validated layout test yet.
