@@ -10,12 +10,14 @@ This repository is a **PCB layout reference**, NOT an automatically validated st
 5. `PLACEMENT_ROUTING_WORKFLOW.md`
 6. `REVIEW_CHECKLIST.md`
 7. `VIDEO_CATALOG.md` + `VIDEO_REVIEWS_EXTERNAL.md` for video chapter, URLs and evidence status
+8. `AI_LAYOUT_RESEARCH.md` for experimental routing benchmarks and new academic results (not automatic quality standards)
 
 ## Before acting on a PCB
 - Read current schematic/board, datasheets, manufacturability, stackup and **project-local** constraints.
 - Detect and respect manually edited placements and tracks; diff before applying any change.
 - Classify each candidate action with `rule_id`, net/refdes, known facts, confidence, evidence, expected tradeoff, rollback path.
 - Never substitute these generic rules for component vendor design requirements.
+- Compare agent performance using same source PCB hashes, router/DRC versions, time budgets and reproducible action traces; see `AI_LAYOUT_RESEARCH.md`.
 - Check `rules/technical_checks.json` for required inputs and evidence. **These checks are proposals, not executable or validated.** Do not mark them PASS without a board-specific test and project constraints.
 - TI TS03 USB 90 ohm +/-15 percent and other source numerical examples are conditional by protocol/PHY; never make them blanket settings for USB-C devices.
 - Before treating a reference as a geometry template, check `references/index.json` and mark it PARTIAL when `cad_placement_parsed=true`, NOT REVIEWED unless `cad_geometry_parsed=true` with revision/hash traceability. Use the `tools/reference_status.py` validator to detect stale entries. **Vendor override first**, especially crystal: ESP32-S3 RD03 recommends >=2.0 mm from clock pin, unlike generic near-IC heuristics.
