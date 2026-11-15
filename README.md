@@ -2,7 +2,7 @@
 
 > Cơ sở tri thức phục vụ **KiCadAutoLayout / Codex / Claude**: placement, routing, PCB review, DRC, DFM.
 
-**Cập nhật:** 2026-11-15 · **Trạng thái:** research v0.3, có metadata/video chapters và một số reference PDF visual-inspected; **chưa kiểm tra video toàn văn hoặc parse PCB CAD**.
+**Cập nhật:** 2026-11-15 · **Trạng thái:** research v0.3, có metadata/video chapters và một số reference PDF visual-inspected; **chưa xác minh video toàn văn; đã đọc một phần tọa độ linh kiện/net trong 1 tệp CAD, chưa parse hình học/DRC đầy đủ**.
 
 ## Bắt đầu
 1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.
@@ -15,11 +15,12 @@
 8. [AGENTS.md](AGENTS.md) — yêu cầu Codex/Claude kế thừa và kiểm chứng quy tắc.
 9. [tools/catalog_status.py](tools/catalog_status.py) — tạo thống kê video CSV/JSON.
 10. [rules/placement_patterns.json](rules/placement_patterns.json) — dữ liệu machine-readable **16 placement patterns**, chưa gắn engine kiểm tra tự động.
-11. [references/index.json](references/index.json) — danh mục có cấu trúc cho **29 reference design**, xác minh theo cấp độ.
+11. [references/index.json](references/index.json) — danh mục có cấu trúc cho **36 reference design**, xác minh theo cấp độ.
 12. [tools/reference_status.py](tools/reference_status.py) — kiểm tra index/MD đồng nhất và xuất CSV.
 13. [TECHNICAL_SOURCES.md](TECHNICAL_SOURCES.md) — 13 nguồn tiêu chuẩn/tài liệu hãng/KiCad có mức bằng chứng rõ ràng.
 14. [rules/technical_checks.json](rules/technical_checks.json) — 10 đề xuất kiểm tra layout có inputs và điều kiện, **chưa thực thi**.
 15. [references/RD30_kicad_placement_sample.json](references/RD30_kicad_placement_sample.json) — 1 bộ dữ liệu vị trí + net được trích trực tiếp từ KiCad source, có SHA.
+16. [AI_LAYOUT_RESEARCH.md](AI_LAYOUT_RESEARCH.md) — 7 paper/repo khoa học, bao gồm CADET + PCBWorld và thiết kế benchmark KiCadAutoLayout.
 
 ## Nguyên tắc quan trọng
 - **Không coi link / chapter / description là bằng chứng đã xem toàn bộ video.** Trạng thái mặc định là `SOURCE_METADATA_REVIEWED`; khi có transcript hoặc phân tích trực tiếp mới nâng cấp và ghi URL + timestamp/đoạn hỗ trợ.
