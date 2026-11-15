@@ -1,0 +1,277 @@
+{
+  "schema_version": "0.1.0",
+  "updated": "2026-11-15",
+  "title": "Proposed evidence-backed technical checks (NOT executable KiCad DRC rules)",
+  "check_status": "PROPOSED_NOT_VALIDATED",
+  "notes": [
+    "No numeric threshold should be inferred from missing value: null is unknown.",
+    "The PASS condition text is a contract for future agent, not evidence a specific PCB passes.",
+    "Sources TSnn and reference RDnn are defined in TECHNICAL_SOURCES.md and REFERENCE_DESIGN_CATALOG.md.",
+    "High-level electrical/EMI checks cannot be substituted by generic DRC."
+  ],
+  "checks": [
+    {
+      "id": "TC01",
+      "title": "Copper zone net must match intended ground net",
+      "mapped_rules": [
+        "G02",
+        "G05",
+        "R01"
+      ],
+      "sources": [
+        "TS01"
+      ],
+      "applies_if": "GND copper zone expected",
+      "inputs": [
+        "kicad_pcb zones/net-id",
+        "schematic or current netlist"
+      ],
+      "pass_condition": "Zone assigned to intended GND net, copper refilled, DRC and connectivity rechecked",
+      "failure_condition": "zone is unassigned or assigned to different net, or unresolved islands where return required",
+      "severity": "HARD_IF_INTENT_KNOWN",
+      "automation": "KIcad CAD+DRC possible",
+      "unit": null,
+      "threshold": null
+    },
+    {
+      "id": "TC02",
+      "title": "High-speed reference GND plane continuity",
+      "mapped_rules": [
+        "R05",
+        "R06",
+        "G03"
+      ],
+      "sources": [
+        "TS03",
+        "TS05",
+        "TS06"
+      ],
+      "applies_if": "Critical fast-edge trace has adjacent reference copper",
+      "inputs": [
+        "trace geometry",
+        "reference plane zone polygons",
+        "layer stackup",
+        "via locations"
+      ],
+      "pass_condition": "No unmitigated plane split/void across critical route; return path documented at reference transitions",
+      "failure_condition": "trace crosses a split with unsupported return-path detour",
+      "severity": "CONDITIONAL",
+      "automation": "Geometric analysis plus engineering sign-off",
+      "unit": null,
+      "threshold": null
+    },
+    {
+      "id": "TC03",
+      "title": "Switching converter hot-loop placement",
+      "mapped_rules": [
+        "P03",
+        "R03"
+      ],
+      "sources": [
+        "TS02",
+        "RD01"
+      ],
+      "applies_if": "Buck/boost power stage topology confirmed",
+      "inputs": [
+        "switching topology",
+        "input cap power pad",
+        "switch/diode/FET pads",
+        "ground copper",
+        "stackup"
+      ],
+      "pass_condition": "High-di/dt current loop is minimized relative to feasible candidates with vendor-based grounding and CIN",
+      "failure_condition": "Long loop due to placement mismatch or avoidable return detour",
+      "severity": "CONDITIONAL",
+      "automation": "Needs schematic graph + geometric candidate comparison",
+      "unit": null,
+      "threshold": null
+    },
+    {
+      "id": "TC04",
+      "title": "Feedback node shielded from switching SW",
+      "mapped_rules": [
+        "P03",
+        "P08",
+        "R03"
+      ],
+      "sources": [
+        "TS02",
+        "RD01"
+      ],
+      "applies_if": "Buck regulator has high impedance FB/COMP network",
+      "inputs": [
+        "MPN/topology",
+        "SW copper",
+        "FB trace/RC placement"
+      ],
+      "pass_condition": "FB/sense routing avoids noisy switch/inductor region per vendor",
+      "failure_condition": "FB long parallel path alongside SW or under inductive switching loop without mitigation",
+      "severity": "CONDITIONAL",
+      "automation": "Spatial net-class checks; manual risk assessment",
+      "unit": null,
+      "threshold": null
+    },
+    {
+      "id": "TC05",
+      "title": "USB pair routing follows actual PHY requirements",
+      "mapped_rules": [
+        "A03",
+        "R02",
+        "R07"
+      ],
+      "sources": [
+        "TS03",
+        "TS09",
+        "TS10",
+        "TS13"
+      ],
+      "applies_if": "USB data pair confirmed and protocol mode known",
+      "inputs": [
+        "USB speed/PHY datasheet",
+        "board stackup",
+        "pair length gap width skew vias",
+        "return reference"
+      ],
+      "pass_condition": "Pair-specific impedance/spacing/skew and return path satisfy chosen PHY + fab",
+      "failure_condition": "Uses unsupported generic 90Ω or 50Ω targets without layer-specific impedance verification",
+      "severity": "CONDITIONAL",
+      "automation": "Only after user/vendor-specific thresholds supplied",
+      "unit": "ohm/mm",
+      "threshold": null
+    },
+    {
+      "id": "TC06",
+      "title": "Exposed pad / via-in-pad manufacturing check",
+      "mapped_rules": [
+        "P09",
+        "G04",
+        "G05"
+      ],
+      "sources": [
+        "TS04",
+        "TS12"
+      ],
+      "applies_if": "QFN/LGA/BGA thermal or GND exposed pad",
+      "inputs": [
+        "land pattern",
+        "paste aperture",
+        "via tenting/fill parameters",
+        "fab/assembly capabilities"
+      ],
+      "pass_condition": "Exposed pad electrically and thermally linked and solderable with vetted via/paste structure",
+      "failure_condition": "Unsupported via-in-pad/solder wicking or incorrect land pattern",
+      "severity": "HARD_IF_FAB_CONSTRAINT_KNOWN",
+      "automation": "CAD checks + assembly review",
+      "unit": null,
+      "threshold": null
+    },
+    {
+      "id": "TC07",
+      "title": "High-current track width verified by ΔT and voltage drop",
+      "mapped_rules": [
+        "R04",
+        "G04"
+      ],
+      "sources": [
+        "TS11"
+      ],
+      "applies_if": "Expected load current specified on power net",
+      "inputs": [
+        "current_profile",
+        "copper thickness",
+        "conductor length and width",
+        "stackup and ambient",
+        "max delta T",
+        "allowed Vdrop"
+      ],
+      "pass_condition": "Thermal and resistive drop analysis meets project targets",
+      "failure_condition": "Trace or neckdown cannot carry current or causes excessive voltage drop/temp rise",
+      "severity": "HARD_IF_ELECTRICAL_SPECS_KNOWN",
+      "automation": "Requires calculator/model and verified assumptions",
+      "unit": "A,mm,°C,V",
+      "threshold": null
+    },
+    {
+      "id": "TC08",
+      "title": "SMT component spacing must satisfy assembly tolerance",
+      "mapped_rules": [
+        "P01",
+        "P09",
+        "P11",
+        "G05"
+      ],
+      "sources": [
+        "TS12",
+        "TS01"
+      ],
+      "applies_if": "Surface-mount components and fab rules present",
+      "inputs": [
+        "courtyards",
+        "package dimensions",
+        "soldermask/paste rules",
+        "assembly process"
+      ],
+      "pass_condition": "Clearance, placement and soldermask geometry supported by actual assembler",
+      "failure_condition": "courtyard overlaps, mask slivers, inaccessible rework where prohibited",
+      "severity": "HARD_IF_FAB_CONSTRAINT_KNOWN",
+      "automation": "CAD rule + fab review",
+      "unit": null,
+      "threshold": null
+    },
+    {
+      "id": "TC09",
+      "title": "ADC input/reference and clock mutual isolation",
+      "mapped_rules": [
+        "P08",
+        "R02",
+        "R10"
+      ],
+      "sources": [
+        "TS04",
+        "TS05",
+        "TS07",
+        "TS08"
+      ],
+      "applies_if": "Sensitive mixed-signal analog frontend or high-speed ADC",
+      "inputs": [
+        "ADC MPN",
+        "analog signal / reference / clock nets",
+        "aggressor signal edge rates",
+        "GND return/stackup"
+      ],
+      "pass_condition": "Functional partition and return currents minimize aggressor/victim coupling as required by SNR/ENOB",
+      "failure_condition": "Noisy digital/clock segment routed over sensitive reference without mitigation",
+      "severity": "CONDITIONAL",
+      "automation": "Partial grouping and proximity check; performance requires measurement/simulation",
+      "unit": null,
+      "threshold": null
+    },
+    {
+      "id": "TC10",
+      "title": "DRC artifacts current and manual edits preserved",
+      "mapped_rules": [
+        "G05",
+        "G06",
+        "G07"
+      ],
+      "sources": [
+        "TS01",
+        "TS06"
+      ],
+      "applies_if": "Review or PCB release after source change",
+      "inputs": [
+        "pcb hash",
+        "sch hash",
+        "rules file and version",
+        "DRC report",
+        "manual placement/route diff"
+      ],
+      "pass_condition": "No unresolved hard violations, refreshed zones, review report tied to current revision, manual edits protected",
+      "failure_condition": "DRC old/stale, zones not refilled, manual modifications overwritten, no source provenance",
+      "severity": "HARD_FOR_RELEASE",
+      "automation": "KIcad CLI DRC and revision-diff; independent review still required",
+      "unit": null,
+      "threshold": null
+    }
+  ]
+}
