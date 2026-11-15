@@ -1,0 +1,214 @@
+{
+  "schema_version": "0.1.0",
+  "updated": "2026-11-15",
+  "note": "Decision hints and provenance, not proof of validation; null/missing thresholds must not be treated as zero. Vendor-specific constraints override generic patterns.",
+  "patterns": [
+    {
+      "id": "PT01",
+      "scope": "mechanical anchors",
+      "priority": 100,
+      "when": [
+        "board outline",
+        "connectors or user-locked footprints"
+      ],
+      "relation": "fixed position/orientation, preserve keepouts",
+      "metric": "xy rotation and courtyard clearance",
+      "threshold_source": "mechanical CAD/project constraints",
+      "check": "automatable when dimensions/locks are provided",
+      "sources": [
+        "EX08",
+        "EX14",
+        "RD08"
+      ]
+    },
+    {
+      "id": "PT02",
+      "scope": "switching converter hot loop",
+      "priority": 95,
+      "when": [
+        "buck or boost topology confirmed"
+      ],
+      "relation": "VIN bypass near power VIN/GND; switching path minimal; FB separated from SW",
+      "metric": "pad-to-pad connection, hot-loop area, SW/FB geometry",
+      "threshold_source": "vendor application note/current and EMC budget",
+      "check": "semi-automated topology; manual loop verification",
+      "sources": [
+        "RD01",
+        "RD02",
+        "EX02"
+      ]
+    },
+    {
+      "id": "PT03",
+      "scope": "decoupling",
+      "priority": 90,
+      "when": [
+        "device power pin with bypass cap"
+      ],
+      "relation": "minimize power-to-cap-to-GND return loop inductance",
+      "metric": "pad routes plus via/plane return",
+      "threshold_source": "vendor layout guide / stackup",
+      "check": "partial geometry calculation",
+      "sources": [
+        "RD01",
+        "RD03",
+        "EX20"
+      ]
+    },
+    {
+      "id": "PT04",
+      "scope": "ESP32-S3 external crystal",
+      "priority": 99,
+      "when": [
+        "ESP32-S3 chip-down and external crystal"
+      ],
+      "relation": "min gap >=2.0mm to clock pin; no vias on clock input/output; respect crystal ground region",
+      "metric": "gap at specified footprint/pad objects, trace via count",
+      "threshold_source": "RD03 specific ESP32-S3 official PCB Layout Design guide",
+      "numeric_threshold": {
+        "min_gap_mm": 2,
+        "clock_vias_max": 0
+      },
+      "check": "geometry if exact pins are mapped",
+      "sources": [
+        "RD03"
+      ]
+    },
+    {
+      "id": "PT05",
+      "scope": "port ESD",
+      "priority": 90,
+      "when": [
+        "external connector and protection device"
+      ],
+      "relation": "ESD near entry and with short proper return path, avoid surge routing through protected IC",
+      "metric": "connector/protector/IC topological ordering",
+      "threshold_source": "ESD device/application requirements",
+      "check": "topological check plus manual EMC review",
+      "sources": [
+        "RD03",
+        "PL32"
+      ]
+    },
+    {
+      "id": "PT06",
+      "scope": "2-layer return path",
+      "priority": 98,
+      "when": [
+        "two-layer PCB and critical signal"
+      ],
+      "relation": "keep continuous GND reference beneath critical tracks; do not unintentionally split",
+      "metric": "plane overlap and return-current detour",
+      "threshold_source": "board layer stack, net criticality",
+      "check": "post-zone-fill geometry review",
+      "sources": [
+        "RD03",
+        "EX11",
+        "EX12",
+        "EX13"
+      ]
+    },
+    {
+      "id": "PT07",
+      "scope": "USB memory and fanout",
+      "priority": 87,
+      "when": [
+        "USB/SPI flash/PSRAM/differential interface"
+      ],
+      "relation": "place series termination at source if vendor requires; reserve escape corridors and reference plane",
+      "metric": "pin fanout feasibility, series-R position, pair length/impedance",
+      "threshold_source": "protocol + device layout guide",
+      "check": "partial geometry + electrical sign-off",
+      "sources": [
+        "RD03",
+        "EX08",
+        "EX09"
+      ]
+    },
+    {
+      "id": "PT08",
+      "scope": "iterative placement",
+      "priority": 72,
+      "when": [
+        "rough placement and routing candidate"
+      ],
+      "relation": "reassess placement after critical fanout and congestion; preserve user edits",
+      "metric": "weighted route risk and lock conflicts",
+      "threshold_source": "project priorities; no universal weights",
+      "check": "automatable with diff and scoring",
+      "sources": [
+        "EX08",
+        "EX09",
+        "EX10",
+        "EX15"
+      ]
+    },
+    {
+      "id": "PT09",
+      "scope": "release review",
+      "priority": 100,
+      "when": [
+        "any release candidate"
+      ],
+      "relation": "require independent electrical/topology/thermal/DFM and full DRC review",
+      "metric": "documented evidence checklist",
+      "threshold_source": "project/fab requirements",
+      "check": "automatable completeness plus human review",
+      "sources": [
+        "EX01",
+        "EX03",
+        "EX10"
+      ]
+    },
+    {
+      "id": "PT10",
+      "scope": "RF antenna and matching",
+      "priority": 99,
+      "when": [
+        "chip-down or module RF antenna"
+      ],
+      "relation": "antenna edge keepout, RF matching and controlled impedance per specific vendor design",
+      "metric": "keepout geometry and RF reference continuity",
+      "threshold_source": "vendor/module-specific app note",
+      "check": "partial geometry; requires RF validation",
+      "sources": [
+        "RD03",
+        "RD04",
+        "PL10"
+      ]
+    },
+    {
+      "id": "PT11",
+      "scope": "AD5940/AD5941 precision AFE",
+      "priority": 91,
+      "when": [
+        "impedance sensing/electrode nets"
+      ],
+      "relation": "functional proximity of electrode/AFE/RCAL and controlled noise coupling, without assumed guard dimensions",
+      "metric": "signal path geometry and noise-risk zones",
+      "threshold_source": "actual sensor topology, analog performance validation",
+      "check": "human analog review until net mapping verified",
+      "sources": [
+        "RD05",
+        "RD06"
+      ]
+    },
+    {
+      "id": "PT12",
+      "scope": "via-aware routing",
+      "priority": 75,
+      "when": [
+        "via transition or return stitching needed"
+      ],
+      "relation": "assess via plus nearby return rather than minimizing total via count",
+      "metric": "transition count, return stitching, plane void/copper neck",
+      "threshold_source": "stackup/manufacturing/reference integrity",
+      "check": "partial geometric checks",
+      "sources": [
+        "EX11",
+        "EX12",
+        "EX20"
+      ]
+    }
+  ]
+}
