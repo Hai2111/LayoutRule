@@ -1,0 +1,276 @@
+{
+  "source_url": "https://github.com/pms67/STM32F4-Reference-PCB/blob/master/STM32F4_REV2.kicad_pcb",
+  "repository": "pms67/STM32F4-Reference-PCB",
+  "source_blob_sha": "abc62424db5875d85692611bf2f9ad2ec33f148d",
+  "license": "MIT (per repository)",
+  "pcb_generation": "KiCad 5.1.6 source (version 20171130)",
+  "evidence_scope": "Footprint XY/rotation, footprint values, pad-net names parsed directly from original kicad_pcb. No fabrication/schematic consistency or electrical tests carried out.",
+  "counts": {
+    "modules_all": 54,
+    "designator_modules": 50,
+    "track_segments": 245,
+    "vias": 67,
+    "zones": 2,
+    "copper_layers": 4
+  },
+  "status": {
+    "placement_xy_read": true,
+    "pad_net_names_read": true,
+    "full_geometry_parsed": false,
+    "drc_run": false,
+    "si_emi_thermal_validated": false
+  },
+  "selected_components": [
+    {
+      "refdes": "C1",
+      "value": "10u",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric",
+      "x_mm": 71.9,
+      "y_mm": 68,
+      "rotation_deg": 0,
+      "pad_count": 2,
+      "nets": [
+        "BUCK_IN",
+        "GND"
+      ]
+    },
+    {
+      "refdes": "C2",
+      "value": "10u",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric",
+      "x_mm": 64.9,
+      "y_mm": 77.25,
+      "rotation_deg": 0,
+      "pad_count": 2,
+      "nets": [
+        "+3V3",
+        "GND"
+      ]
+    },
+    {
+      "refdes": "C3",
+      "value": "10u",
+      "footprint": "Capacitor_SMD:C_1206_3216Metric",
+      "x_mm": 64.9,
+      "y_mm": 80,
+      "rotation_deg": 0,
+      "pad_count": 2,
+      "nets": [
+        "GND",
+        "+3V3"
+      ]
+    },
+    {
+      "refdes": "C4",
+      "value": "10n",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "x_mm": 67.5,
+      "y_mm": 72.25,
+      "rotation_deg": 270,
+      "pad_count": 2,
+      "nets": [
+        "BUCK_SW",
+        "BUCK_BST"
+      ]
+    },
+    {
+      "refdes": "C5",
+      "value": "4u7",
+      "footprint": "Capacitor_SMD:C_0603_1608Metric",
+      "x_mm": 43.2125,
+      "y_mm": 55,
+      "rotation_deg": 180,
+      "pad_count": 2,
+      "nets": [
+        "GND",
+        "+3V3"
+      ]
+    },
+    {
+      "refdes": "C6",
+      "value": "100n",
+      "footprint": "Capacitor_SMD:C_0402_1005Metric",
+      "x_mm": 42.25,
+      "y_mm": 58.515,
+      "rotation_deg": 90,
+      "pad_count": 2,
+      "nets": [
+        "GND",
+        "+3V3"
+      ]
+    },
+    {
+      "refdes": "C7",
+      "value": "100n",
+      "footprint": "Capacitor_SMD:C_0402_1005Metric",
+      "x_mm": 47.015,
+      "y_mm": 70.5,
+      "rotation_deg": 180,
+      "pad_count": 2,
+      "nets": [
+        "+3V3",
+        "GND"
+      ]
+    },
+    {
+      "refdes": "C8",
+      "value": "100n",
+      "footprint": "Capacitor_SMD:C_0402_1005Metric",
+      "x_mm": 55.735,
+      "y_mm": 69,
+      "rotation_deg": 0,
+      "pad_count": 2,
+      "nets": [
+        "GND",
+        "+3V3"
+      ]
+    },
+    {
+      "refdes": "J5",
+      "value": "USB_B_Micro",
+      "footprint": "SchmillipKiCADLibrary:USB_MICRO_B_101181930001LF",
+      "x_mm": 84.5,
+      "y_mm": 52.25,
+      "rotation_deg": 90,
+      "pad_count": 11,
+      "nets": [
+        "+5V",
+        "USB_CONN_D-",
+        "USB_CONN_D+",
+        "Net-(J5-Pad4)",
+        "GND",
+        "Net-(J5-Pad6)"
+      ]
+    },
+    {
+      "refdes": "L1",
+      "value": "10u",
+      "footprint": "Inductor_SMD:L_Sunlord_MWSA0518_5.4x5.2mm",
+      "x_mm": 63.5,
+      "y_mm": 72.25,
+      "rotation_deg": 270,
+      "pad_count": 2,
+      "nets": [
+        "BUCK_SW",
+        "+3V3"
+      ]
+    },
+    {
+      "refdes": "U1",
+      "value": "MP2359DJ-LF-Z",
+      "footprint": "Package_TO_SOT_SMD:SOT-23-6",
+      "x_mm": 70.5,
+      "y_mm": 72.25,
+      "rotation_deg": 90,
+      "pad_count": 6,
+      "nets": [
+        "BUCK_BST",
+        "GND",
+        "BUCK_FB",
+        "BUCK_EN",
+        "BUCK_SW",
+        "BUCK_IN"
+      ]
+    },
+    {
+      "refdes": "U2",
+      "value": "STM32F405RGT6",
+      "footprint": "Package_QFP:LQFP-64_10x10mm_P0.5mm",
+      "x_mm": 50,
+      "y_mm": 62.75,
+      "rotation_deg": 0,
+      "pad_count": 64,
+      "nets": [
+        "+3V3",
+        "Net-(U2-Pad2)",
+        "Net-(U2-Pad3)",
+        "Net-(U2-Pad4)",
+        "HSE_IN",
+        "HSE_OUT",
+        "NRST",
+        "Net-(U2-Pad8)",
+        "Net-(U2-Pad9)",
+        "Net-(U2-Pad10)",
+        "Net-(U2-Pad11)",
+        "GND",
+        "+3.3VA",
+        "Net-(U2-Pad14)",
+        "Net-(U2-Pad15)",
+        "LED_STATUS",
+        "Net-(U2-Pad17)",
+        "Net-(U2-Pad20)",
+        "Net-(U2-Pad21)",
+        "Net-(U2-Pad22)",
+        "Net-(U2-Pad23)",
+        "Net-(U2-Pad24)",
+        "Net-(U2-Pad25)",
+        "Net-(U2-Pad26)",
+        "Net-(U2-Pad27)",
+        "Net-(U2-Pad28)",
+        "USART3_TX",
+        "USART3_RX",
+        "Net-(C13-Pad1)",
+        "Net-(U2-Pad33)",
+        "Net-(U2-Pad34)",
+        "Net-(U2-Pad35)",
+        "Net-(U2-Pad36)",
+        "Net-(U2-Pad37)",
+        "Net-(U2-Pad38)",
+        "Net-(U2-Pad39)",
+        "Net-(U2-Pad40)",
+        "Net-(U2-Pad41)",
+        "Net-(U2-Pad42)",
+        "Net-(U2-Pad43)",
+        "USB_D-",
+        "USB_D+",
+        "SWDIO",
+        "Net-(C14-Pad1)",
+        "SWCLK",
+        "Net-(U2-Pad50)",
+        "Net-(U2-Pad51)",
+        "Net-(U2-Pad52)",
+        "Net-(U2-Pad53)",
+        "Net-(U2-Pad54)",
+        "SWO",
+        "Net-(U2-Pad56)",
+        "Net-(U2-Pad57)",
+        "I2C1_SCL",
+        "I2C1_SDA",
+        "BOOT0",
+        "Net-(U2-Pad61)",
+        "Net-(U2-Pad62)"
+      ]
+    },
+    {
+      "refdes": "U3",
+      "value": "USBLC6-2SC6",
+      "footprint": "Package_TO_SOT_SMD:SOT-23-6",
+      "x_mm": 75.975,
+      "y_mm": 52.575,
+      "rotation_deg": 180,
+      "pad_count": 6,
+      "nets": [
+        "+5V",
+        "USB_D-",
+        "USB_D+",
+        "USB_CONN_D+",
+        "GND",
+        "USB_CONN_D-"
+      ]
+    },
+    {
+      "refdes": "Y1",
+      "value": "16MHz",
+      "footprint": "Crystal:Crystal_SMD_3225-4Pin_3.2x2.5mm",
+      "x_mm": 38.5,
+      "y_mm": 61,
+      "rotation_deg": 270,
+      "pad_count": 4,
+      "nets": [
+        "HSE_IN",
+        "GND",
+        "Net-(C16-Pad1)"
+      ]
+    }
+  ]
+}
