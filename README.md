@@ -2,12 +2,12 @@
 
 > Cơ sở tri thức phục vụ **KiCadAutoLayout / Codex / Claude**: placement, routing, PCB review, DRC, DFM.
 
-**Cập nhật:** 2026-11-15 · **Trạng thái:** research v0.2, có metadata/video chapters và một số reference PDF visual-inspected; **chưa kiểm tra video toàn văn hoặc parse PCB CAD**.
+**Cập nhật:** 2026-11-15 · **Trạng thái:** research v0.3, có metadata/video chapters và một số reference PDF visual-inspected; **chưa kiểm tra video toàn văn hoặc parse PCB CAD**.
 
 ## Bắt đầu
 1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.
-2. [VIDEO_REVIEWS_EXTERNAL.md](VIDEO_REVIEWS_EXTERNAL.md) — **20 video review** ngoài hai kênh: Robert Feranec/FEDEVEL, EEVblog, element14.
-3. [REFERENCE_DESIGN_CATALOG.md](REFERENCE_DESIGN_CATALOG.md) — **29 nguồn reference PCB/hãng**, mức xác minh khác nhau.
+2. [VIDEO_REVIEWS_EXTERNAL.md](VIDEO_REVIEWS_EXTERNAL.md) — **25 video review** ngoài hai kênh: Robert Feranec/FEDEVEL, EEVblog, element14.
+3. [REFERENCE_DESIGN_CATALOG.md](REFERENCE_DESIGN_CATALOG.md) — **36 nguồn reference PCB/hãng**, mức xác minh khác nhau.
 4. [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) — **16 pattern có điều kiện**, từ mechanical freeze tới source-specific crystal placement.
 5. [LAYOUT_RULES.md](LAYOUT_RULES.md) — bộ quy tắc có ID, điều kiện áp dụng, ngoại lệ và cách kiểm tra.
 6. [PLACEMENT_ROUTING_WORKFLOW.md](PLACEMENT_ROUTING_WORKFLOW.md) — thứ tự placement / routing dành cho agent.
@@ -16,7 +16,10 @@
 9. [tools/catalog_status.py](tools/catalog_status.py) — tạo thống kê video CSV/JSON.
 10. [rules/placement_patterns.json](rules/placement_patterns.json) — dữ liệu machine-readable **16 placement patterns**, chưa gắn engine kiểm tra tự động.
 11. [references/index.json](references/index.json) — danh mục có cấu trúc cho **29 reference design**, xác minh theo cấp độ.
-12. [tools/reference_status.py](tools/reference_status.py) — kiểm tra index/MD đồng nhất và xuất CSV; chưa tự phân tích CAD.
+12. [tools/reference_status.py](tools/reference_status.py) — kiểm tra index/MD đồng nhất và xuất CSV.
+13. [TECHNICAL_SOURCES.md](TECHNICAL_SOURCES.md) — 13 nguồn tiêu chuẩn/tài liệu hãng/KiCad có mức bằng chứng rõ ràng.
+14. [rules/technical_checks.json](rules/technical_checks.json) — 10 đề xuất kiểm tra layout có inputs và điều kiện, **chưa thực thi**.
+15. [references/RD30_kicad_placement_sample.json](references/RD30_kicad_placement_sample.json) — 1 bộ dữ liệu vị trí + net được trích trực tiếp từ KiCad source, có SHA.
 
 ## Nguyên tắc quan trọng
 - **Không coi link / chapter / description là bằng chứng đã xem toàn bộ video.** Trạng thái mặc định là `SOURCE_METADATA_REVIEWED`; khi có transcript hoặc phân tích trực tiếp mới nâng cấp và ghi URL + timestamp/đoạn hỗ trợ.
@@ -25,9 +28,9 @@
 - **DRC=0 là điều kiện cần, không đủ**; agent còn phải kiểm tra topology, return path, vòng dòng chuyển mạch, nhiệt, khả năng sản xuất và rủi ro EMI/SI.
 - Các giới hạn chiều rộng, clearance, via, impedance **lấy từ nhà sản xuất, stackup và từng dự án**, không khóa cứng thành một cấu hình cho mọi board.
 
-**Tổng catalog video: 63 video = 37 Phil's Lab + 6 Altium Academy + 20 nguồn ngoài; trạng thái metadata/chapter M=63, transcript/video full T/V=0.** Không tuyên bố đã xem hết.
+**Tổng catalog video: 68 video = 37 Phil's Lab + 6 Altium Academy + 25 nguồn ngoài; trạng thái metadata/chapter M=68, transcript/video full T/V=0.** Không tuyên bố đã xem hết.
 
-**Kiểm tra reference:** chạy `python tools/reference_status.py --csv-output report/references.csv` tại root repo. Các trạng thái `CAD_GEOMETRY_PARSED` hiện **0/29**; vì vậy các luật hình học còn là candidates.
+**Kiểm tra reference:** chạy `python tools/reference_status.py --csv-output report/references.csv` tại root repo. Hiện **1/36** reference đã được đọc một phần placement/net từ CAD (RD30), **0/36** đã parse/verify toàn bộ geometry + DRC/electrical performance; các luật hình học khác còn là candidates.
 
 **Kiểm tra số video:** chạy `python tools/catalog_status.py --json-output report/videos.json --csv-output report/videos.csv` tại root repo. Không chứa transcript có bản quyền.
 
@@ -42,4 +45,4 @@
 ## Quy định cập nhật
 Mỗi video mới phải thêm một bản ghi trong `VIDEO_CATALOG.md` với: source, ngày, mức xác minh, mốc thời gian, tóm tắt, rule IDs, điểm cần xác minh tiếp. Rule mới chỉ được gắn `HARD` khi có điều kiện kỹ thuật/tiêu chuẩn hoặc thông số nhà sản xuất để kiểm tra.
 
-**Nguồn:** [Phil's Lab](https://www.phils-lab.net/videos), [Altium Academy](https://www.youtube.com/@AltiumAcademy), tài liệu [Altium Component Placement & Routing](https://www.altium.com/documentation/altium-designer/tutorial/component-placement-routing-board). Nội dung trong repo là bản tóm tắt và đề xuất kiểm tra kỹ thuật, không sao chép transcript có bản quyền.
+**Nguồn chính:** [Phil's Lab](https://www.phils-lab.net/videos), [Altium Academy](https://www.youtube.com/@AltiumAcademy), tài liệu [Altium Component Placement & Routing](https://www.altium.com/documentation/altium-designer/tutorial/component-placement-routing-board). Nội dung trong repo là bản tóm tắt và đề xuất kiểm tra kỹ thuật, không sao chép transcript có bản quyền.
