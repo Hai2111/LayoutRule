@@ -1,6 +1,6 @@
 # PLACEMENT PATTERNS — mô hình ra quyết định cho agent
 
-Updated 2026-11-15. Nguồn đối chiếu: [REFERENCE_DESIGN_CATALOG.md](REFERENCE_DESIGN_CATALOG.md) (RDxx), [VIDEO_REVIEWS_EXTERNAL.md](VIDEO_REVIEWS_EXTERNAL.md) (EXxx), [VIDEO_CATALOG.md](VIDEO_CATALOG.md) (PLxx, AAxx).
+Updated 2026-11-16. Nguồn đối chiếu: [REFERENCE_DESIGN_CATALOG.md](REFERENCE_DESIGN_CATALOG.md) (RDxx), [VIDEO_REVIEWS_EXTERNAL.md](VIDEO_REVIEWS_EXTERNAL.md) (EXxx), [VIDEO_CATALOG.md](VIDEO_CATALOG.md) (PLxx, AAxx).
 
 **Nguyên tắc:** Đánh giá vị trí dựa trên **pad-to-pad path, electrical topology, return current và thứ tự ưu tiên**, không chỉ khoảng cách tâm linh kiện hay số airwire. `HARD` chỉ khi ràng buộc datasheet/board/fab yêu cầu; các quy tắc khác là `CONDITIONAL` hoặc `HEURISTIC`.
 
@@ -119,6 +119,20 @@ Updated 2026-11-15. Nguồn đối chiếu: [REFERENCE_DESIGN_CATALOG.md](REFERE
 - **Method:** pin exact revision SHA and source state → derive before/after refdes+net+layer+board outline → link stated motivation → validate if geometry or electrical topology actually changed.
 - **Check:** source version, observed delta, claimed failure, whether fix is trace/placement/topology, evidence/test. Record outcomes rather than falsely saying 'this placement alone solved the problem'.
 - **Status:** HEURISTIC / design lessons until independent measurements and layout diff.
+
+## PT17 — Reserve placement slack and iterate with route feasibility (proposed)
+
+- **When:** placement where mechanical anchors (for example, a USB-C receptacle on a board edge) constrain the remaining floorplan; multi-block boards with risk of local congestion.
+- **Mechanical constraint:** preserve physical mating/insertion clearance, connector overhang, board outline and all real keepouts as HARD constraints. If USB-C must sit on an edge but its position along the edge is still adjustable, preserve that degree of freedom; do not move it inward arbitrarily to create a cosmetic margin.
+- **Placement slack:** reserve *movable space* around likely congestion zones, component-group escape directions, critical net corridors and power/GND return corridors. This is different from minimum copper-to-edge clearance or footprint courtyard. Represent it as candidate movement envelopes and routing corridors; keep its location and size adaptable.
+- **First pass:** classify fixed vs movable anchors; group each IC with relevant passives by pin and functional topology; estimate route congestion and reserve escape channels. Avoid compressing every functional block merely to minimize airwire length.
+- **Micro-loop (before bulk routing):** candidate placement -> critical escape / short trial routes -> KiCad geometry and DRC checks -> congestion/length/via/return-path review -> local relocation of *movable* groups -> reroute affected nets. Repeat until constrained routes are feasible, not until coordinates visually appear compact.
+- **Change scope:** preserve user-edited/locked parts and all unrelated completed routes. If changing a footprint breaks routing, reroute only affected nets and compare candidates against the same baseline source/hash; never silently overwrite manual placement.
+- **Measure:** route completion, unresolved crossings/escape failures, local congestion, critical pad-to-pad paths, via count, current return continuity, power loop area, courtyard/keepout compliance, free-space **location** and available movement directions. DRC zero alone does not certify SI/EMI/thermal.
+- **Counterargument:** more empty board area is not inherently better. Reserving space in the wrong region can stretch USB, analog or high-di/dt loops, add vias, fragment GND and worsen routing. No universal “keep 10%/20% free” rule without board-specific validation.
+- **Decision:** choose the feasible candidate that improves critical electrical/routing costs with minimal collateral changes; stop or request review if critical constraints lack evidence. Do not optimize purely by shortest airwire or highest empty-area ratio.
+- **Evidence level:** DESIGN HYPOTHESIS derived from user placement discussion (2026-11-16) and existing placement/routing workflow; **not independently validated against a CAD benchmark yet**. Promote only after reproducing before/after placement, native DRC and route metrics on specific boards.
+- **Status:** HEURISTIC / test-required, not an unconditional HARD rule.
 
 ## Heuristic priority graph (không phải 1 luật cứng)
 ```text
