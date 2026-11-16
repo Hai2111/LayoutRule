@@ -6,7 +6,7 @@
 
 **Reference policy:** read the `TECHNICAL_SOURCES.md` source hierarchy and run all applicable `rules/technical_checks.json` proposals when implementation exists; unresolved inputs mean `NEEDS_REVIEW`. RD30 demonstrates a partial real KiCad placement/net source extraction, **not** a certified golden placement.
 
-**New candidate checks:** PT13 (matched analog channels), PT14 (isolation barrier), PT15 (industrial interface protection), PT16 (revision-aware failures) are mapped to `references/index.json`. None has an automatic validated layout test yet.
+**New candidate checks:** PT13 (matched analog channels), PT14 (isolation barrier), PT15 (industrial interface protection), PT16 (revision-aware failures) are mapped to `references/index.json`. PT17 (adaptive placement slack and routing-feedback micro-loop) is a new proposed heuristic based on the user placement discussion, not a validated CAD result. None has an automatic validated layout test yet.
 
 **Vendor layout guides outrank generic placement heuristics.** Do not optimize Y1 location on ESP32-S3 using an unconditional 'as-close-as-possible' constraint: see RD03/PT04.
 
@@ -19,9 +19,21 @@ Read: schematic/netlist, board outline, all footprints, Fab constraints, number 
 1. **Mechanical freeze (P01/A04):** board edge, mount holes, connectors, switches, antennas, enclosure-locked components.
 2. **Block placement (P02/A05):** partition MCU, PSU, interfaces, clock, RF, analog, sensors and related passives. Estimate airwire/ratsnest congestion and power/signal flow.
 3. **Critical placement (P03–P09):** for each buck/boost close high-di/dt loop; place ESD at connector; group clock and decouplers around actual IC pins; antenna keepout; reserved via escapes for fine pitch.
-4. **Fanout + route feasibility:** simulate pin escape on 2-layer QFN and multi-pad packages. If blocked, adjust placement *before* bulk routing.
-5. **Optimize (P10/P11):** minimize routing obstruction and critical loop/path costs subject to locked placement; do not alter net/pin functions without proof.
-6. **Snapshot:** position/orientation diff, DRC and image/zone evidence; never silently overwrite manual user edits.
+4. **Fanout + route feasibility (PT17):** simulate pin escape on 2-layer QFN and multi-pad packages; reserve movable space and viable trace/return corridors at predicted congestion sites, not a fixed percentage everywhere. If blocked, adjust placement *before* bulk routing.
+5. **Optimize (P10/P11/PT17):** compare multiple candidate group placements under connector and user locks; minimize critical loop/path and congestion costs without treating empty area itself as an objective.
+6. **Snapshot:** position/orientation diff, available movement envelopes, DRC and image/zone evidence; never silently overwrite manual user edits.
+
+## 1A. Adaptive placement slack and short routing feedback loop (PT17)
+A placement cannot be declared route-ready solely from footprint clearance or ratsnest length.
+
+1. **Anchor eligibility:** lock only true mechanical, electrical and user-fixed constraints. A connector may be edge-constrained without its along-edge coordinate being fixed. Preserve connector mating depth and outside-board clearance.
+2. **Reserve selectively:** mark potential component-group movement envelopes, fanout space, short power/decoupling loops, GND returns and USB/sensitive-signal corridors. Quantify their geometry where possible; never impose a universal blank-area percentage.
+3. **Trial routes:** try critical escapes / short routes on a cloned board; record failures, vias, paths, return-plane disruptions, clearance and relevant DRC.
+4. **Local repair:** if a route detours or fails, identify the responsible movable group(s); propose small position/rotation changes within legal envelopes. Re-route the affected nets and preserve unrelated user routes.
+5. **Acceptance and stop:** keep candidates that satisfy hard constraints and improve measured route feasibility or electrical performance; revert worse candidates. Terminate for no material improvement, bounded iteration budget or unresolved electrical inputs. Record remaining risks and never fabricate a PASS.
+6. **Traceability:** every loop writes baseline/candidate SHA, affected refdes/net, movement coordinates, route/DRC deltas, reason and rollback path. Feed observed successful/failed patterns back into PT17 with evidence status; one success is not a universal standard.
+
+**Anti-pattern:** shifting USB-C away from its required edge/insertion geometry to manufacture whitespace; equally, pushing all whitespace to an unused corner while the pin-escape corridor is blocked.
 
 ## 2. Routing pipeline (priority depends on net criticality)
 1. **Local bypass/power switching closure:** route short loops inside each power block first where necessary; if conflict with high-speed interfaces compare engineering impact, not rote order.
