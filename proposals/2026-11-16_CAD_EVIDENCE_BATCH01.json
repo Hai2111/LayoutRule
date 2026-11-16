@@ -3,7 +3,7 @@
   "study_id": "CAD_BATCH_20261116_01",
   "status": "PROPOSED_NOT_APPROVED",
   "produced_at_utc": "2026-11-16",
-  "methodology": "Direct static reading of source KiCad board files. Exact source blob SHAs; no KiCad native ERC/DRC. Segment length totals are summed copper objects, not end-to-end route lengths.",
+  "methodology": "Direct static reading of source KiCad board files. Exact source blob SHAs; no KiCad native ERC/DRC. Segment length totals are summed copper objects, not end-to-end route lengths. Training project .kicad_pro inspected for netclass widths and clearances.",
   "source_cases": [
     {
       "id": "RD30",
@@ -266,7 +266,49 @@
         "UART nets also connect to debug header; aggregated length not point-to-point",
         "R3 corridor causality not tested",
         "No alternative placement or native DRC performed"
-      ]
+      ],
+      "project_pro_blob_sha": "9d56b7ff57d8ad42bcbc18a923545761d8082931",
+      "project_netclasses": {
+        "Default": {
+          "track_width_mm": 0.2,
+          "clearance_mm": 0.15
+        },
+        "Power": {
+          "track_width_mm": 0.4,
+          "clearance_mm": 0.2
+        },
+        "Power_assignment_pattern": "/+5V",
+        "global_min_track_width_mm": 0.2,
+        "global_min_clearance_mm": 0
+      },
+      "direct_straight_line_geometry_check": {
+        "net": "/UART_RX",
+        "from": "U2:2",
+        "from_xy_mm": [
+          12.475,
+          18.175
+        ],
+        "to": "U1:3",
+        "to_xy_mm": [
+          18.1375,
+          16.375
+        ],
+        "direct_distance_mm": 5.9417,
+        "crossing_nominal_pad_envelopes": [
+          {
+            "ref": "R3",
+            "pad": "1",
+            "net": "/+5V"
+          },
+          {
+            "ref": "R3",
+            "pad": "2",
+            "net": "/NRST"
+          }
+        ],
+        "method": "nominal 2D straight centerline vs F.Cu pad rectangles; not actual route; synthetic regression tests",
+        "result": "POTENTIAL_CONGESTION_NOT_ROUTE_FEASIBILITY"
+      }
     }
   ],
   "proposed_checks": [
@@ -407,6 +449,31 @@
       ],
       "flag_if": "candidate cannot prove improvements without damage or has no actual routed trial",
       "result": "NEEDS_REVIEW",
+      "status": "PROPOSED",
+      "evidence": [
+        "TRAINING_20261116"
+      ]
+    },
+    {
+      "id": "ER07",
+      "title": "Resolve effective per-net KiCad netclasses and custom DRC before routing",
+      "mapped_existing": [
+        "TC08",
+        "TC10",
+        "RE01",
+        "RE09"
+      ],
+      "kind": "CONFIGURATION_INVARIANT",
+      "automation_stage": "PROJECT_AND_NATIVE_DRC",
+      "required_inputs": [
+        "kicad_pcb",
+        "kicad_pro",
+        "kicad_dru if any",
+        "netclass assignment",
+        "native DRC"
+      ],
+      "flag_if": "agent routes using generic global floor or mismatched imported DSN constraints rather than effective netclass widths/clearances",
+      "result": "NEEDS_REVIEW_OR_DRC_FAIL",
       "status": "PROPOSED",
       "evidence": [
         "TRAINING_20261116"
