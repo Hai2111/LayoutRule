@@ -81,6 +81,7 @@ def parse_board(src):
             if not (m and ref):
                 continue
             rid = next((v for v in ref.groups() if v is not None), None)
+            fp_layer = re.search(r'\(layer\s+"?([^\s")]+)', item)
             pads = []
             for ptype, pad in forms(item, {'pad'}):
                 pad_no = re.match(r'\(pad\s+(?:"([^"]+)"|([^\s()]+))', pad)
@@ -89,8 +90,10 @@ def parse_board(src):
                 pads.append({'number': (pad_no.group(1) or pad_no.group(2)) if pad_no else None,
                              'net': net_of(pad, net_ids),
                              'local_xy_mm': [float(loc.group(1)), float(loc.group(2))] if loc else None,
+                             'local_rotation_deg': float(loc.group(3) or 0) if loc else 0,
                              'size_mm': [float(size.group(1)), float(size.group(2))] if size else None})
             fps[rid] = {'value': next((v for v in val.groups() if v is not None), None) if val else None,
+                        'layer': fp_layer.group(1) if fp_layer else None,
                         'xy_mm': [float(m.group(1)), float(m.group(2))],
                         'rotation_deg': float(m.group(3) or 0),
                         'pad_count': len(pads), 'pads': pads}
