@@ -1,0 +1,1408 @@
+{
+  "schema_version": "1.0",
+  "date": "2026-11-16",
+  "status": "PROPOSAL_AWAITING_OWNER_REVIEW",
+  "purpose": "36/36 reference-source review and candidate placement-routing workflow mapping; evidence level preserved, not 36 geometry analyses",
+  "source_index_blob_sha": "c717fa20e86d2a9a7249bf42b0def610f29f7e54",
+  "record_count": 36,
+  "semantics": {
+    "source_file_verified": "text source fetched and statically scanned; NOT DRC or independent functional validation",
+    "catalog_only": "original catalogue observation without fresh CAD parsing",
+    "reference_is_not_normative": "board geometries are examples, not mandatory electrical limits"
+  },
+  "records": [
+    {
+      "id": "RD01",
+      "title": "TI TPS62933 synchronous buck 2-layer",
+      "source_urls": [
+        "https://www.ti.com/lit/ds/symlink/tps62933.pdf",
+        "https://www.ti.com/tool/TPS62933EVM"
+      ],
+      "original_catalog_evidence": "VISUAL_LAYOUT_INSPECTED",
+      "original_scope": "(top/bottom hình 12-2/3 + đọc §12.1)",
+      "processing_category": "POWER",
+      "relationship_hypothesis": "VIN bypass với VIN–GND sát IC; SW tới cuộn cảm; FB divider gần FB và xa SW; local BST/SS/RT, copper GND thấp L.",
+      "constraints_and_counterexamples": "Chỉ áp dụng topology và IC thích hợp; recommendation 2oz, 2-layer là cho TPS62933, không suy thành thông số chung.",
+      "pattern_ids": [
+        "PT02",
+        "TC03",
+        "TC04"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF10",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "VISUAL_LAYOUT_INSPECTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD02",
+      "title": "TI TPS62933 single-layer EMI example",
+      "source_urls": [
+        "https://e2e.ti.com/support/power-management-group/power-management/f/power-management-forum/1064106/faq-tps62933-how-to-achieve-single-layer-pcb-layout-with-improved-emi"
+      ],
+      "original_catalog_evidence": "VISUAL_LAYOUT_INSPECTED",
+      "original_scope": "(hình E2E)",
+      "processing_category": "POWER",
+      "relationship_hypothesis": "Placement theo chân IC nhằm giảm loop và routing trên 1 lớp; đánh giá pinout trước khi tối ưu net length.",
+      "constraints_and_counterexamples": "Không kết luận board 1 lớp nào cũng đạt EMC. Cùng IC với RD01, không đếm là thiết kế độc lập.",
+      "pattern_ids": [
+        "PT02",
+        "TC03"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF10",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "VISUAL_LAYOUT_INSPECTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD03",
+      "title": "Espressif ESP32-S3 chip/module",
+      "source_urls": [
+        "https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32s3/pcb-layout-design.html"
+      ],
+      "original_catalog_evidence": "VENDOR_GUIDE_READ",
+      "original_scope": "(power, crystal, RF, flash, USB, module)",
+      "processing_category": "RF_MCU",
+      "relationship_hypothesis": "Crystal/series Rs/ground, 0201 RF CLC, RF antenna edge/keepout; USB pair + contiguous return, SPI series resistor near MCU.",
+      "constraints_and_counterexamples": "**Quan trọng**: crystal guideline hãng đề nghị khoảng cách từ clock pin **ít nhất 2.0 mm**; không dùng luật “crystal sát chân nhất”. Các số RF/USB từ S3 không mặc định cho S3-WROOM module hay MCU khác.",
+      "pattern_ids": [
+        "PT04",
+        "PT06",
+        "PT07",
+        "PT10",
+        "TC05"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "VENDOR_GUIDE_READ",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD04",
+      "title": "Nordic nRF54L15 DK PCA10156",
+      "source_urls": [
+        "https://www.nordicsemi.com/Products/Development-hardware/nRF54L15-DK/Hardware-files",
+        "https://docs.nordicsemi.com/r/bundle/ug_nrf54l15_dk/page/ug/nrf54l15_dk/intro/intro.html"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "",
+      "processing_category": "RF_MCU",
+      "relationship_hypothesis": "Schematic+layout+Gerber+BOM dành cho RF/MCU, clock, supply, SWD; so sánh revision DK 1.0.0 và radio reference rev 0.8.",
+      "constraints_and_counterexamples": "DK 1.0.0 gồm nhiều circuit chỉ phục vụ debug/measurement; không sao chép toàn bộ placement sang sản phẩm pin nhỏ. ZIP chưa parse.",
+      "pattern_ids": [
+        "PT03",
+        "PT10"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD05",
+      "title": "Analog Devices EVAL-AD5940BIOZ Rev B (impedance 4-wire)",
+      "source_urls": [
+        "https://wiki.analog.com/resources/eval/user-guides/eval-ad5940/hardware/eval-ad5940bioz",
+        "https://wiki.analog.com/_media/resources/eval/user-guides/eval-ad5940/hardware/08-049988-01-b.pdf"
+      ],
+      "original_catalog_evidence": "VISUAL_LAYOUT_INSPECTED",
+      "original_scope": "(PDF trang 1 silkscreen, trang 2 layer-1 copper; chưa xem tất cả layer)",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Board có các vùng connector/sensor, electrode/RTIA/CTIA/RCAL, power, MCU/interface; nên gán tuyến nhạy cảm trước bulk signal.",
+      "constraints_and_counterexamples": "Là EVAL shield cho BIA, không chứng minh mọi clearance/guard cho HoofVision; chưa tracing từng net từ schematics.",
+      "pattern_ids": [
+        "PT11",
+        "TC09"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "VISUAL_LAYOUT_INSPECTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD06",
+      "title": "Analog Devices EVAL-AD5940ELCZ Rev A",
+      "source_urls": [
+        "https://wiki.analog.com/resources/eval/user-guides/eval-ad5940/hardware/eval-ad5940elcz"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Review đường electrode CE/RE/SE/DE, BNC buffer high-Z, analog supply, cáp đo, RCAL; so sánh BIOZ.",
+      "constraints_and_counterexamples": "ADI cảnh báo cáp crocodile có ký sinh R/C ảnh hưởng đo trở kháng; layout không giải quyết toàn bộ lỗi đo.",
+      "pattern_ids": [
+        "PT11",
+        "TC09"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD07",
+      "title": "Raspberry Pi RP2040 Minimal KiCad",
+      "source_urls": [
+        "https://pip.raspberrypi.com/categories/814-rp2040",
+        "https://www.raspberrypi.com/documentation/microcontrollers/microcontroller-chips.html"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "",
+      "processing_category": "RF_MCU",
+      "relationship_hypothesis": "PCB KiCad mẫu 2-layer: MCU–flash–crystal–decoupling–USB/power, rất phù hợp tạo gold-standard placement test.",
+      "constraints_and_counterexamples": "ZIP trên product portal chưa đọc/parse thành tọa độ trong phiên này.",
+      "pattern_ids": [
+        "PT03",
+        "PT07"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD08",
+      "title": "FEDEVEL custom keyboard (RP2040)",
+      "source_urls": [
+        "https://github.com/FEDEVEL/custom-keyboard",
+        "https://oshwlab.com/robertferanec/custom-keyboard",
+        "https://home.fedevel.com/blog/tutorial-custom-diy-keyboard-design-and-build-part-3-pcb-component-placement",
+        "https://fedevel.com/blog/tutorial-custom-diy-keyboard-design-and-build-part-4-pcb-layout",
+        "https://home.fedevel.com/blog/tutorial-custom-diy-keyboard-design-and-build-part-5-pcb-layout-improvement"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "",
+      "processing_category": "TRAINING_REFERENCE",
+      "relationship_hypothesis": "Paired reference: mechanical placement→MCU periphery→fanout→critical USB→power→GND stitching→DRC; dùng so sánh before/after.",
+      "constraints_and_counterexamples": "License ghi CC BY-NC-SA 4.0: chỉ lưu liên kết và tóm tắt, không nhập file source của người khác vào repo này mà bỏ qua license.",
+      "pattern_ids": [
+        "PT01",
+        "PT08"
+      ],
+      "workflow_checks": [
+        "WF00",
+        "WF03",
+        "WF05",
+        "WF06",
+        "WF07",
+        "WF11",
+        "WF12"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": "Repository tree inspected: no directly editable .kicad_pcb in main; tutorial/source links remain separate",
+      "result_status": "SOURCE_PROJECT_LINKED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD09",
+      "title": "Espressif development kits (ESP32-S3 and others)",
+      "source_urls": [
+        "https://github.com/espressif/esp-dev-kits"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(docs/schematics có sẵn; không xác nhận PCB source layout cho mọi board)",
+      "processing_category": "RF_MCU",
+      "relationship_hypothesis": "Đối chiếu pinout, USB, EN/BOOT, regulator, module orientation.",
+      "constraints_and_counterexamples": "Repo chỉ đảm bảo hardware resources/schematic theo từng devkit, không suy ra có edit-able PCB của tất cả.",
+      "pattern_ids": [
+        "PT01",
+        "PT10"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": "Repository tree inspected: no .kicad_pcb paths found in master tree; manufacturer guide RD03 is stronger for rules",
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD10",
+      "title": "TI TIDA-010243 – three-phase CT energy meter",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-010243"
+      ],
+      "original_catalog_evidence": "VISUAL_LAYOUT_INSPECTED",
+      "original_scope": "(assembly+BOM+Gerber+PCB artwork+schematic)",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Đã mở assembly PDF và artwork (top solder mask); 3 pha CT, ADS131M08 và giao tiếp cách ly; phân vùng analog/digital và safety là đề tài kiểm chứng;  Patterns PT11, PT13, PT14",
+      "constraints_and_counterexamples": "Chưa truy net; hình top mask không chứng minh isolation/return path",
+      "pattern_ids": [
+        "PT13",
+        "PT14",
+        "TC09"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "VISUAL_LAYOUT_INSPECTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD11",
+      "title": "TI TIDA-010986 – Rogowski coil active integrator (3 pha)",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-010986"
+      ],
+      "original_catalog_evidence": "VISUAL_LAYOUT_INSPECTED",
+      "original_scope": "(assembly+BOM+Gerber+PCB artwork+schematic)",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Đã xem assembly PDF trang 1: U1/U4/U6 lặp lại theo 3 pha và nhóm R/C quanh từng op amp cạnh connector J1/J2/J3; có thể xây placement template nhiều channel;  Patterns PT11, PT13",
+      "constraints_and_counterexamples": "Chưa kiểm tra các copper layers; không suy ra bằng nhau điện học giữa các pha",
+      "pattern_ids": [
+        "PT13",
+        "TC09"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "VISUAL_LAYOUT_INSPECTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD12",
+      "title": "TI TIDA-00835 – precision energy measurement CT/Rogowski",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00835"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Có dữ liệu để so sánh ảnh hưởng placement input filters và ADC/reference trong metrology;  Patterns PT11, PT13",
+      "constraints_and_counterexamples": "Cần xem board gerber trước khi suy layout thực tế",
+      "pattern_ids": [
+        "PT11",
+        "PT13"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD13",
+      "title": "TI TIDA-00454 – CT and line voltage energy meter",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00454"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Kiểm tra phân vùng mạch đo CT, voltage divider, ADC và an toàn điện áp lưới;  Patterns PT11, PT14",
+      "constraints_and_counterexamples": "Không áp dụng clearance từ board tới hệ thống khác nếu chưa xét tiêu chuẩn",
+      "pattern_ids": [
+        "PT11",
+        "PT14"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD14",
+      "title": "TI TIDA-010065 – isolated analog voltage/current input",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-010065"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Sơ đồ placement nhiều kênh isolated amplifiers, isolated power, ADC; so sánh đường nguồn sạch và rào cách ly;  Patterns PT11, PT14",
+      "constraints_and_counterexamples": "Không copy cách ly theo hình mà thiếu creepage/clearance và chứng nhận",
+      "pattern_ids": [
+        "PT14",
+        "TC09"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD15",
+      "title": "TI TIDA-01385 – CT energy harvesting + supercapacitor + boost",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-01385"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "processing_category": "POWER",
+      "relationship_hypothesis": "Placement đường AC CT→rectifier/harvester→supercap/boost/backup battery;  Patterns PT02, PT11",
+      "constraints_and_counterexamples": "Không đồng nhất energy-harvesting path với CT sense analog",
+      "pattern_ids": [
+        "PT02",
+        "PT11"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF10",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD16",
+      "title": "TI TIDA-00862 – RS485 full duplex 2-wire",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00862"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(design guide+assembly+BOM+Gerber+PCB layout+schematic)",
+      "processing_category": "INTERFACE",
+      "relationship_hypothesis": "Phân nhóm bus transceiver, điện trở nối tiếp, mạng lọc và connector trước khi route;  Patterns PT05, PT15",
+      "constraints_and_counterexamples": "Đây là topology RS485 đặc biệt, không tự áp cho half-duplex tiêu chuẩn",
+      "pattern_ids": [
+        "PT15"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD17",
+      "title": "TI TIDA-00060 – extended-common-mode RS485",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00060"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(test report+BOM+Gerber+schematic)",
+      "processing_category": "INTERFACE",
+      "relationship_hypothesis": "Đối chiếu vị trí transceiver với interface ra dây dài, test/terminal và nguồn bypass;  Patterns PT05, PT15",
+      "constraints_and_counterexamples": "Không có source CAD xác nhận; chỉ download Gerber listed",
+      "pattern_ids": [
+        "PT15"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD18",
+      "title": "TI TIDA-00057 – isolated RS485 (ISO35T)",
+      "source_urls": [
+        "https://www.ti.com/tool/TIDA-00057"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(test report+BOM+Gerber+schematic)",
+      "processing_category": "INTERFACE",
+      "relationship_hypothesis": "Khảo sát isolation barrier, transformer/isolated supply và bus side routing;  Patterns PT14, PT15",
+      "constraints_and_counterexamples": "Tuân thủ creepage/clearance của chuẩn và vật liệu thay vì lấy hình board làm luật",
+      "pattern_ids": [
+        "PT14",
+        "PT15"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD19",
+      "title": "Microchip ADM01097 – MCP3564 precision 24-bit ADC board",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/ADM01097"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(BOM+schematic+Gerber+design files+3D PDF)",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Tách analog front end/reference/ADC khỏi MCU/PIC32 host, ground+reference routing;  Patterns PT03, PT11, PT13",
+      "constraints_and_counterexamples": "Board evaluation chứa nhiều mạch tùy chọn, không chứng minh mọi net đã tối ưu",
+      "pattern_ids": [
+        "PT03",
+        "PT11"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD20",
+      "title": "Microchip EV-MCP8048 – 2-layer high-current BLDC driver",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/ev-mcp8048"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(Altium+Gerber+schematic+BOM)",
+      "processing_category": "POWER",
+      "relationship_hypothesis": "Học placement MOSFET/driver/current shunt, 3-phase symmetry và đường công suất trên 2 lớp;  Patterns PT02, PT13",
+      "constraints_and_counterexamples": "Current loop/thermal phụ thuộc mức dòng và driver, phải tính riêng",
+      "pattern_ids": [
+        "PT02",
+        "PT13"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF10",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD21",
+      "title": "Microchip EV55U36A – MCP37D21 80Msps ADC board",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/ev55u36a"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(Gerber+schematic+BOM+user guide)",
+      "processing_category": "MIXED_SIGNAL",
+      "relationship_hypothesis": "Đối chiếu khoảng cách ADC/reference clocks/analog input, phân lớp signal-vs-digital bus;  Patterns PT03, PT07, PT11",
+      "constraints_and_counterexamples": "Không gán điện trở/impedance chưa có stack-up datasheet",
+      "pattern_ids": [
+        "PT03",
+        "PT07",
+        "PT11"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD22",
+      "title": "Microchip EV65D44A – USB Power Delivery framework board",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/ev65d44a"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(Altium schematic+Gerber+BOM)",
+      "processing_category": "INTERFACE",
+      "relationship_hypothesis": "Khu vực USB-C, CC/PD, power path, MCU, protection và board-to-board expansion;  Patterns PT05, PT07, PT15",
+      "constraints_and_counterexamples": "PD reference có nhiều node và firmware; không suy thành USB-C default 5V sink",
+      "pattern_ids": [
+        "PT05",
+        "PT07"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD23",
+      "title": "Microchip ADM00821 – MIC4684 2A buck EVM",
+      "source_urls": [
+        "https://www.microchip.com/en-us/development-tool/adm00821"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(Gerber+BOM+schematic)",
+      "processing_category": "POWER",
+      "relationship_hypothesis": "Ví dụ buck SO-8 200kHz để so sánh loop/feedback placement với TI TPS62933;  Patterns PT02",
+      "constraints_and_counterexamples": "Topology pin và switching frequency khác; so sánh quan hệ chứ không copy distances",
+      "pattern_ids": [
+        "PT02"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF10",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD24",
+      "title": "OLIMEX ESP32-S3-DevKit-LiPo – ESP32-S3 USB-C+LiPo",
+      "source_urls": [
+        "https://github.com/OLIMEX/ESP32-S3-DevKit-LiPo"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(public HARDWARE folder; KiCad files to confirm by download)",
+      "processing_category": "RF_MCU",
+      "relationship_hypothesis": "Bố trí module antenna, 2 USB-C, LiPo charger, USB/battery switchover, debug và expansion;  Patterns PT01, PT05, PT07, PT10",
+      "constraints_and_counterexamples": "Kiểm tra license CERN-OHL v2 và revision; chưa parse KiCad",
+      "pattern_ids": [
+        "PT01",
+        "PT03",
+        "PT07",
+        "PT10"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": {
+        "repository": "OLIMEX/ESP32-S3-DevKit-LiPo",
+        "path": "HARDWARE/ESP32-S3-DevKit-LiPo_Rev_B/ESP32-S3-DevKit-LiPo_Rev_B.kicad_pcb",
+        "blob_sha": "d570de38cc257e65e1e69930127b3e09c40c989b",
+        "format": "KiCad",
+        "footprints": 64,
+        "segments": 1324,
+        "vias": 128,
+        "zones": 89
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD25",
+      "title": "OLIMEX ESP32-POE – KiCad ESP32 Ethernet PoE",
+      "source_urls": [
+        "https://github.com/OLIMEX/ESP32-POE"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(KiCad hardware+gerbers/revisions)",
+      "processing_category": "BOARD_REVISIONS",
+      "relationship_hypothesis": "Có revision history về chuyển 2→4 lớp do thermal DCDC, sửa ethernet connectivity, placement keepout; có thể học từ lỗi sửa thực tế;  Patterns PT01, PT02, PT06, PT16",
+      "constraints_and_counterexamples": "Cần chọn một revision thống nhất; không gộp file phiên bản cũ/mới",
+      "pattern_ids": [
+        "PT02",
+        "PT06",
+        "PT16"
+      ],
+      "workflow_checks": [
+        "WF00",
+        "WF03",
+        "WF05",
+        "WF08",
+        "WF11",
+        "WF12"
+      ],
+      "source_cad": {
+        "repository": "OLIMEX/ESP32-POE",
+        "path": "HARDWARE/ESP32-PoE-hardware-revision-B1/ESP32-PoE_Rev_B1.kicad_pcb",
+        "blob_sha": "943faf085f3b16eef4afc14ccbc1350e22915ffd",
+        "format": "KiCad",
+        "footprints": 123,
+        "segments": 2429,
+        "vias": 176,
+        "zones": 12,
+        "notes": "OLD Rev B1 source checked; do not treat as latest POE hardware"
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD26",
+      "title": "OLIMEX ESP32-GATEWAY – KiCad Ethernet + Wi-Fi board",
+      "source_urls": [
+        "https://github.com/OLIMEX/ESP32-GATEWAY"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(KiCad hardware+revision changes)",
+      "processing_category": "BOARD_REVISIONS",
+      "relationship_hypothesis": "Changelog đề cập giảm nhiễu Ethernet clock bằng thay đổi header GPIO17; rất hữu ích để đánh dấu aggressor/victim zones;  Patterns PT06, PT07, PT10, PT16",
+      "constraints_and_counterexamples": "Đây là bằng chứng thay đổi topology thực tế, không đủ xác định nguyên nhân SI nếu thiếu đo kiểm",
+      "pattern_ids": [
+        "PT06",
+        "PT07",
+        "PT10",
+        "PT16"
+      ],
+      "workflow_checks": [
+        "WF00",
+        "WF03",
+        "WF05",
+        "WF08",
+        "WF11",
+        "WF12"
+      ],
+      "source_cad": {
+        "repository": "OLIMEX/ESP32-GATEWAY",
+        "path": "HARDWARE/Hardware revision I/ESP32-GATEWAY_Rev_I.kicad_pcb",
+        "blob_sha": "ebff1065b48d2741684f7a87bbd1ce4f5e283f3d",
+        "format": "KiCad",
+        "footprints": 111,
+        "segments": 1934,
+        "vias": 287,
+        "zones": 19
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD27",
+      "title": "OLIMEX LoRa-STM32WL-DevKIT – STM32WL RF+I2C sensors",
+      "source_urls": [
+        "https://github.com/OLIMEX/LoRa-STM32WL-DevKIT"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(public HARDWARE folder; board docs)",
+      "processing_category": "RF_MCU",
+      "relationship_hypothesis": "Reference RF radio STM32WL, antenna matching, SWD, sensors, power/decoupling;  Patterns PT03, PT07, PT10",
+      "constraints_and_counterexamples": "Chưa parse PCB; phải tách RF keepout và module matching theo board rev",
+      "pattern_ids": [
+        "PT03",
+        "PT07",
+        "PT10"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": {
+        "repository": "OLIMEX/LoRa-STM32WL-DevKIT",
+        "path": "HARDWARE/LoRa-STM32WL-DevKIT/LoRa-STM32WL-DevKit-RevD1/LoRa-STM32WL-DevKit_RevD1.kicad_pcb",
+        "blob_sha": "47376b4a3ac2a9656e3273f76a3cd1805304de6d",
+        "format": "KiCad",
+        "footprints": 69,
+        "segments": 739,
+        "vias": 137,
+        "zones": 8
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD28",
+      "title": "OLIMEX ESP32-DevKit-LiPo – KiCad power-path board",
+      "source_urls": [
+        "https://github.com/OLIMEX/ESP32-DevKit-LiPo"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(public KiCad HARDWARE project)",
+      "processing_category": "RF_MCU",
+      "relationship_hypothesis": "Reference board LiPo charging, battery/power, MCU module placement và user connectors;  Patterns PT01, PT03, PT10",
+      "constraints_and_counterexamples": "Có thể khác hoàn toàn ESP32-S3 power constraints; không coi tương đương MPN",
+      "pattern_ids": [
+        "PT01",
+        "PT03",
+        "PT10"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": {
+        "repository": "OLIMEX/ESP32-DevKit-LiPo",
+        "path": "HARDWARE/ESP32-DevKit-LiPo-Rev.D/ESP32-DevKit-Lipo_Rev_D.kicad_pcb",
+        "blob_sha": "cff1fae49e917f4c9ddd338449de02cadb1684a0",
+        "format": "KiCad",
+        "footprints": 56,
+        "segments": 1221,
+        "vias": 108,
+        "zones": 12
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD29",
+      "title": "TI TPS62A03EVM-028 – compact buck EVM",
+      "source_urls": [
+        "https://www.ti.com/lit/ug/sluud12/sluud12.pdf"
+      ],
+      "original_catalog_evidence": "ARTIFACT_LISTED",
+      "original_scope": "(EVM guide with PCB top/inner layers)",
+      "processing_category": "POWER",
+      "relationship_hypothesis": "Ví dụ board 4-layer nhỏ, hỗ trợ so sánh placement hot loop và nhiều lớp với design TPS62933;  Patterns PT02, PT06",
+      "constraints_and_counterexamples": "Chưa mở PDF screenshot; không có hình nào được xác minh trực tiếp ở bước này",
+      "pattern_ids": [
+        "PT02",
+        "PT06"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF10",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": null,
+      "result_status": "ARTIFACT_LISTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD30",
+      "title": "pms67 STM32F4 Reference PCB – STM32F405 + buck MP2359 + USB",
+      "source_urls": [
+        "https://github.com/pms67/STM32F4-Reference-PCB"
+      ],
+      "original_catalog_evidence": "CAD_PARTIAL_PARSED",
+      "original_scope": "(Đã đọc source PCB; 54 modules, 4-layer, 245 segments, 67 vias; 14 linh kiện critical trích ref/value/xy/rot/net; pinned blob abc62424db5875d85692611bf2f9ad2ec33f148d)",
+      "processing_category": "TRAINING_REFERENCE",
+      "relationship_hypothesis": "Đối chiếu IC nguồn MP2359–L1–CIN/COUT, ESD U3–USB J5–MCU U2; PL11 tutorial pairing; PT02/PT03/PT07",
+      "constraints_and_counterexamples": "Chưa parse toàn bộ copper zone geometry hay chạy DRC; đây là case study chưa được chứng nhận optimal PCB. Xem references/RD30_kicad_placement_sample.json",
+      "pattern_ids": [
+        "PT02",
+        "PT03",
+        "PT07"
+      ],
+      "workflow_checks": [
+        "WF00",
+        "WF03",
+        "WF05",
+        "WF06",
+        "WF07",
+        "WF11",
+        "WF12"
+      ],
+      "source_cad": {
+        "repository": "pms67/STM32F4-Reference-PCB",
+        "path": "STM32F4_REV2.kicad_pcb",
+        "blob_sha": "abc62424db5875d85692611bf2f9ad2ec33f148d",
+        "format": "KiCad",
+        "footprints": 54,
+        "segments": 245,
+        "vias": 67,
+        "zones": 2
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD31",
+      "title": "Adafruit Feather ESP32-S3 – native USB-C + LiPo + RF",
+      "source_urls": [
+        "https://github.com/adafruit/Adafruit-Feather-ESP32-S3-PCB"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(Đã xác nhận repo có board+schematic files, không parse Eagle)",
+      "processing_category": "RF_MCU",
+      "relationship_hypothesis": "Placement module antenna, USB-C charger, battery fuel gauge, USB direct MCU; PT01/PT05/PT07/PT10",
+      "constraints_and_counterexamples": "Không sao chép board content; phải kiểm tra bản 8MB/no PSRAM đúng revision và luật license.",
+      "pattern_ids": [
+        "PT01",
+        "PT05",
+        "PT07",
+        "PT10"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": {
+        "repository": "adafruit/Adafruit-Feather-ESP32-S3-PCB",
+        "path": "Adafruit ESP32-S3 8MB No PSRAM.brd",
+        "blob_sha": "e5267ed7e2307e5737991c6a55c21986bf1310f6",
+        "format": "EAGLE_XML",
+        "elements": 47,
+        "signals": 42,
+        "notes": "element and signal counts only; KiCad-specific geometry parser inapplicable"
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD32",
+      "title": "SparkFun Soft Power Switch USB-C – power gating + USB passthrough",
+      "source_urls": [
+        "https://github.com/sparkfun/SparkFun_Soft_Power_Switch_USB-C"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(Đã xác nhận project KiCad và phạm vi 5V 2A/4A peak qua README, chưa phân tích source)",
+      "processing_category": "INTERFACE",
+      "relationship_hypothesis": "USB interface power-path / MOSFET / button / protection / return; PT01/PT02/PT05/PT07",
+      "constraints_and_counterexamples": "Power switching use case differs from charger or USB-PD; do not copy current limit.",
+      "pattern_ids": [
+        "PT01",
+        "PT02",
+        "PT05",
+        "PT07"
+      ],
+      "workflow_checks": [
+        "WF01",
+        "WF02",
+        "WF04",
+        "WF05",
+        "WF07",
+        "WF08",
+        "WF09",
+        "WF11"
+      ],
+      "source_cad": {
+        "repository": "sparkfun/SparkFun_Soft_Power_Switch_USB-C",
+        "path": "Hardware/Soft_Power_Switch_USB-C.kicad_pcb",
+        "blob_sha": "ea9c01bf0f8d5cdd80414ad3ced1f5bf2bb69aa9",
+        "format": "KiCad",
+        "footprints": 61,
+        "segments": 284,
+        "vias": 55,
+        "zones": 1
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD33",
+      "title": "Libre Solar BMS-C1 – 16-cell 70–100 A battery management",
+      "source_urls": [
+        "https://github.com/LibreSolar/bms-c1"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(Official repo confirms board, BQ76952, ESP32-C3, high-side FET/shunt and CAN/RS485)",
+      "processing_category": "TRAINING_REFERENCE",
+      "relationship_hypothesis": "Cell sense vs high-current shunt/FET and high-voltage domain grouping + thermal and safety; PT11/PT13/PT14/PT15/PT16",
+      "constraints_and_counterexamples": "Prototype with minor issues remaining; 70–100A conditional on FET and cooling, no claim layout validated by us.",
+      "pattern_ids": [
+        "PT11",
+        "PT13",
+        "PT14",
+        "PT15",
+        "PT16"
+      ],
+      "workflow_checks": [
+        "WF00",
+        "WF03",
+        "WF05",
+        "WF06",
+        "WF07",
+        "WF11",
+        "WF12"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": "Repository tree lists kicad/bms-c1.kicad_pcb blob 7fd33833c390e4698b2bf7cd07b660d96328c324 (2.7MB); connector returned empty text",
+      "result_status": "CAD_BLOB_LOCATED_NOT_READ",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD34",
+      "title": "Libre Solar MPPT-2420-HC – buck/MPPT 20A + CAN",
+      "source_urls": [
+        "https://github.com/LibreSolar/mppt-2420-hc"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(Repo: 80V PV, 20A inductor, STM32G431, 10–32V battery, CAN)",
+      "processing_category": "POWER",
+      "relationship_hypothesis": "Current path, TO-220 mechanical heatsink and connector anchors, critical shunt/ADC loops; PT01/PT02/PT08/PT14",
+      "constraints_and_counterexamples": "Not a certified 20A thermal design for other cooling geometry; no CAD parse yet.",
+      "pattern_ids": [
+        "PT01",
+        "PT02",
+        "PT08",
+        "PT14"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF10",
+        "WF11"
+      ],
+      "source_cad": null,
+      "independent_cad_text_read_current_turn": false,
+      "source_tree_checked_note": "Repository tree lists kicad/mppt-2420-hc.kicad_pcb blob f0447b97e90f50202069417a1ca22cd4fc30ea75 (1.16MB); connector returned empty text",
+      "result_status": "CAD_BLOB_LOCATED_NOT_READ",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD35",
+      "title": "Libre Solar MPPT-1210-HUS – 10A solar charge + dual USB",
+      "source_urls": [
+        "https://github.com/LibreSolar/mppt-1210-hus"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(Repo: 12V battery, 40V max PV, charge/load 10A, USB power output and protection)",
+      "processing_category": "POWER",
+      "relationship_hypothesis": "Two separate power domains (PV/battery/USB) with thermal and output current restrictions; PT02/PT08/PT15",
+      "constraints_and_counterexamples": "Evaluation phase only; high-current traces must be recomputed to user's copper/environment.",
+      "pattern_ids": [
+        "PT02",
+        "PT08",
+        "PT15"
+      ],
+      "workflow_checks": [
+        "WF02",
+        "WF03",
+        "WF04",
+        "WF07",
+        "WF08",
+        "WF10",
+        "WF11"
+      ],
+      "source_cad": {
+        "repository": "LibreSolar/mppt-1210-hus",
+        "path": "kicad/mppt-1210-hus.kicad_pcb",
+        "blob_sha": "c46b9b10d67dcbb0e3227b5e709634ad83b04698",
+        "format": "KiCad",
+        "footprints": 135,
+        "segments": 1023,
+        "vias": 212,
+        "zones": 22
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "STATIC_CAD_METADATA_EXTRACTED",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    },
+    {
+      "id": "RD36",
+      "title": "STM32F401RE 2-layer USB-C dev board – independent student reference",
+      "source_urls": [
+        "https://github.com/colonelblacc/STM32F401RE-Dev-Board-Design"
+      ],
+      "original_catalog_evidence": "SOURCE_PROJECT_LINKED",
+      "original_scope": "(README claims 0 DRC/ERC, 2-layer STM32F401RE and USB-C; no independent verification)",
+      "processing_category": "TRAINING_REFERENCE",
+      "relationship_hypothesis": "Good candidate for quality benchmark / negative test using DRC ≠ layout quality; PT03/PT04/PT07/PT09",
+      "constraints_and_counterexamples": "Self-reported review only, not manufacturer's EVM or functional/EMI validation.",
+      "pattern_ids": [
+        "PT03",
+        "PT04",
+        "PT07",
+        "PT09"
+      ],
+      "workflow_checks": [
+        "WF00",
+        "WF03",
+        "WF05",
+        "WF06",
+        "WF07",
+        "WF11",
+        "WF12"
+      ],
+      "source_cad": {
+        "repository": "colonelblacc/STM32F401RE-Dev-Board-Design",
+        "path": "STM32.kicad_pcb",
+        "blob_sha": "f7bb50a89902d141d892ef504622c5b49928fb6b",
+        "format": "KiCad",
+        "footprints": 39,
+        "segments": 0,
+        "vias": 0,
+        "zones": 0,
+        "notes": "NO TRACKS in present source; README DRC claims not independently established"
+      },
+      "independent_cad_text_read_current_turn": true,
+      "source_tree_checked_note": null,
+      "result_status": "NEGATIVE_ROUTING_REFERENCE",
+      "rule_maturity": "DRAFT_HYPOTHESIS_NOT_APPROVED",
+      "limitations_of_our_review": [
+        "No native KiCad ERC/DRC executed this turn",
+        "No proof of optimal routing/EMC/thermal",
+        "Do not transfer numeric distances or performance to other MPNs"
+      ]
+    }
+  ]
+}
