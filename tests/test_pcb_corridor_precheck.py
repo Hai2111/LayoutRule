@@ -23,14 +23,14 @@ def board_at(reset_y):
 
 class CorridorTests(unittest.TestCase):
     def test_reset_between_uart_blocked(self):
-        d = precheck(board_at(17), 'U2','2','U1','3', 0.2, 0.127)
+        d = precheck(board_at(17), 'U2','2','U1','3', 0.2, 0.15)
         self.assertEqual(d['status'], 'POTENTIAL_CONGESTION')
         self.assertAlmostEqual(d['direct_pad_center_distance_mm'], 5.9417)
         self.assertEqual([(i['ref'],i['pad']) for i in d['intersected_unrelated_pad_envelopes']],
                          [('R3','1'),('R3','2')])
 
     def test_move_reset_clears_direct_line_hypothesis(self):
-        d = precheck(board_at(12), 'U2','2','U1','3', 0.2, 0.127)
+        d = precheck(board_at(12), 'U2','2','U1','3', 0.2, 0.15)
         self.assertEqual(d['status'], 'NO_PAD_ENVELOPE_HIT')
         self.assertFalse(d['intersected_unrelated_pad_envelopes'])
 
