@@ -24,7 +24,15 @@ Directly inspected three *original KiCad PCB source texts* through the GitHub co
 - The UART chip-side pad rows are on the facing sides of U2/U1. The R3 pad copper lies approximately \`x=14.275..16.725 mm, y=16.525..17.475 mm\` (using R3 footprint pad nominal dimensions), inside the coarse intervening routing region. **This is a congestion candidate, not proof** that moving R3 removes both RX vias; NRST trace/pad escape may still obstruct.
 - \`C2\` 1 µF at **(15.5,15.25)** belongs to CH340C \`/V3\`–\`/GND\`; \`C4\` 1 µF at **(15.5,19.75)** belongs to STM8 \`/VCAP\`–\`/GND\`. Treating both as freely movable obstacle passives would **risk their local power loops**. Evaluate them separately from R3. **No placement/route candidate has been executed** on this source.
 
-## Six candidate rules (testable rather than slogans)
+
+### Stronger pad-level precheck on Training (nominal geometry)
+
+- CH340C U2 pad 2 (/UART_RX): **(12.475,18.175) mm** after 180° footprint transform; STM8 U1 pad 3 (/UART_RX): **(18.1375,16.375) mm**. Straight centerline distance **5.9417 mm**.
+- Both pads of R3 (nets /+5V and /NRST) intersect the *hypothetical straight F.Cu RX connection* with nominal uninflated pad rectangles. Thus R3 is a **verified geometric obstruction of that single direct route hypothesis**; it is not proof of an unavoidable via or that moving R3 alone eliminates two vias.
+- The experimental [corridor precheck](../tools/pcb_corridor_precheck.py) inflates unrelated F.Cu pad bounding boxes by chosen trace-width/2 + clearance, then flags potential intersections. Its output is **POTENTIAL_CONGESTION**, not DRC/feasibility PASS/FAIL. Synthetic test moving R3 to y=12 mm removes this one modeled intersection; no full-board candidate placement was tested.
+- Matched Training .kicad_pro source blob SHA \`9d56b7ff57d8ad42bcbc18a923545761d8082931\`: **Default** netclass track width 0.2 mm, clearance **0.15 mm**; **Power** netclass width 0.4 mm, clearance **0.20 mm**, with /+5V assigned by netclass pattern. Generic board design-settings min_clearance=0 is **not** the effective per-net clearance rule. A test using 0.15 mm is source-specific, not a universal limit.
+
+## Seven candidate rules (testable rather than slogans)
 
 ### ER01 — Qualify CAD before treating it as a routing reference
 **Maps:** PT09, PT16, TC10. **Priority:** hard *data-ingestion gate*, not an electronic design rule.
@@ -87,6 +95,17 @@ Directly inspected three *original KiCad PCB source texts* through the GitHub co
 - **Counterexample:** optimizing only net-via count with no DRC/source parity is not an accepted result.
 - **Evidence:** Training existing UART candidate opportunity and source-governed process; **actual optimization not yet executed**.
 
+
+### ER07 — Resolve effective KiCad netclass/DRU rules before placement/routing scoring
+**Maps:** TC08, TC10, RE01–RE09 workflow. **Priority:** hard tool-configuration correctness before CAD acceptance.
+
+**Applies:** every board with project-specific netclasses, pattern assignments, net ties, copper constraints and optional custom .kicad_dru.
+
+- **Inputs:** exact PCB+PRO+DRU SHA, netclass definitions and assignment patterns, per-layer stackup, trace/via floor settings and native KiCad DRC/version.
+- **Check:** evaluate the **effective width/clearance of each routed net** using the project rule stack; do not take a global floor of 0 mm as the actual allowed clearance if Default class is 0.15 mm, and do not substitute a proposed 0.127 mm from another project. Before accepting Freerouting DSN/SES output, re-run native KiCad DRC because rule transfer is incomplete.
+- **Counterexample:** syntactically valid 0.1 mm trace segments on Training may violate its configured 0.2 mm minimum; a route that clears local copper using smaller widths is not an acceptable improvement.
+- **Evidence:** current Training .kicad_pro and board sources; existing ROUTING_ENGINE_INTEGRATION.md discussion of DSN limitations. **No native DRC run in this extraction.**
+
 ## What is still NOT established
 
 - Neither RD30 nor RD36 nor Training was electrically qualified or had native DRC/ERC run during this extraction.
@@ -96,4 +115,4 @@ Directly inspected three *original KiCad PCB source texts* through the GitHub co
 
 ## Owner approval checklist
 
-Approve, amend or reject **ER01–ER06 individually**. Upon approval, merge exact selected rules into canonical \`PLACEMENT_PATTERNS.md\`, \`rules/placement_patterns.json\`, \`rules/technical_checks.json\`/workflow as appropriate; add tests and cross-links. Approval is not inferred from this draft PR or from downstream CAD results.
+Approve, amend or reject **ER01–ER07 individually**. Upon approval, merge exact selected rules into canonical \`PLACEMENT_PATTERNS.md\`, \`rules/placement_patterns.json\`, \`rules/technical_checks.json\`/workflow as appropriate; add tests and cross-links. Approval is not inferred from this draft PR or from downstream CAD results.
