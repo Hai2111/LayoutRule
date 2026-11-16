@@ -1,0 +1,37 @@
+name: Reference workflow research contract tests
+on:
+  push:
+    branches:
+      - 'research/**'
+  pull_request:
+    paths:
+      - 'tools/plan_reference_workflow.py'
+      - 'tools/pcb_ref_extract.py'
+      - 'tests/**'
+      - 'proposals/**'
+      - '.github/workflows/reference-research-check.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-knowledge-base:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout exact revision
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Parse Python sources
+        run: python -m compileall -q tools tests
+      - name: Verify all 36 references and 13 workflow stages
+        run: python tools/plan_reference_workflow.py --validate
+      - name: Run stdlib research contract fixtures
+        run: |
+          python -m unittest discover -s tests -p 'test_reference_workflow.py' -v
+          python -m unittest discover -s tests -p 'test_pcb_ref_extract.py' -v
+      - name: Clarify test scope
+        run: |
+          echo 'These tests check the proposed research planner and fixture parser only.'
+          echo 'They are NOT a KiCad PCB ERC/DRC, autoroute, EMI, or DFM verification.'
