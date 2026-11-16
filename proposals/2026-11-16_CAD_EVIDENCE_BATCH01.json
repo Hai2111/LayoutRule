@@ -1,0 +1,489 @@
+{
+  "schema_version": "0.1",
+  "study_id": "CAD_BATCH_20261116_01",
+  "status": "PROPOSED_NOT_APPROVED",
+  "produced_at_utc": "2026-11-16",
+  "methodology": "Direct static reading of source KiCad board files. Exact source blob SHAs; no KiCad native ERC/DRC. Segment length totals are summed copper objects, not end-to-end route lengths. Training project .kicad_pro inspected for netclass widths and clearances.",
+  "source_cases": [
+    {
+      "id": "RD30",
+      "repository": "pms67/STM32F4-Reference-PCB",
+      "path": "STM32F4_REV2.kicad_pcb",
+      "source_blob_sha": "abc62424db5875d85692611bf2f9ad2ec33f148d",
+      "kicad_version": "5.1.6",
+      "copper_layers": 4,
+      "modules": 54,
+      "segments": 245,
+      "vias": 67,
+      "zones": 2,
+      "category": "PARTIAL_CAD_OBSERVATION",
+      "key_components": {
+        "J5": {
+          "xy_mm": [
+            84.5,
+            52.25
+          ],
+          "value": "USB_B_Micro"
+        },
+        "U3": {
+          "xy_mm": [
+            75.975,
+            52.575
+          ],
+          "value": "USBLC6-2SC6"
+        },
+        "U2": {
+          "xy_mm": [
+            50,
+            62.75
+          ],
+          "value": "STM32F405RGT6"
+        },
+        "U1": {
+          "xy_mm": [
+            70.5,
+            72.25
+          ],
+          "value": "MP2359DJ-LF-Z"
+        },
+        "L1": {
+          "xy_mm": [
+            63.5,
+            72.25
+          ],
+          "value": "10u"
+        },
+        "C1": {
+          "xy_mm": [
+            71.9,
+            68
+          ],
+          "nets": [
+            "BUCK_IN",
+            "GND"
+          ]
+        },
+        "R3": {
+          "xy_mm": [
+            73.5,
+            74.2875
+          ],
+          "nets": [
+            "+3V3",
+            "BUCK_FB"
+          ]
+        }
+      },
+      "center_distances_mm": {
+        "J5-U3": 8.531,
+        "U3-U2": 27.897
+      },
+      "net_stats": [
+        {
+          "net": "USB_CONN_D-",
+          "segments": 5,
+          "segment_length_sum_mm": 5.161,
+          "vias": 0,
+          "layers": [
+            "F.Cu"
+          ]
+        },
+        {
+          "net": "USB_CONN_D+",
+          "segments": 5,
+          "segment_length_sum_mm": 5.161,
+          "vias": 0,
+          "layers": [
+            "F.Cu"
+          ]
+        },
+        {
+          "net": "USB_D-",
+          "segments": 6,
+          "segment_length_sum_mm": 22.891,
+          "vias": 0,
+          "layers": [
+            "F.Cu"
+          ]
+        },
+        {
+          "net": "USB_D+",
+          "segments": 6,
+          "segment_length_sum_mm": 22.891,
+          "vias": 0,
+          "layers": [
+            "F.Cu"
+          ]
+        },
+        {
+          "net": "BUCK_IN",
+          "segments": 7,
+          "segment_length_sum_mm": 8.783,
+          "vias": 0,
+          "layers": [
+            "F.Cu"
+          ]
+        },
+        {
+          "net": "BUCK_SW",
+          "segments": 5,
+          "segment_length_sum_mm": 9.652,
+          "vias": 0,
+          "layers": [
+            "F.Cu"
+          ]
+        },
+        {
+          "net": "BUCK_FB",
+          "segments": 3,
+          "segment_length_sum_mm": 3.862,
+          "vias": 0,
+          "layers": [
+            "F.Cu"
+          ]
+        }
+      ],
+      "safety_notes": [
+        "No DRC or SI/EMC validation",
+        "No pad-level return-loop area computed",
+        "Source is an independent designer reference, not a manufacturer EVM"
+      ]
+    },
+    {
+      "id": "RD36",
+      "repository": "colonelblacc/STM32F401RE-Dev-Board-Design",
+      "path": "STM32.kicad_pcb",
+      "source_blob_sha": "f7bb50a89902d141d892ef504622c5b49928fb6b",
+      "copper_layers": 2,
+      "footprints": 39,
+      "segments": 0,
+      "vias": 0,
+      "zones": 0,
+      "category": "PLACEMENT_ONLY_FROM_CURRENT_SOURCE",
+      "source_claim": "README states completed DRC/ERC; actual current-source board file lacks routed segments",
+      "schematic_alert": {
+        "refdes": [
+          "R3",
+          "R6"
+        ],
+        "values": [
+          "22k",
+          "22k"
+        ],
+        "observed_topology": "in series between connector USB data nets and MCU D+/-; verify schematic/datasheet before trusting",
+        "classification": "UNVERIFIED_POTENTIAL_ELECTRICAL_ERROR"
+      },
+      "safety_notes": [
+        "Other binary export/ZIP might represent final routed board",
+        "Cannot infer native KiCad DRC pass on this CAD"
+      ]
+    },
+    {
+      "id": "TRAINING_20261116",
+      "repository": "Hai2111/Training",
+      "path": "stm8_rgb_usb_c_v2/stm8_rgb_usb_c_v2.kicad_pcb",
+      "source_blob_sha": "9872eabddd9b3852fbf3be43290a31557d9d7bbd",
+      "copper_layers": 2,
+      "footprints": 24,
+      "segments": 237,
+      "vias": 18,
+      "zones": 1,
+      "category": "DOWNSTREAM_CASE_NOT_UPSTREAM_STANDARD",
+      "key_components": {
+        "U1": {
+          "xy_mm": [
+            21,
+            18
+          ],
+          "value": "STM8S003F3P6"
+        },
+        "U2": {
+          "xy_mm": [
+            10,
+            15
+          ],
+          "value": "CH340C"
+        },
+        "R3": {
+          "xy_mm": [
+            15.5,
+            17
+          ],
+          "nets": [
+            "/+5V",
+            "/NRST"
+          ],
+          "nominal_pad_copper_bbox_mm": [
+            14.275,
+            16.525,
+            16.725,
+            17.475
+          ]
+        },
+        "C2": {
+          "xy_mm": [
+            15.5,
+            15.25
+          ],
+          "nets": [
+            "/V3",
+            "/GND"
+          ]
+        },
+        "C4": {
+          "xy_mm": [
+            15.5,
+            19.75
+          ],
+          "nets": [
+            "/VCAP",
+            "/GND"
+          ]
+        }
+      },
+      "net_stats": [
+        {
+          "net": "/UART_RX",
+          "segments": 8,
+          "segment_length_sum_mm": 19.17,
+          "vias": 2,
+          "layers": [
+            "F.Cu",
+            "B.Cu"
+          ]
+        },
+        {
+          "net": "/UART_TX",
+          "segments": 19,
+          "segment_length_sum_mm": 17.83,
+          "vias": 0,
+          "layers": [
+            "F.Cu"
+          ]
+        }
+      ],
+      "safety_notes": [
+        "UART nets also connect to debug header; aggregated length not point-to-point",
+        "R3 corridor causality not tested",
+        "No alternative placement or native DRC performed"
+      ],
+      "project_pro_blob_sha": "9d56b7ff57d8ad42bcbc18a923545761d8082931",
+      "project_netclasses": {
+        "Default": {
+          "track_width_mm": 0.2,
+          "clearance_mm": 0.15
+        },
+        "Power": {
+          "track_width_mm": 0.4,
+          "clearance_mm": 0.2
+        },
+        "Power_assignment_pattern": "/+5V",
+        "global_min_track_width_mm": 0.2,
+        "global_min_clearance_mm": 0
+      },
+      "direct_straight_line_geometry_check": {
+        "net": "/UART_RX",
+        "from": "U2:2",
+        "from_xy_mm": [
+          12.475,
+          18.175
+        ],
+        "to": "U1:3",
+        "to_xy_mm": [
+          18.1375,
+          16.375
+        ],
+        "direct_distance_mm": 5.9417,
+        "crossing_nominal_pad_envelopes": [
+          {
+            "ref": "R3",
+            "pad": "1",
+            "net": "/+5V"
+          },
+          {
+            "ref": "R3",
+            "pad": "2",
+            "net": "/NRST"
+          }
+        ],
+        "method": "nominal 2D straight centerline vs F.Cu pad rectangles; not actual route; synthetic regression tests",
+        "result": "POTENTIAL_CONGESTION_NOT_ROUTE_FEASIBILITY"
+      }
+    }
+  ],
+  "proposed_checks": [
+    {
+      "id": "ER01",
+      "title": "Validate source CAD before training routing rules",
+      "mapped_existing": [
+        "PT09",
+        "PT16",
+        "TC10"
+      ],
+      "kind": "INGESTION_GATE",
+      "automation_stage": "STATIC",
+      "required_inputs": [
+        "source PCB file",
+        "source SHA",
+        "schematic if release asserted",
+        "native DRC for validated claim"
+      ],
+      "flag_if": "0 saved track segments while labeled positive routed example",
+      "result": "NOT_ROUTED_REFERENCE",
+      "status": "PROPOSED",
+      "evidence": [
+        "RD36"
+      ]
+    },
+    {
+      "id": "ER02",
+      "title": "Identify unrelated footprint intrusion into critical net corridors",
+      "mapped_existing": [
+        "PT07",
+        "PT08",
+        "PT17"
+      ],
+      "kind": "HEURISTIC",
+      "automation_stage": "GEOMETRY_PRECHECK",
+      "required_inputs": [
+        "source/destination pads",
+        "layer geometry",
+        "project locks",
+        "footprint pad and courtyard shapes"
+      ],
+      "flag_if": "movable unrelated footprint intersects candidate routing corridor and current route detours/changes layer",
+      "result": "POTENTIAL_CONGESTION",
+      "status": "PROPOSED",
+      "evidence": [
+        "TRAINING_20261116"
+      ]
+    },
+    {
+      "id": "ER03",
+      "title": "Preserve local bypass/VCAP path when clearing routes",
+      "mapped_existing": [
+        "PT03",
+        "PT08",
+        "PT17"
+      ],
+      "kind": "CONDITIONAL_VENDOR",
+      "automation_stage": "GEOMETRY_AND_NETLIST",
+      "required_inputs": [
+        "pin-net graph",
+        "vendor companion placement rules",
+        "return path",
+        "candidate before/after"
+      ],
+      "flag_if": "proposed move changes critical local bypass/VCAP loop without vendor-based verification",
+      "result": "NEEDS_REVIEW",
+      "status": "PROPOSED",
+      "evidence": [
+        "TRAINING_20261116"
+      ]
+    },
+    {
+      "id": "ER04",
+      "title": "Port ESD topology and routed pairing",
+      "mapped_existing": [
+        "PT05",
+        "PT07",
+        "TC05"
+      ],
+      "kind": "CONDITIONAL",
+      "automation_stage": "TOPOLOGY_AND_GEOMETRY",
+      "required_inputs": [
+        "connector/ESD/PHY pad-net map",
+        "surge GND return",
+        "PHY requirements",
+        "stackup"
+      ],
+      "flag_if": "unprotected branch before ESD or unexpected ESD return/path/USB pair mismatch",
+      "result": "NEEDS_REVIEW",
+      "status": "PROPOSED",
+      "evidence": [
+        "RD30"
+      ]
+    },
+    {
+      "id": "ER05",
+      "title": "Buck hot-loop area versus misleading short net lengths",
+      "mapped_existing": [
+        "PT02",
+        "TC03",
+        "TC04"
+      ],
+      "kind": "CONDITIONAL_VENDOR",
+      "automation_stage": "POWER_TOPOLOGY_AND_COPPER_POLYGONS",
+      "required_inputs": [
+        "exact regulator MPN",
+        "VIN+GND switching loop pads",
+        "copper polygons and layer stack",
+        "SW/FB mapping"
+      ],
+      "flag_if": "only center distance/total SW net length is used as hot loop proof",
+      "result": "INSUFFICIENT_EVIDENCE",
+      "status": "PROPOSED",
+      "evidence": [
+        "RD30",
+        "RD01",
+        "TS02"
+      ]
+    },
+    {
+      "id": "ER06",
+      "title": "Constrained placement/routing before-after acceptance",
+      "mapped_existing": [
+        "PT08",
+        "PT17",
+        "TC10"
+      ],
+      "kind": "RELEASE_WORKFLOW",
+      "automation_stage": "REQUIRES_NATIVE_DRC",
+      "required_inputs": [
+        "baseline and candidate PCB SHA",
+        "manual locks",
+        "native DRC",
+        "zone refill",
+        "selected net route metrics",
+        "unrouted counts"
+      ],
+      "flag_if": "candidate cannot prove improvements without damage or has no actual routed trial",
+      "result": "NEEDS_REVIEW",
+      "status": "PROPOSED",
+      "evidence": [
+        "TRAINING_20261116"
+      ]
+    },
+    {
+      "id": "ER07",
+      "title": "Resolve effective per-net KiCad netclasses and custom DRC before routing",
+      "mapped_existing": [
+        "TC08",
+        "TC10",
+        "RE01",
+        "RE09"
+      ],
+      "kind": "CONFIGURATION_INVARIANT",
+      "automation_stage": "PROJECT_AND_NATIVE_DRC",
+      "required_inputs": [
+        "kicad_pcb",
+        "kicad_pro",
+        "kicad_dru if any",
+        "netclass assignment",
+        "native DRC"
+      ],
+      "flag_if": "agent routes using generic global floor or mismatched imported DSN constraints rather than effective netclass widths/clearances",
+      "result": "NEEDS_REVIEW_OR_DRC_FAIL",
+      "status": "PROPOSED",
+      "evidence": [
+        "TRAINING_20261116"
+      ]
+    }
+  ],
+  "limitations": [
+    "No reference release is marked electrically validated",
+    "No GitHub README assertion promoted into DRC truth",
+    "No user changes to downstream KiCad PCB",
+    "No changes to canonical rules until explicit per-rule owner approval"
+  ]
+}
