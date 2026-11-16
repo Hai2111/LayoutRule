@@ -1,8 +1,9 @@
 # AGENTS.md — instructions for Claude / Codex / KiCadAutoLayout
 
-This repository is a **PCB layout reference**, NOT an automatically validated standards database.
+This repository is the **canonical PCB layout reference**, NOT an automatically validated standards database. Owner-controlled update rules: [GOVERNANCE.md](GOVERNANCE.md). Downstream repos may submit evidence and proposals, but do not modify the upstream rulebook automatically.
 
 ## Read order
+0. `GOVERNANCE.md` — owner approval and one-way dependency
 1. `README.md`
 2. `LAYOUT_RULES.md`
 3. `TECHNICAL_SOURCES.md` (official CAD docs, vendors, IPC standard scope and contradictory advice)
@@ -35,14 +36,16 @@ This repository is a **PCB layout reference**, NOT an automatically validated st
 Use `PASS`, `FAIL`, `NEEDS_REVIEW`, `NA` per rule. Output terse actionable review, prioritize blocked risks. A tool failure or unavailable data is NOT a PASS.
 
 ## Updating research
-When discovering official standards/technical papers, add a source ID TSnn in `TECHNICAL_SOURCES.md` with exact accessible edition and provenance. **Do not claim to possess the full paid IPC standards from their free sample/TOC PDFs.**
+**Governance:** These are instructions for drafting change proposals, not for changing canonical `main` without the owner's explicit approval of the exact revision. See `GOVERNANCE.md`; do not infer approval from successful tests or downstream project outcomes. Record provenance and exceptions.
 
-When discovering new reference PCBs, update both `REFERENCE_DESIGN_CATALOG.md` and `references/index.json` (source URL, exact revision, published files, evidence status, group, potential PT patterns). Do NOT call Gerber/CAD files parsed until coordinates, nets and polygons were actually extracted. Maintain strict license boundaries.
+When discovering official standards/technical papers, propose a source ID TSnn in `TECHNICAL_SOURCES.md` with exact accessible edition and provenance. **Do not claim to possess the full paid IPC standards from their free sample/TOC PDFs.**
+
+When discovering new reference PCBs, propose coordinated updates to both `REFERENCE_DESIGN_CATALOG.md` and `references/index.json` (source URL, exact revision, published files, evidence status, group, potential PT patterns). Do NOT call Gerber/CAD files parsed until coordinates, nets and polygons were actually extracted. Maintain strict license boundaries.
 
 When discovering new Phil's Lab/Altium Academy videos:
 1. Check URL, author/channel, chapters and duplication.
 2. Add to its matching catalog with unique PLnn/AAnn/EXnn and `M`.
 3. Summarize scope and source-supported takeaways; do not fabricate detailed quotes or numerical requirements.
 4. Upgrade to `T` or `V` only after obtaining/examining full transcript or video, with timestamped evidence and review note.
-5. Add or revise rules only after explaining scope, testability, priority and exception.
+5. Propose added or revised rules only after explaining scope, testability, priority and exception.
 6. Update catalog totals and relevant backlinks. Never silently rewrite prior reviewed cases.
