@@ -1,0 +1,464 @@
+{
+  "schema_version": "1.0",
+  "status": "RESEARCH_PROPOSAL_OWNER_APPROVAL_REQUIRED",
+  "date": "2026-11-16",
+  "source_reference_matrix": "2026-11-16_ALL_36_REFERENCE_MATRIX.json",
+  "num_reference_sources": 36,
+  "stages": [
+    {
+      "id": "WF00",
+      "title": "Source identity, schematic integrity and ruleset",
+      "focus": "INPUT",
+      "dependencies": [],
+      "hard_invariants": [
+        "do not change pad→net mapping without schematic-approved ECO",
+        "preserve manual PCB baseline hash",
+        "real DRC/ERC errors are not PASS"
+      ],
+      "actions": [
+        "record PCB/SCH/PRO/rulebook SHA and KiCad version",
+        "extract netlist, ERC, current DRC where available",
+        "classify unclear constraints and gather exact datasheet/fab rules"
+      ],
+      "soft_failure": "Continue generating review and candidate plans in an isolated copy, mark NEEDS_EVIDENCE; never certify until resolved",
+      "outputs": [
+        "input_manifest.json",
+        "netlist_map.json",
+        "erc_baseline.json",
+        "drc_baseline.json"
+      ],
+      "rule_refs": [
+        "ER01",
+        "ER06",
+        "TC10"
+      ]
+    },
+    {
+      "id": "WF01",
+      "title": "Mechanical anchor and movement-envelope planning",
+      "focus": "PLACEMENT",
+      "dependencies": [
+        "WF00"
+      ],
+      "hard_invariants": [
+        "mating edge and connector overhang",
+        "mounting holes, antenna keepout, creepage when specified",
+        "user-locked parts unchanged"
+      ],
+      "actions": [
+        "fix true mechanical anchors only",
+        "retain edge-sliding degrees of freedom for unconstrained connectors",
+        "label movable/reserved space by congestion corridor rather than fixed free area"
+      ],
+      "soft_failure": "Try alternative legal connector translation/functional-block orientation; retain immutable locked anchors",
+      "outputs": [
+        "anchor_constraints.json",
+        "movement_envelopes.json"
+      ],
+      "rule_refs": [
+        "PT01",
+        "PT17",
+        "ER02"
+      ]
+    },
+    {
+      "id": "WF02",
+      "title": "Build electrical-topology dependency graph",
+      "focus": "PLACEMENT",
+      "dependencies": [
+        "WF00",
+        "WF01"
+      ],
+      "hard_invariants": [
+        "respect functional pin identities and safety domains"
+      ],
+      "actions": [
+        "map supply-pin/decoupler local loops, input/filter/AFE/ADC chains, ESD-port-PHY, switching hot loops, MOSFET gates, RF matching, differential pair and ground returns",
+        "classify net priority from edge rate, energy, noise sensitivity and hardware constraints",
+        "select applicable reference patterns by IC/topology/stackup, not simply device names"
+      ],
+      "soft_failure": "Unknown nets remain NEEDS_EVIDENCE; optimize independent known blocks while preserving unknown paths",
+      "outputs": [
+        "functional_graph.json",
+        "priority_nets.json",
+        "reference_selection.json"
+      ],
+      "rule_refs": [
+        "PT02",
+        "PT03",
+        "PT05",
+        "PT07",
+        "PT11",
+        "PT13",
+        "PT14",
+        "PT15",
+        "ER03",
+        "ER04",
+        "ER05"
+      ]
+    },
+    {
+      "id": "WF03",
+      "title": "Generate multiple board-level candidate placements",
+      "focus": "PLACEMENT",
+      "dependencies": [
+        "WF01",
+        "WF02"
+      ],
+      "hard_invariants": [
+        "outline, courtyard and legitimate keepouts",
+        "user-locked footprints",
+        "specified isolation spacing"
+      ],
+      "actions": [
+        "generate placement variants by legal rotation, translation and block permutations",
+        "cluster support passives around relevant pads using low-loop impedance proxy",
+        "reserve critical fanout corridors and local movement slack",
+        "reject only invalid candidates, not the entire batch"
+      ],
+      "soft_failure": "Keep the best legal candidate and generate locally perturbed alternatives; never declare 'no solution' due to a single failed attempt",
+      "outputs": [
+        "candidate_positions.json",
+        "feasibility_filter.json"
+      ],
+      "rule_refs": [
+        "PT01",
+        "PT03",
+        "PT08",
+        "PT17",
+        "ER02",
+        "ER03"
+      ]
+    },
+    {
+      "id": "WF04",
+      "title": "Electrical-critical local placement and escape precheck",
+      "focus": "PLACEMENT",
+      "dependencies": [
+        "WF03"
+      ],
+      "hard_invariants": [
+        "vendor-specific crystal/RF/thermal/decoupling constraints",
+        "current/safety boundaries"
+      ],
+      "actions": [
+        "close switch + input bypass current loop using topology-specific copper path",
+        "align ESD+USB PHY, clock and RF matching with required reference areas",
+        "protect VCAP and high-frequency decoupling path, AFE inputs and precision references",
+        "check test access and tight package escape"
+      ],
+      "soft_failure": "Adjust only the local functional group, recalculate return path, or choose another candidate; don't push critical parts away just to obtain a short ordinary signal",
+      "outputs": [
+        "critical_local_loops.json",
+        "preflight_obstacles.json"
+      ],
+      "rule_refs": [
+        "PT02",
+        "PT03",
+        "PT04",
+        "PT05",
+        "PT06",
+        "PT07",
+        "PT10",
+        "PT11",
+        "PT14",
+        "ER03",
+        "ER04",
+        "ER05"
+      ]
+    },
+    {
+      "id": "WF05",
+      "title": "Predict congestion and mark routing corridors",
+      "focus": "PLACEMENT",
+      "dependencies": [
+        "WF04"
+      ],
+      "hard_invariants": [
+        "legal trace clearances and drill/neck rules",
+        "no required reference-plane fragmentation"
+      ],
+      "actions": [
+        "build corridor occupancy/crossing/fanout feasibility map using global pad positions and copper geometries",
+        "identify movable unrelated blockers such as reset pull-up occupying UART corridor",
+        "assess candidate alternate escapes by layer and ground return",
+        "rank blockers by critical-net detour cost, not generic visual whitespace"
+      ],
+      "soft_failure": "Emit proposed local component shifts, orientation changes or alternative layer topology and retry WF03–WF05",
+      "outputs": [
+        "congestion_map.json",
+        "blocking_components.json",
+        "escape_candidates.json"
+      ],
+      "rule_refs": [
+        "PT06",
+        "PT07",
+        "PT08",
+        "PT12",
+        "PT17",
+        "ER02"
+      ]
+    },
+    {
+      "id": "WF06",
+      "title": "Trial-route constrained net groups on clones",
+      "focus": "ROUTING_FEEDBACK",
+      "dependencies": [
+        "WF05"
+      ],
+      "hard_invariants": [
+        "source PCB immutable",
+        "correct pad connectivity",
+        "no modifications outside selected scope without explicit diff",
+        "no omitted KiCad custom clearance/DRU rules"
+      ],
+      "actions": [
+        "route clock/critical analog, power hot loops, USB/differential nets and constrained escapes as appropriate",
+        "record failed exits, vias, length, return discontinuity and pre/post DRC",
+        "if router repeatedly detours, return to WF03/WF04 with culprit move proposals",
+        "allow multiple candidate trials under a finite resource budget"
+      ],
+      "soft_failure": "Try alternative route order, scoped rip-up and another legal placement; if tools unavailable return an executable plan with honest NOT_RUN status",
+      "outputs": [
+        "trial_route_manifest.json",
+        "critical_route_metrics.json",
+        "placement_feedback.json"
+      ],
+      "rule_refs": [
+        "PT08",
+        "PT12",
+        "PT17",
+        "ER06"
+      ]
+    },
+    {
+      "id": "WF07",
+      "title": "Route full PCB in dependency-aware groups",
+      "focus": "ROUTING",
+      "dependencies": [
+        "WF06"
+      ],
+      "hard_invariants": [
+        "route layer/netclass constraints",
+        "continuity and current capacity",
+        "preserved legal critical routes"
+      ],
+      "actions": [
+        "choose net-group order based on conflicts and criticality rather than alphabetic list",
+        "avoid unnecessary vias/detours but allow justified layer transitions with return management",
+        "iterate limited rip-up of only newly affected routes",
+        "keep best complete feasible candidate and compare per-net deltas"
+      ],
+      "soft_failure": "Retry affected group with alternate ordering; widen movement envelope of movable groups; never delete all existing valid routes indiscriminately",
+      "outputs": [
+        "route_candidate.kicad_pcb",
+        "net_route_metrics.json",
+        "route_diff.json"
+      ],
+      "rule_refs": [
+        "PT06",
+        "PT07",
+        "PT08",
+        "PT12",
+        "ER06"
+      ]
+    },
+    {
+      "id": "WF08",
+      "title": "Power/ground/EMI/DFM spatial review",
+      "focus": "VALIDATION",
+      "dependencies": [
+        "WF06",
+        "WF07"
+      ],
+      "hard_invariants": [
+        "known copper current, isolation and thermal requirements",
+        "proper decoupling return",
+        "mandated keepouts"
+      ],
+      "actions": [
+        "refill copper zones and inspect connectivity/return continuity/islands",
+        "evaluate voltage drop and current neckdown, SW/FB separation, shielding and safety",
+        "evaluate USB pair impedance only with known PHY/stackup; no fabricated 90-ohm pass",
+        "compare if a same-layer detour is worse than justified vias"
+      ],
+      "soft_failure": "Propose local copper/placement changes and return to WF04–WF07; log remaining NEEDS_EVIDENCE conditions",
+      "outputs": [
+        "ground_return_report.json",
+        "power_integrity_report.json",
+        "dfm_precheck.json"
+      ],
+      "rule_refs": [
+        "PT02",
+        "PT06",
+        "PT07",
+        "PT11",
+        "PT14",
+        "ER05",
+        "TC02",
+        "TC07"
+      ]
+    },
+    {
+      "id": "WF09",
+      "title": "Native KiCad checks and source consistency",
+      "focus": "VALIDATION",
+      "dependencies": [
+        "WF08"
+      ],
+      "hard_invariants": [
+        "no newly introduced hard ERC/DRC error for release",
+        "zero unintentionally unrouted nets",
+        "no changed protected placement",
+        "matching board/schematic netlist"
+      ],
+      "actions": [
+        "run native KiCad ERC and DRC on exact candidate",
+        "check fill state, pad-net, width, via, courtyard, copper short, unrouted, diff to baseline",
+        "record exceptions and precise locations for automatic repair proposals"
+      ],
+      "soft_failure": "No silent bypass: return to earliest cause stage with localized repair recipe; when KiCad unavailable label NOT_RUN and keep candidate unreleased",
+      "outputs": [
+        "candidate_erc.json",
+        "candidate_drc.json",
+        "source_integrity_diff.json",
+        "unresolved_exceptions.json"
+      ],
+      "rule_refs": [
+        "PT09",
+        "ER01",
+        "ER06",
+        "TC01",
+        "TC10"
+      ]
+    },
+    {
+      "id": "WF10",
+      "title": "Select Pareto-improving legal candidate and stop bounded search",
+      "focus": "OPTIMIZATION",
+      "dependencies": [
+        "WF06",
+        "WF07",
+        "WF08",
+        "WF09"
+      ],
+      "hard_invariants": [
+        "hard constraints remain non-negotiable",
+        "baseline and all candidate hashes kept"
+      ],
+      "actions": [
+        "discard violating candidates but retain learnings",
+        "compare on route completion, critical return/loop, critical path length, via count, congestion, user locks and DFM",
+        "avoid converting metrics with unknown units or uncalibrated weighted cost into false precision",
+        "stop on convergence or fixed iteration budget, retaining best feasible candidate and untested alternatives"
+      ],
+      "soft_failure": "Report best known candidate and pending risks with next actionable experiment; NEVER claim global optimum from finite search",
+      "outputs": [
+        "candidate_ranking.json",
+        "pareto_report.json",
+        "best_candidate_manifest.json"
+      ],
+      "rule_refs": [
+        "PT08",
+        "PT09",
+        "PT17",
+        "ER06"
+      ]
+    },
+    {
+      "id": "WF11",
+      "title": "Produce auditable deliverables and user-controlled upstream proposals",
+      "focus": "REPORTING",
+      "dependencies": [
+        "WF10"
+      ],
+      "hard_invariants": [
+        "do not push from Training into LayoutRule main",
+        "owner approval required for canonical rule change",
+        "no invented CAD/DRC evidence"
+      ],
+      "actions": [
+        "save board outputs and before/after metrics with source and rulebook hashes",
+        "create evidence-backed rule candidate report with scope, exception and counterexample",
+        "classify checks as PASS, FAIL, NOT_RUN or NEEDS_EVIDENCE",
+        "ask owner to approve exact proposed rules, separately from candidate PCB acceptance"
+      ],
+      "soft_failure": "Deliver partial verified artifacts and explicit gaps rather than block all useful reports",
+      "outputs": [
+        "review_summary.md",
+        "evidence_manifest.json",
+        "rule_proposals.md"
+      ],
+      "rule_refs": [
+        "PT09",
+        "PT16",
+        "ER01",
+        "ER06"
+      ]
+    },
+    {
+      "id": "WF12",
+      "title": "Learn from real hardware revisions and negative cases",
+      "focus": "LEARNING",
+      "dependencies": [
+        "WF11"
+      ],
+      "hard_invariants": [
+        "source revisions and outcome evidence pinned",
+        "no unapproved promotion to canonical rules"
+      ],
+      "actions": [
+        "compare before/after of same-board revisions with changes in netlist, layer count, thermal, return and EMC outcomes",
+        "retain failures and unverified cases for future regression tests",
+        "update candidate heuristics only with documented counterexamples and owner-controlled promotion"
+      ],
+      "soft_failure": "Keep evidence as draft or inconclusive and continue collecting; don't force a rule from incomplete data",
+      "outputs": [
+        "revision_delta.json",
+        "regression_cases.json",
+        "upstream_candidate_proposals.json"
+      ],
+      "rule_refs": [
+        "PT16",
+        "ER01"
+      ]
+    }
+  ],
+  "resource_budget": {
+    "max_candidates_per_iteration": 8,
+    "max_local_placement_iterations": 20,
+    "max_trial_route_orders_per_candidate": 4,
+    "max_post_route_repair_iterations": 12,
+    "stop_when_no_improvement_iterations": 4,
+    "notes": "Default evaluation budgets are computational heuristics, NOT electrical standards. Caller may tune them. Preserve every change and no unbounded loops."
+  },
+  "selection_policy": {
+    "ordered": "Hard invariants before Pareto ranking",
+    "reject_on": [
+      "new hard DRC/ERC violations for release",
+      "illegal mechanical/creepage/footprint move",
+      "unintended netlist mutation",
+      "modified user-locked footprints",
+      "hard route continuity failure"
+    ],
+    "ranking_metrics": [
+      "completed_routes",
+      "critical_current_loop_quality",
+      "reference_continuity",
+      "critical_signal_path",
+      "avoidable_vias",
+      "route_congestion",
+      "dfm_cost",
+      "manual_edit_delta"
+    ],
+    "missing_measurements": "NEEDS_EVIDENCE, never assume pass",
+    "recovery": "try legal localized alternatives, retain best prior candidate and actionable report; do not disable constraints"
+  },
+  "downstream_contract": {
+    "read_only_rule_source": true,
+    "owner_review_for_rule_promotion": true,
+    "do_not_modify_source_pcb": true,
+    "native_drc_not_run_here": true,
+    "validate_full_schematic_before_fab": true
+  }
+}
