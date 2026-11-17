@@ -148,6 +148,35 @@ Luôn đặt theo thứ tự dưới đây, vì linh kiện ở trên bị ràng
 
 Thứ tự dưới đây là mặc định; đổi thứ tự hai bước kề nhau được phép khi có xung đột chỗ, nhưng phải ghi lý do (R02, R03). **Không route theo thứ tự net ID. Không chạy autorouter toàn board.**
 
+### Luật cứng bắt buộc trước khi route bất kỳ trace nào (K1–K3)
+
+Những luật này được rút ra từ kiểm chứng thực tế (xem `LESSONS_LEARNED.md`). Vi phạm bất kỳ luật nào → loại candidate, quay lại Pha 2.
+
+**K1 — Cấm trace dưới bụng linh kiện thụ động và dưới vỏ connector.**
+- Không có trace nào (kể cả lớp `F.Cu` và `B.Cu`) đi qua bounding-box thân của R, C, L, D dạng SMD.
+- Không trace đi giữa hai pad của bất kỳ linh kiện nào (xuyên qua khe linh kiện).
+- Không trace dưới thân SOT-23 (vùng giữa hai hàng pad).
+- Không trace dưới vỏ kim loại connector (USB shell, RJ45 shell, v.v.).
+- Trace trong *kênh* giữa hai hàng chân SOIC/TSSOP (không dưới thân IC) là vùng xám — cần chủ ý nhưng không cấm hoàn toàn; phải ghi rõ trong REVIEW nếu dùng.
+- Ngoại lệ có cơ sở: nếu topology bắt buộc (ví dụ cầu nối D+/D− USB-C do pin-out xen kẽ) thì phải ghi vào EXEMPT list của checker và giải thích trong REVIEW.md.
+- **Kiểm tra:** `python tools/drc_body_keepout.py board.kicad_pcb` — phải trả về 0 violation (trừ EXEMPT đã khai báo).
+
+**K2 — Cấm "route in order, done when connected".**
+- Không được route tuần tự từ net 1 đến net N rồi xác nhận hoàn thành khi tất cả node đã nối.
+- Tiêu chí hoàn thành là: (a) đúng thứ tự ưu tiên K3, (b) không vi phạm K1, (c) return path hợp lệ — không phải chỉ "nối được".
+
+**K3 — Thứ tự bắt buộc: Placement → P1 → check → đặt lại nếu thất bại → P2 → P3.**
+```
+place_all()
+  → route_P1()      # USB/cặp vi sai, decoupling, connector cluster, vòng nóng
+  → check_K1()      # drc_body_keepout.py — phải 0 violation
+  → if fail: adjust_placement(), goto route_P1   # loại candidate, không patch
+  → route_P2()      # trunk nguồn, tải LED/motor, gate MOSFET
+  → route_P3()      # UART, debug, control — được 1 via ngắn mỗi đường, không đi dưới P1/P2
+  → final_check()
+```
+Mỗi vòng lặp placement phải được ghi số thứ tự và lý do loại vào REVIEW.md.
+
 **3.1 Dựng GND trước.** Vẽ outline zone GND trên lớp tham chiếu (và các lớp khác nếu có) ngay từ đầu để mọi quyết định sau nhìn thấy nó. Board 2 lớp: mỗi pad GND trên `F.Cu` có via xuống `B.Cu` ngay cạnh pad, hoặc nối vào vùng GND `F.Cu` có via gần đó (R06, PT06).
 
 **3.2 Vòng nóng của converter.** Dùng polygon/track rộng, một lớp, không via. Nối CIN–IC trước, rồi SW–L, rồi L–COUT, rồi GND chung. Sau đó khóa các net này.

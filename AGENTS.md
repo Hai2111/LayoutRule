@@ -21,6 +21,7 @@ When the task is to **produce** a layout rather than review one, follow `AGENT_L
 2. Floorplan → place inside blocks → route by risk order → functional check. Each phase has a gate; do not pass a gate with an open `FAIL`.
 3. When project/fab/vendor data is silent, use the starting value from `rules/layout_defaults.json`, record its id under `assumptions`, and continue. Stop for a human only in the cases listed in playbook section 7.
 4. Run `python tools/layout_audit.py BOARD.kicad_pcb layout_intent.json` at gates G2–G5 in addition to KiCad ERC/DRC. Its PASS is a geometry statement, not electrical proof.
+4a. Also run `python tools/drc_body_keepout.py BOARD.kicad_pcb [--exempt REF,NET ...]` to enforce K1 (no trace under component body). Must return 0 violations (excluding declared exemptions) before any P2 routing begins. Calibration: same checker on STM8 V6 Codex = 52 hits, V8 Claude full re-route = 0 hits. See `LESSONS_LEARNED.md` for K1/K2/K3 rules derived from that session.
 5. If a net will not route cleanly, change placement; do not route around a bad placement.
 
 ## Before acting on a PCB
