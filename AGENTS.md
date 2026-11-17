@@ -9,10 +9,19 @@ This repository is the **canonical PCB layout reference**, NOT an automatically 
 3. `TECHNICAL_SOURCES.md` (official CAD docs, vendors, IPC standard scope and contradictory advice)
 4. `REFERENCE_DESIGN_CATALOG.md`, `references/index.json`, `PLACEMENT_PATTERNS.md` (vendor-specific overrides)
 5. `PLACEMENT_ROUTING_WORKFLOW.md`
+5a. `AGENT_LAYOUT_PLAYBOOK.md` + `rules/layout_defaults.json` — PROPOSED step-by-step procedure, gates and starting values for an agent that must complete placement and routing
 6. `REVIEW_CHECKLIST.md`
 7. `VIDEO_CATALOG.md` + `VIDEO_REVIEWS_EXTERNAL.md` for video chapter, URLs and evidence status
 8. `AI_LAYOUT_RESEARCH.md` for experimental routing benchmarks and new academic results (not automatic quality standards)
 9. `ROUTING_ENGINE_INTEGRATION.md` for safe Claude routing controller/decision rules and Freerouting KiCad10 tool contracts
+
+## Doing placement and routing (PROPOSED 2026-11-17, pending owner approval)
+When the task is to **produce** a layout rather than review one, follow `AGENT_LAYOUT_PLAYBOOK.md` phase by phase:
+1. Write `layout_intent.json` from the schematic before placing anything (net classes with currents, hot loops, decoupling map, blocks, anchors).
+2. Floorplan → place inside blocks → route by risk order → functional check. Each phase has a gate; do not pass a gate with an open `FAIL`.
+3. When project/fab/vendor data is silent, use the starting value from `rules/layout_defaults.json`, record its id under `assumptions`, and continue. Stop for a human only in the cases listed in playbook section 7.
+4. Run `python tools/layout_audit.py BOARD.kicad_pcb layout_intent.json` at gates G2–G5 in addition to KiCad ERC/DRC. Its PASS is a geometry statement, not electrical proof.
+5. If a net will not route cleanly, change placement; do not route around a bad placement.
 
 ## Before acting on a PCB
 - Read current schematic/board, datasheets, manufacturability, stackup and **project-local** constraints.

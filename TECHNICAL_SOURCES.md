@@ -11,7 +11,7 @@
 6. **Video review** with time-stamped specific observed design examples.
 7. **Unverified heuristics**: warnings only. A source's authority does not make every inference applicable to other topologies.
 
-## Source index (13 primary documents)
+## Source index (17 primary documents; TS14–TS17 are PROPOSED additions, 2026-11-17)
 
 | ID | Type | Source and verified scope | Evidence status | Rules / applicable claims |
 |---|---|---|---|---|
@@ -28,6 +28,10 @@
 | TS11 | Manufacturer standard | [IPC-2152 — Current Carrying Capacity in Printed Board Design, contents/sample](https://www.ipc.org/TOC/IPC-2152.pdf) | **PDF_SCREENSHOT_INSPECTED** (cover and contents, no full standard validation) | Proper trace sizing uses current **and allowed conductor temperature rise** plus copper/layer/enclosure conditions; never derive all currents from one fixed width. R04,G04. Avoid claiming a particular width/amp value from an unread copy. |
 | TS12 | Manufacturer standard | [IPC-7351 — SMT Land Pattern, contents/sample](https://www.ipc.org/TOC/IPC-7351.pdf) | **PDF_SCREENSHOT_INSPECTED** (cover and contents, no full standard validation) | Land pattern/pad tolerancing, component courtyard/spacing, SMT assembly and rework matter beyond DRC clearance. P09,P11,G05; exact footprint geometry needs current standard/datasheet/fab. |
 | TS13 | Vendor USB product note | [TI TS3USB30 datasheet (Rev. F), layout section](https://www.ti.com/lit/ds/scds237f/scds237f.pdf) | **PDF_METADATA_AND_SEARCH_TEXT_ONLY** | Example of vendor-specified matched D+/D− pair, minimize corners/vias, bypass placement offset from D pairs; cannot generalize numeric length threshold without reading actual current datasheet and interface. R07,P04. |
+| TS14 | Vendor app note | [TI SLVA959 — Best Practices for Board Layout of Motor Drivers](https://www.ti.com/lit/pdf/slva959) | **TEXT_SUMMARY_READ** (section 3 Vias, section 6.3.2; figures not visually inspected) | Table 3-1 via current capacity at 10 °C rise on 1 oz (e.g. 12 mil 0.84 A, 16 mil 1.1 A); multiple vias for power/ground placed close to where current enters or leaves the pin; solid rather than spoke connection; clustered vias can open a gap in the plane; minimise layer jumps in the high-current path. Scope: motor drivers; used as starting value D-VIA. R04, R08, G03, G04, PT12. |
+| TS15 | Technical article | [Brooks & Adam — Vias are cooler than we think, Signal Integrity Journal](https://www.signalintegrityjournal.com/articles/1459-vias-are-cooler-than-we-think) | **TEXT_SUMMARY_READ** | Via temperature follows the attached traces rather than via current alone (measured 44.5 °C via vs 40.5 °C trace at 8.55 A on a 200 mil trace); quotes IPC-2152 p.26 on matching via cross-section to conductor or using multiple vias. Do not treat as licence for single-via power transitions: voltage drop, inductance and redundancy still apply. R04, PT12. |
+| TS16 | Vendor reference design guide | [TI TIDUCL0 — TIDA-00774 18 V / 1 kW BLDC drive design guide](https://ti.com/lit/pdf/tiducl0) | **TEXT_SUMMARY_READ** (layout section; layer plots not inspected) | 4-layer, 2 oz board for 50 A RMS: wide power tracks repeated on several layers and joined by arrays of stitching vias. Example of one design, not a general rating. R04, G03. |
+| TS17 | Technical article | [Stitching together a multi-layer PCB PDN, Semiconductor Engineering](https://semiengineering.com/stitching-together-a-multi-layer-pcb-pdn) | **TEXT_SUMMARY_READ** | Simulated 5×5 stitching-via array at a plane bend: current concentrates in the inside-corner vias (about 9.7 A max vs 0.003 A min) because via resistance is far below plane sheet resistance. Extreme case with very short vias; direction of the effect, not the ratio, is what transfers. PT12, D-VIA. |
 
 ## Source-derived conclusions (not universal CAD geometry constraints)
 
