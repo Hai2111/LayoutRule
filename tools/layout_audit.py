@@ -118,10 +118,12 @@ class Board:
 
         self.segments = []
         for s in kids(root, 'segment') + kids(root, 'arc'):
-            a, b = kid(s, 'start'), kid(s, 'end')
-            self.segments.append({'x1': num(a[1]), 'y1': num(a[2]), 'x2': num(b[1]), 'y2': num(b[2]),
-                                  'w': num(kid(s, 'width')[1]), 'layer': kid(s, 'layer')[1],
-                                  'net': netname(s)})
+            a, b, m = kid(s, 'start'), kid(s, 'end'), kid(s, 'mid')
+            rec = {'x1': num(a[1]), 'y1': num(a[2]), 'x2': num(b[1]), 'y2': num(b[2]),
+                   'w': num(kid(s, 'width')[1]), 'layer': kid(s, 'layer')[1], 'net': netname(s)}
+            if m is not None:
+                rec['len'] = arc_length((rec['x1'], rec['y1']), (num(m[1]), num(m[2])), (rec['x2'], rec['y2']))
+            self.segments.append(rec)
         self.vias = []
         for v in kids(root, 'via'):
             at = kid(v, 'at')
@@ -143,7 +145,23 @@ def dist(a, b):
 
 
 def seg_len(s):
-    return math.hypot(s['x2'] - s['x1'], s['y2'] - s['y1'])
+    return s['len'] if 'len' in s else math.hypot(s['x2'] - s['x1'], s['y2'] - s['y1'])
+
+
+def arc_length(a, m, b):
+    """length of the circular arc from a to b passing through m"""
+    d = 2 * (a[0] * (m[1] - b[1]) + m[0] * (b[1] - a[1]) + b[0] * (a[1] - m[1]))
+    if abs(d) < 1e-12:                                   # collinear: treat as two straight pieces
+        return math.hypot(m[0] - a[0], m[1] - a[1]) + math.hypot(b[0] - m[0], b[1] - m[1])
+    sq = lambda p: p[0] * p[0] + p[1] * p[1]
+    cx = (sq(a) * (m[1] - b[1]) + sq(m) * (b[1] - a[1]) + sq(b) * (a[1] - m[1])) / d
+    cy = (sq(a) * (b[0] - m[0]) + sq(m) * (a[0] - b[0]) + sq(b) * (m[0] - a[0])) / d
+    r = math.hypot(a[0] - cx, a[1] - cy)
+    ang = lambda p: math.atan2(p[1] - cy, p[0] - cx)
+    two_pi = 2 * math.pi
+    am, ab = (ang(m) - ang(a)) % two_pi, (ang(b) - ang(a)) % two_pi
+    sweep = ab if am <= ab else two_pi - ab             # go the way that passes through m
+    return r * sweep
 
 
 def clusters(points, link):
@@ -258,9 +276,32 @@ class Audit:
                 per = dv['current_per_via_a']['drill_0.4mm' if min(v['drill'] for v in grp) >= 0.4 else 'drill_0.3mm']
                 need = max(dv['min_vias_power_net'], math.ceil(amps / per - 1e-9))
                 cx = sum(v['x'] for v in grp) / len(grp); cy = sum(v['y'] for v in grp) / len(grp)
-                self.add('VIA-POWER', 'R04,R08,PT12', 'PASS' if len(grp) >= need else 'FAIL',
-                         f'{name} @({cx:.2f},{cy:.2f})', len(grp), need,
-                         '' if len(grp) >= need else 'too few vias where this power net changes layer')
+                status, note = ('PASS', '') if len(grp) >= need else ('FAIL', 'too few vias where this power net changes layer')
+                if status == 'PASS' and self.maybe_serial(name, grp):
+                    status = 'NEEDS_REVIEW'
+                    note = ('vias in this group are joined by a track on one layer only: they may be in series '
+                            '(down and back up), not in parallel; check each transition by eye')
+                self.add('VIA-POWER', 'R04,R08,PT12', status, f'{name} @({cx:.2f},{cy:.2f})', len(grp), need, note)
+
+    def maybe_serial(self, name, grp):
+        """True if two vias of the group are linked by a track run on exactly one layer.
+        Parallel vias share copper on both layers (tracks or zones); a down-and-up jumper
+        is linked on one layer only. Proximity alone cannot tell these apart."""
+        by_layer = defaultdict(list)
+        for s in self.b.segments:
+            if s['net'] == name:
+                by_layer[s['layer']].append(s)
+        linked = defaultdict(set)                         # (i, j) -> layers with a direct run
+        for layer, segs in by_layer.items():
+            for _, run in chains(segs):
+                ends = [(x, y) for s in run for x, y in ((s['x1'], s['y1']), (s['x2'], s['y2']))]
+                hit = [i for i, v in enumerate(grp)
+                       if any(math.hypot(v['x'] - x, v['y'] - y) <= 0.05 for x, y in ends)]
+                for i in hit:
+                    for j in hit:
+                        if i < j:
+                            linked[(i, j)].add(layer)
+        return any(len(layers) == 1 for layers in linked.values())
 
     def check_net_limits(self, nets):
         for name, spec in nets.items():
@@ -298,11 +339,18 @@ class Audit:
                 st = 'NEEDS_REVIEW'
             self.add('DECAP', 'P04,PT03', st, f"{item['pin']}<-{item['cap']}", round(dd, 2),
                      item.get('target_mm', a['target']), 'supply pad to capacitor pad' + side)
-            targets = [v for v in self.b.vias if v['net'] in gnd_names]
-            if item.get('gnd_pin') and item['gnd_pin'] in self.b.pads:
-                targets = targets + [self.b.pads[item['gnd_pin']]]
-            if targets:
-                gd = min(dist(c, t) for c in cold for t in targets)
+            cold_nets = {c['net'] for c in cold}
+            targets = [v for v in self.b.vias if v['net'] in cold_nets]
+            gp = self.b.pads.get(item.get('gnd_pin', ''))
+            if gp is not None:
+                if gp['net'] in cold_nets:
+                    targets = targets + [gp]
+                else:
+                    self.add('DECAP-GND', 'P04,G01', 'FAIL', item['cap'], None, None,
+                             f"gnd_pin {gp['key']} is on {gp['net']}, not the capacitor's ground net")
+            pairs = [(c, t) for c in cold for t in targets if c['net'] == t['net']]
+            if pairs:
+                gd = min(dist(c, t) for c, t in pairs)
                 self.add('DECAP-GND', 'P04,PT03', self.grade(gd, g['target'], g['review']),
                          item['cap'], round(gd, 2), g['target'], 'capacitor GND pad to nearest GND via / IC GND pin')
             else:
@@ -362,7 +410,17 @@ class Audit:
     def check_diff_pairs(self):
         dd = self.d['differential_pair']
         for pair in self.i.get('diff_pairs', []):
-            spec = dd.get(pair.get('type', 'usb_fs_ls'), dd['usb_fs_ls'])
+            spec = dd.get(pair.get('type', ''))
+            if not isinstance(spec, dict) or 'skew_mm' not in spec:
+                if all(k in pair for k in ('skew_target_mm', 'skew_review_mm', 'max_vias_per_line')):
+                    spec = {'skew_mm': {'target': pair['skew_target_mm'], 'review': pair['skew_review_mm']},
+                            'max_vias_per_line': pair['max_vias_per_line'],
+                            'max_length_mm_review': pair.get('max_length_mm', float('inf'))}
+                else:
+                    self.add('DIFF-SKEW', 'R07', 'NEEDS_REVIEW', pair['name'], None, None,
+                             f"no limits for pair type '{pair.get('type')}': give skew_target_mm, skew_review_mm and "
+                             'max_vias_per_line in the intent from the interface/PHY specification')
+                    continue
             lp = sum(seg_len(s) for s in self.b.segments if s['net'] == pair['p'])
             ln = sum(seg_len(s) for s in self.b.segments if s['net'] == pair['n'])
             vp = sum(1 for v in self.b.vias if v['net'] == pair['p'])

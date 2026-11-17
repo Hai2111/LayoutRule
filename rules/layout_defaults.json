@@ -110,7 +110,8 @@
     "note": "Impedance needs the real stackup (R07, TS03). On a generic 1.6 mm 2-layer board 90 ohm differential is usually not achievable with practical widths: route short, coupled, over solid GND and report the limitation instead of certifying impedance.",
     "usb_fs_ls": {"skew_mm": {"target": 2.0, "review": 5.0}, "max_vias_per_line": 2, "max_length_mm_review": 100},
     "usb_hs": {"skew_mm": {"target": 0.5, "review": 1.5}, "max_vias_per_line": 2, "max_length_mm_review": 75},
-    "via_count_must_match_between_lines": true
+    "via_count_must_match_between_lines": true,
+    "other_interfaces": "No starting values for CAN, RS-485, Ethernet, LVDS etc. Put skew_target_mm, skew_review_mm and max_vias_per_line on the pair in layout_intent.json from the interface/PHY specification; without them the audit returns NEEDS_REVIEW."
   },
   "two_layer_reference_plane": {
     "id": "D-2L",
