@@ -73,6 +73,20 @@
 
 **10 proposed machine-readable checks** are in [rules/technical_checks.json](rules/technical_checks.json). They specify expected inputs and exceptions, **not an operating KiCad verification engine**.
 
+## Đề xuất bổ sung (PROPOSED 2026-11-17, chưa được owner duyệt)
+Các luật A/P/R/G ở trên nêu điều kiện và ngoại lệ nhưng không cho agent trình tự thao tác hay con số để bắt đầu. Hai tài liệu đề xuất lấp chỗ đó, không thay đổi nội dung luật hiện có:
+
+- [AGENT_LAYOUT_PLAYBOOK.md](AGENT_LAYOUT_PLAYBOOK.md): trình tự pha, cổng kiểm đo được, quy tắc quay lui.
+- [rules/layout_defaults.json](rules/layout_defaults.json): giá trị khởi điểm D-…. Đây **không** phải ngưỡng PASS/FAIL phổ quát và không mâu thuẫn A02/PT03: số của dự án, nhà máy và hãng luôn ghi đè; mỗi giá trị đã dùng phải được ghi thành giả định; vượt mốc `review` thì sửa hoặc giải trình.
+
+| ID đề xuất | Level | Rule | Kiểm tra |
+|---|---|---|---|
+| V01 | CONDITIONAL | Đường tải dòng đổi lớp dùng `n = max(2, ceil(I / dòng mỗi via))` via; cả đường GND hồi về. | `VIA-POWER`; D-VIA; TS14. |
+| V02 | HEURISTIC | Dàn cụm via ngang bề rộng đường đồng (2–3 hàng so le), không xếp một hàng dọc theo dòng; đổi lớp ở đoạn thẳng, không ở góc cua. | Xem hình học cụm via; TS17 + mô hình DC chưa đối chiếu đo đạc. |
+| V03 | CONDITIONAL | Via của đường dòng lớn nối đặc, đặt sát chân linh kiện, không thắt cổ giữa pad và cụm via, không khoét khe trên plane GND. | Zone connect, bề rộng cổ, antipad; TS14. |
+| N01 | HARD (quy trình) | Agent làm layout phải có `layout_intent.json` trước placement và không báo hoàn thành khi cổng G5 còn `FAIL`. | File intent + báo cáo cổng. |
+| N02 | HARD (quy trình) | Thiếu số liệu: dùng giá trị khởi điểm và ghi giả định; chỉ dừng hỏi người theo danh sách ở playbook mục 7. | Mục `assumptions` trong intent. |
+
 ## Quy tắc ưu tiên nguồn và conflict resolution
 - **Applicable safety requirements + project acceptance criteria > device-specific vendor guide/datasheet > verified same-topology EVM > general technical article/standard scope > reviewed CAD > video anecdote.** A vendor note may be wrong/outdated outside its own IC: validate contradictory advice on actual hardware. Nếu hai hãng mâu thuẫn, không áp guideline của hãng này lên IC hãng khác.
 - **Crystal example:** RD03 (ESP32-S3) min 2.0 mm, trái với heuristic “càng gần càng tốt” trong bản trước. Đọc [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) PT04 trước khi agent đặt Y1.

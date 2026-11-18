@@ -13,6 +13,7 @@ Mỗi check: `rule_id, status(PASS|FAIL|NEEDS_REVIEW|NA), evidence, file_hash, n
 | 4. Critical routing | Clocks, RF, USB/diff, AFE, clock buses có return path hợp lệ? Trace width/spacing/impedance được tính? | net-class & route report |
 | 5. Power & ground | Di/dt loops đủ nhỏ? Vdrop/trace thermal đủ? GND không bị ngắt/đảo? Via transfer hợp lý? | loop map, plane map, current analysis |
 | 6. Manufacturing | DRC = 0 hard errors; fab holes, mask slivers, silk/polarity, land patterns, test points, footprints hợp lý? | DRC, 3D, Gerber viewer, fab notes |
+| 6b. Functional gate (PROPOSED) | F1–F12 trong AGENT_LAYOUT_PLAYBOOK Pha 4: sụt áp, via đổi lớp, vòng nóng, decoupling, GND liền, thạch anh, vi sai, FB/analog, TVS, nhiệt, keepout, lắp ráp | `layout_audit.py` JSON + intent + hash board; giả định D-… đã dùng |
 | 7. Independent review | Có vấn đề dù DRC=0? Mỗi ngoại lệ đã nêu risk/owner? | review summary / exception log |
 
 ### Block release immediately

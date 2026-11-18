@@ -2,6 +2,8 @@
 
 **Use with:** `LAYOUT_RULES.md`, `PLACEMENT_PATTERNS.md`, `REFERENCE_DESIGN_CATALOG.md`, `VIDEO_CATALOG.md`, `VIDEO_REVIEWS_EXTERNAL.md`, `REVIEW_CHECKLIST.md`.
 
+**Step-by-step procedure (PROPOSED 2026-11-17):** this file states the pipeline and its evidence rules; [AGENT_LAYOUT_PLAYBOOK.md](AGENT_LAYOUT_PLAYBOOK.md) is the proposed operational version with concrete actions, measurable gates, backtracking and starting values. Where they differ, this file stays authoritative until the owner approves the playbook.
+
 **Research benchmark:** `AI_LAYOUT_RESEARCH.md` discusses KiCad PCBWorld/CADET as optional evaluation tooling. These have **not** been integrated into this project or executed. Do not report a pass based on published paper results.
 
 **Reference policy:** read the `TECHNICAL_SOURCES.md` source hierarchy and run all applicable `rules/technical_checks.json` proposals when implementation exists; unresolved inputs mean `NEEDS_REVIEW`. RD30 demonstrates a partial real KiCad placement/net source extraction, **not** a certified golden placement.

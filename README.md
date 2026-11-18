@@ -4,6 +4,11 @@
 
 **Cập nhật:** 2026-11-15 · **Trạng thái:** research v0.3, có metadata/video chapters và một số reference PDF visual-inspected; **chưa xác minh video toàn văn; đã đọc một phần tọa độ linh kiện/net trong 1 tệp CAD, chưa parse hình học/DRC đầy đủ**.
 
+## Quy trình cho agent tự làm layout (đề xuất 2026-11-17, chờ owner duyệt)
+- [AGENT_LAYOUT_PLAYBOOK.md](AGENT_LAYOUT_PLAYBOOK.md) — quy trình 5 pha có cổng kiểm: intent → floorplan → placement → routing → kiểm chức năng; kèm quy tắc quay lui và danh sách lỗi agent hay mắc.
+- [rules/layout_defaults.json](rules/layout_defaults.json) — giá trị khởi điểm (bề rộng theo dòng, số via đổi lớp, khoảng cách decoupling, vòng nóng…) dùng khi dự án/nhà máy/hãng không cho số; mỗi giá trị ghi rõ `VENDOR` / `CALC` / `PRACTICE`.
+- [tools/layout_audit.py](tools/layout_audit.py) — đo hình học `.kicad_pcb` so với `layout_intent.json`; mới thử trên board tổng hợp trong `tests/fixtures/` (`python tests/test_layout_audit.py`), chưa thử trên board KiCad 10 thật.
+
 ## Routing engine (bổ sung 2026-11-15)
 - [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md) — so sánh Freerouting DSN/SES và PCBWorld/CADET, luật routing + cách kiểm tra native DRC. Code thử nghiệm đã commit trong [Hai2111/Training/routing](https://github.com/Hai2111/Training/tree/main/routing).
 - KiCad 10 export/import Specctra DSN/SES được xác minh trong API chính thức. Adapter Python mới **chưa thực thi với KiCad/Java thật trên máy người dùng**, chỉ compile và plan-only test.
@@ -21,7 +26,7 @@
 10. [rules/placement_patterns.json](rules/placement_patterns.json) — dữ liệu machine-readable **16 placement patterns**, chưa gắn engine kiểm tra tự động.
 11. [references/index.json](references/index.json) — danh mục có cấu trúc cho **36 reference design**, xác minh theo cấp độ.
 12. [tools/reference_status.py](tools/reference_status.py) — kiểm tra index/MD đồng nhất và xuất CSV.
-13. [TECHNICAL_SOURCES.md](TECHNICAL_SOURCES.md) — 13 nguồn tiêu chuẩn/tài liệu hãng/KiCad có mức bằng chứng rõ ràng.
+13. [TECHNICAL_SOURCES.md](TECHNICAL_SOURCES.md) — 17 nguồn tiêu chuẩn/tài liệu hãng/KiCad (TS14–TS17 là đề xuất mới) có mức bằng chứng rõ ràng.
 14. [rules/technical_checks.json](rules/technical_checks.json) — 10 đề xuất kiểm tra layout có inputs và điều kiện, **chưa thực thi**.
 15. [references/RD30_kicad_placement_sample.json](references/RD30_kicad_placement_sample.json) — 1 bộ dữ liệu vị trí + net được trích trực tiếp từ KiCad source, có SHA.
 16. [AI_LAYOUT_RESEARCH.md](AI_LAYOUT_RESEARCH.md) — 7 paper/repo khoa học, bao gồm CADET + PCBWorld và thiết kế benchmark KiCadAutoLayout.

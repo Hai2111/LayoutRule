@@ -1,0 +1,154 @@
+{
+  "schema_version": "0.1.0",
+  "updated": "2026-11-17",
+  "status": "PROPOSED",
+  "title": "Starting values for agent placement/routing when project, fab and vendor data are silent",
+  "how_to_use": [
+    "Precedence: project constraints > fab capability > device-specific vendor guide > these starting values.",
+    "A starting value is NOT a pass/fail standard. 'target' is what the agent aims for; beyond 'review' the agent must either fix the layout or write a justification in the review report.",
+    "Every starting value the agent actually uses must be listed in layout_intent.json under 'assumptions' with the id below, so the owner can see what was assumed.",
+    "basis: VENDOR = stated in a cited vendor document; CALC = computed from a stated formula; PRACTICE = common engineering practice, not verified against a source in this repository.",
+    "null is unknown, never zero."
+  ],
+  "fab_profile_fallback": {
+    "id": "D-FAB",
+    "basis": "PRACTICE",
+    "note": "Deliberately looser than typical prototype-fab minimums so the board stays manufacturable at most fabs. Replace with the real fab's numbers as soon as they are known (rule A02).",
+    "track_min_mm": 0.2,
+    "clearance_min_mm": 0.2,
+    "via_signal": {"drill_mm": 0.3, "diameter_mm": 0.6},
+    "via_power": {"drill_mm": 0.4, "diameter_mm": 0.8},
+    "copper_to_edge_mm": 0.5,
+    "component_to_edge_mm": 1.0,
+    "copper_oz_outer": 1
+  },
+  "track_width_by_current": {
+    "id": "D-WIDTH",
+    "basis": "CALC",
+    "formula": "IPC-2221 external conductor: I = 0.048 * dT^0.44 * A^0.725 (A in mil^2), 1 oz copper, dT = 10 C; value then rounded up to a convenient width. Same formula as the KiCad PCB Calculator track-width tab.",
+    "note": "Thermal sizing only. Always also check voltage drop (D-VDROP). For 2 oz copper the calculated width halves. Above 5 A use a filled zone/polygon and a project-specific calculation (rule R04).",
+    "table": [
+      {"current_a_max": 0.3, "calc_mm": 0.07, "use_mm": 0.25},
+      {"current_a_max": 0.5, "calc_mm": 0.12, "use_mm": 0.3},
+      {"current_a_max": 1.0, "calc_mm": 0.30, "use_mm": 0.5},
+      {"current_a_max": 2.0, "calc_mm": 0.78, "use_mm": 1.0},
+      {"current_a_max": 3.0, "calc_mm": 1.37, "use_mm": 1.5},
+      {"current_a_max": 5.0, "calc_mm": 2.77, "use_mm": 3.0}
+    ],
+    "gnd_return_rule": "The return (GND) path of a load must be at least as wide as its supply path; on a 2-layer board that means a filled GND zone, not a thin GND track."
+  },
+  "voltage_drop": {
+    "id": "D-VDROP",
+    "basis": "CALC",
+    "formula": "R = rho * L / (w * t), rho = 1.72e-8 ohm*m at 20 C, t = 35 um per oz; 1 oz sheet resistance ~0.49 mOhm/square. Vdrop = I * R summed over supply and return.",
+    "target_percent_of_rail": 2.0,
+    "review_percent_of_rail": 5.0
+  },
+  "vias_at_layer_change": {
+    "id": "D-VIA",
+    "basis": "VENDOR",
+    "sources": ["TS14", "TS15", "TS16", "TS17"],
+    "current_per_via_a": {"drill_0.3mm": 0.8, "drill_0.4mm": 1.0},
+    "min_vias_power_net": 2,
+    "min_vias_signal_net": 1,
+    "count_rule": "n = max(2, ceil(I_continuous / current_per_via)) for every place a power or GND-return path changes layer.",
+    "placement_rule": [
+      "Spread the vias across the WIDTH of the copper, in at most 2-3 staggered rows; do not line them up single-file along the current direction.",
+      "Change layer on a straight section, not in a corner; in a corner only the inside-corner vias carry current.",
+      "Keep copper between pad and via group at least as wide as the track itself (no neck-down).",
+      "Solid connection to zones for these vias; no thermal-relief spokes.",
+      "Leave copper between antipads on inner planes so the via group does not cut a slot in GND.",
+      "Put vias next to the component pin where current enters/leaves."
+    ],
+    "note": "TS14 lists 0.84 A for a 12 mil via and 1.1 A for a 16 mil via at 10 C rise on 1 oz. TS15 shows via temperature follows the attached copper, so the count is driven by voltage drop, inductance and redundancy, not by fear of fusing."
+  },
+  "decoupling": {
+    "id": "D-DECAP",
+    "basis": "PRACTICE",
+    "note": "Distance is a proxy for loop inductance (rule P04 / PT03). Measured pad-to-pad from the IC supply pad to the capacitor pad on the same net, plus capacitor GND pad to the IC GND pad or to its GND via.",
+    "smallest_cap_power_pad_to_pin_mm": {"target": 2.0, "review": 4.0},
+    "cap_gnd_pad_to_gnd_via_or_pin_mm": {"target": 1.5, "review": 3.0},
+    "same_side_as_ic": true,
+    "one_local_cap_per_supply_pin_or_pin_group": true,
+    "bulk_cap_to_ic_mm": {"target": 10.0, "review": 20.0}
+  },
+  "switching_converter": {
+    "id": "D-SMPS",
+    "basis": "PRACTICE",
+    "sources": ["TS02", "RD01"],
+    "note": "The converter's own datasheet layout figure overrides everything here (PT02).",
+    "hot_loop_pad_to_pad_segment_mm": {"target": 3.0, "review": 5.0},
+    "hot_loop_vias_allowed": 0,
+    "hot_loop_single_layer": true,
+    "components_inside_hot_loop_allowed": 0,
+    "inductor_to_sw_pin_mm": {"target": 3.0, "review": 6.0},
+    "bootstrap_cap_to_pins_mm": {"target": 2.0, "review": 4.0},
+    "fb_divider_to_fb_pin_mm": {"target": 3.0, "review": 6.0},
+    "fb_trace_min_distance_from_sw_copper_mm": {"target": 2.0, "review": 1.0},
+    "no_signal_routing_under_inductor_same_layer": true
+  },
+  "crystal": {
+    "id": "D-XTAL",
+    "basis": "PRACTICE",
+    "note": "Vendor guide first (PT04). ESP32-S3 (RD03) wants at least 2.0 mm between crystal and clock pin; do not carry that number to other MCUs.",
+    "trace_length_each_mm": {"target": 8.0, "review": 15.0},
+    "vias_allowed": 0,
+    "load_cap_to_crystal_pad_mm": {"target": 2.0, "review": 4.0},
+    "no_other_net_under_crystal_and_traces": true
+  },
+  "esd_protection": {
+    "id": "D-ESD",
+    "basis": "PRACTICE",
+    "tvs_to_connector_pin_mm": {"target": 5.0, "review": 10.0},
+    "order": "connector pin -> TVS pad -> rest of circuit (the track must pass the TVS pad, not branch to it with a stub)",
+    "tvs_gnd_to_gnd_zone_vias_min": 1
+  },
+  "differential_pair": {
+    "id": "D-DIFF",
+    "basis": "PRACTICE",
+    "confidence": "LOW",
+    "note": "Impedance needs the real stackup (R07, TS03). On a generic 1.6 mm 2-layer board 90 ohm differential is usually not achievable with practical widths: route short, coupled, over solid GND and report the limitation instead of certifying impedance.",
+    "usb_fs_ls": {"skew_mm": {"target": 2.0, "review": 5.0}, "max_vias_per_line": 2, "max_length_mm_review": 100},
+    "usb_hs": {"skew_mm": {"target": 0.5, "review": 1.5}, "max_vias_per_line": 2, "max_length_mm_review": 75},
+    "via_count_must_match_between_lines": true,
+    "other_interfaces": "No starting values for CAN, RS-485, Ethernet, LVDS etc. Put skew_target_mm, skew_review_mm and max_vias_per_line on the pair in layout_intent.json from the interface/PHY specification; without them the audit returns NEEDS_REVIEW."
+  },
+  "two_layer_reference_plane": {
+    "id": "D-2L",
+    "basis": "PRACTICE",
+    "sources": ["RD03"],
+    "note": "On 2 layers one side (normally B.Cu) is the GND reference. A track on that side is a slot in the plane.",
+    "reference_layer_default": "B.Cu",
+    "jumper_length_on_reference_layer_mm": {"target": 5.0, "review": 10.0},
+    "never_under": ["hot loop", "crystal and its traces", "differential pair", "sensitive analog input", "inductor"],
+    "gnd_zone_islands_on_reference_layer": {"target": 1, "review": 2},
+    "parallel_jumpers_min_gap_for_gnd_between_mm": 1.0
+  },
+  "return_via": {
+    "id": "D-RETURN",
+    "basis": "PRACTICE",
+    "sources": ["TS03"],
+    "gnd_via_within_mm_of_critical_signal_via": {"target": 2.0, "review": 4.0},
+    "applies_to": "clock, differential pair and fast-edge nets that change reference plane on 4+ layer boards"
+  },
+  "placement_geometry": {
+    "id": "D-PLACE",
+    "basis": "PRACTICE",
+    "placement_grid_mm": 0.5,
+    "fine_grid_mm": 0.1,
+    "rotation_step_deg": 90,
+    "passive_pad_to_pad_gap_mm": {"target": 0.5, "review": 0.3},
+    "block_area_factor_over_courtyard_sum": {"two_layer": 2.0, "four_layer": 1.5},
+    "all_smd_on_one_side_unless_justified": true,
+    "fanout_channel_next_to_fine_pitch_ic_mm": 1.0
+  },
+  "routing_feedback": {
+    "id": "D-LOOP",
+    "basis": "PRACTICE",
+    "detour_ratio_review": 1.5,
+    "detour_ratio_definition": "routed length / Manhattan pad-to-pad distance",
+    "extra_vias_on_ordinary_signal_review": 2,
+    "max_local_placement_iterations": 5,
+    "max_attempts_per_net_before_placement_change": 3
+  }
+}
