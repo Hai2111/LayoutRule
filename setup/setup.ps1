@@ -5,11 +5,14 @@
 
 $ErrorActionPreference = "Stop"
 $frDir  = Join-Path $PSScriptRoot "freerouting"
+$frJar  = Join-Path $frDir "freerouting-2.5.0.jar"
 $frExe  = Join-Path $frDir "cli\freerouting-cli.exe"
 $frVer  = "2.5.0"
 $frZip  = "freerouting-cli-$frVer-windows-x64.zip"
 $frUrl  = "https://github.com/freerouting/freerouting/releases/download/v$frVer/$frZip"
 $frSha  = "5750dc0bed261eefae29d79784301b478af978fd472407d77e01e85dbb794857"
+$jarUrl = "https://github.com/freerouting/freerouting/releases/download/v$frVer/freerouting-$frVer.jar"
+$jarSha = "f6f51bb02245e8e717f9359bd260cc9c5c0b1bc0acc8b7cb2cd5b8ffeb5de3c7"
 
 $pyOk = $false
 $kicadOk = $false
@@ -69,26 +72,33 @@ if ($javaCmd) {
     Write-Host "[MISS] java not found. Install JDK 17+: https://adoptium.net/"
 }
 
-# --- 4) Freerouting CLI - download + verify checksum if missing ---
-if (Test-Path $frExe) {
-    $frOk = $true
-    Write-Host "[OK]   freerouting-cli.exe present -> $frExe"
-} else {
-    Write-Host "[....] freerouting-cli.exe missing. Downloading $frVer (windows-x64)..."
-    New-Item -ItemType Directory -Force -Path $frDir | Out-Null
-    $zipPath = Join-Path $frDir $frZip
-    Invoke-WebRequest -Uri $frUrl -OutFile $zipPath -UseBasicParsing
-    $actual = (Get-FileHash $zipPath -Algorithm SHA256).Hash.ToLower()
-    if ($actual -ne $frSha) {
-        Write-Host "[FAIL] SHA256 MISMATCH! expected $frSha, got $actual. Do NOT run this binary."
+# --- 4) Freerouting - JAR (recommended: the native Windows CLI crashes
+#        during routing, see SMOKE_TEST.md). Download + verify SHA256. ---
+if (Test-Path $frJar) {
+    $actual = (Get-FileHash $frJar -Algorithm SHA256).Hash.ToLower()
+    if ($actual -eq $jarSha) {
+        $frOk = $true
+        Write-Host "[OK]   freerouting-2.5.0.jar present + SHA256 verified -> $frJar"
+    } else {
+        Write-Host "[FAIL] freerouting JAR SHA256 MISMATCH! expected $jarSha, got $actual. Delete and re-run."
         exit 1
     }
-    Write-Host "[OK]   SHA256 verified (match)."
-    Expand-Archive $zipPath -DestinationPath (Join-Path $frDir "cli") -Force
-    if (Test-Path $frExe) {
-        $frOk = $true
-        Write-Host "[OK]   extracted -> $frExe"
+} else {
+    Write-Host "[....] freerouting-2.5.0.jar missing. Downloading..."
+    New-Item -ItemType Directory -Force -Path $frDir | Out-Null
+    Invoke-WebRequest -Uri $jarUrl -OutFile $frJar -UseBasicParsing
+    $actual = (Get-FileHash $frJar -Algorithm SHA256).Hash.ToLower()
+    if ($actual -ne $jarSha) {
+        Write-Host "[FAIL] SHA256 MISMATCH! expected $jarSha, got $actual. Do NOT run this JAR."
+        exit 1
     }
+    $frOk = $true
+    Write-Host "[OK]   freerouting JAR verified (match) -> $frJar"
+}
+
+# --- 4b) native CLI: kept optional (not required for routing) ---
+if (Test-Path $frExe) {
+    Write-Host "[INFO] native freerouting-cli.exe present (crashes on routing - prefer JAR) -> $frExe"
 }
 
 # --- Summary ---
@@ -97,12 +107,12 @@ Write-Host "=== setup summary ==="
 Write-Host ("python       : " + $(if ($pyOk)    { "OK" }    else { "MISSING" }))
 Write-Host ("kicad-cli    : " + $(if ($kicadOk) { "OK" } else { "MISSING" }))
 Write-Host ("java         : " + $(if ($javaOk)  { "OK" } else { "MISSING" }))
-Write-Host ("freerouting  : " + $(if ($frOk)    { "OK ($frVer)" } else { "MISSING" }))
+Write-Host ("freerouting  : " + $(if ($frOk)    { "OK (JAR $frVer)" } else { "MISSING" }))
 Write-Host ""
 if ($pyOk -and $kicadOk -and $javaOk -and $frOk) {
     Write-Host "All tools ready. Agent can start:"
     Write-Host "  - DRC/ERC + image render: kicad-cli (see paths above)"
-    Write-Host "  - Routing engine:         $frExe (DSN/SES, see ROUTING_ENGINE_INTEGRATION.md)"
+    Write-Host "  - Routing engine: java -jar $frJar -de board.dsn -do board.ses (see SMOKE_TEST.md / ROUTING_ENGINE_INTEGRATION.md)"
     Write-Host "  - Geometry audit:         python tools\layout_audit.py / tools\drc_body_keepout.py"
     exit 0
 } else {
