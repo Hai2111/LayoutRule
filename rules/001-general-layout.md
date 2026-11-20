@@ -59,11 +59,11 @@ Owner approved the rule on 2026-11-20 and asked the open validation items to be 
 
 | # | Item | Status | Evidence |
 |---|---|---|---|
-| 1 | DRC on 2 ref projects | **PENDING — blocked** | All 10 converted ref boards in `../ref/Kicad/` are **unrouted snapshots** (0 tracks / 0 vias each, checked 2026-11-20); running clearance DRC on them validates nothing. Rerun this step after at least one ref board is routed, or on a project board after its first routing pass. |
+| 1 | DRC on 2 ref projects | **PENDING — runnable now** | Initial 2026-11-20 check wrongly reported "all boards unrouted" (grep used the old KiCad `(track` token; KiCad 10 stores tracks as `(segment` tokens). Corrected 2026-11-20: **all 10 ref boards are routed** (e.g. RA01 = 215 segments, 40 comp-range boards 178–223, largest LoraGw 1159). Step 1 can be executed immediately. |
 | 2 | Fab capability cross-check | **DONE (static)** | DRAFT values vs JLCPCB standard 2-layer published minimums (trace 0.1 mm, clearance 0.1 mm, drill 0.3 mm): every DRAFT value in this file (0.2 clearance, 0.2 signal track, 0.3/0.4 via drills, 0.15 annular) is **looser** than the fab minimum → manufacturable on the standard tier. Caveat per A02: the JLCPCB numbers come from the fab's design-guide table, **re-verify against the live page at routing time** (fab specs shift; free-tier values were 0.15 mm in older revisions). |
 | 3 | Owner adjudication | **DONE** | Owner approved 2026-11-20 (merge `7a8584a` + follow-up), scope: 2–4 layer FR-4 prototype, starter/HEURISTIC. |
 
-**Result:** rule stays APPROVED-as-starter; parameters remain **DRAFT with fab cross-check recorded**, NOT VALIDATED, until step 1 produces a real DRC run.
+**Result:** rule stays APPROVED-as-starter; parameters remain **DRAFT with fab cross-check recorded**, NOT VALIDATED, until step 1 (DRC on routed ref boards) produces a real run. Step 1 is runnable now that ref boards are confirmed routed (correction of 2026-11-20).
 
 ## Rollback
 

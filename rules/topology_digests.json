@@ -28,10 +28,10 @@
         "components": 47,
         "nets": 60,
         "layers": 2,
-        "tracks": 0,
-        "vias": 0,
-        "locked_flags": 101,
-        "state": "unrouted (placement-only snapshot sau convert)"
+        "segments": 215,
+        "layer_change_vias": 0,
+        "embedded_pad_vias": 74,
+        "state": "routed (F.Cu + B.Cu, no layer-change vias). Note: KiCad 10 stores tracks as (segment ...) tokens, not (track ..."
       },
       "match_hints": {
         "component_range": [30, 60],
@@ -51,7 +51,7 @@
       ],
       "render_views": ["top:full", "bottom:full", "zoom:antenna_area"],
       "agent_notes": [
-        "File đang ở trạng thái 0 track/0 via — dùng làm tham chiếu PLACEMENT + block topology, không tham chiếu routing hình học.",
+        "Board đã route (215 segments, F.Cu + B.Cu, không có via đổi lớp) — dùng làm tham chiếu PLACEMENT + hình học ROUTING.",
         "47 component / 60 net trong ngưỡng class light → một session đọc được chỉ với digest này + render_views, không cần parse .kicad_pcb."
       ]
     }
