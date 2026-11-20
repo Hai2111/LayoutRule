@@ -1,0 +1,9 @@
+# Toolchain binaries are NOT committed — setup/setup.ps1 re-downloads
+# and SHA256-verifies them so any agent machine reproduces MANIFEST.json.
+/setup/freerouting/*.zip
+/setup/freerouting/cli/
+
+# local run artifacts
+report/
+__pycache__/
+*.pyc

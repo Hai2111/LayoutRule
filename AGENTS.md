@@ -29,6 +29,7 @@ When the task is to **produce** a layout rather than review one, follow **`ITERA
 
 ## Before acting on a PCB
 - Read current schematic/board, datasheets, manufacturability, stackup and **project-local** constraints.
+- **Toolchain:** run `powershell -NoProfile -ExecutionPolicy Bypass -File setup\setup.ps1` (or equivalent check on non-Windows) before first use of kicad-cli, Freerouting or the Python audit tools. Pinned versions: [setup/MANIFEST.json](setup/MANIFEST.json).
 - Detect and respect manually edited placements and tracks; diff before applying any change.
 - Classify each candidate action with `rule_id`, net/refdes, known facts, confidence, evidence, expected tradeoff, rollback path.
 - Never substitute these generic rules for component vendor design requirements.
