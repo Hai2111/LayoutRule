@@ -1,0 +1,56 @@
+{
+  "schema_version": "0.1.0",
+  "updated": "2026-11-20",
+  "status": "PROPOSED",
+  "title": "Topology digests — input nhỏ để một agent session đọc và hiểu ref design mà không parse toàn bộ .kicad_pcb",
+  "how_to_use": [
+    "Mỗi entry là digest của MỘT ref design: đủ để đối chiếu với board đích (số component, refdes chính, class, các neo hình học) và làm seed cho layout_intent.json khi topology trùng class.",
+    "Chọn entry qua match_hints: khớp class + dải component + feature chính → dùng digest; chỉ khớp hình học → dùng làm tham chiếu positioning, KHÔNG copy net topology.",
+    "Digest là TÓM TẮT, không thay thế ERC/DRC trên board thật. Mọi giá trị trong digest lấy từ file CAD gốc; ghi sha256 của file CAD nguồn vào source_sha256 để truy vết.",
+    "render_views: danh sách view nên có (ảnh) khi session cần đối chiếu trực quan — digest không nhúng ảnh."
+  ],
+  "class_boundaries": {
+    "light": {"components_max": 50, "nets_max": 70, "note": "1 trục chức năng, không BGA, RF đơn giản hoặc không có"},
+    "medium": {"components_max": 300, "nets_max": 400, "note": "RF + MCU + nguồn, có thể BGA pitch thường"},
+    "heavy": {"components_max": null, "nets_max": null, "note": ">300 comp hoặc BGA multi-rail; chưa có mẫu"}
+  },
+  "digests": [
+    {
+      "id": "RD-RA01",
+      "title": "RA-01 smoke detector MCU board (smoke test conversion)",
+      "class": "light",
+      "source": "ref/Kicad/RA01_SCH_PCB/RA-01SCH_SMOKE.kicad_pcb (KiCad 10, converted from Altium)",
+      "source_sha256": "d7e9819d1744dd8a2c6c79930547ce4cb26aa5ef3d7371ab1dd6e93cb2f08ebb",
+      "stats": {
+        "components": 47,
+        "nets": 60,
+        "layers": 2,
+        "tracks": 0,
+        "vias": 0,
+        "locked_flags": 101,
+        "state": "unrouted (placement-only snapshot sau convert)"
+      },
+      "match_hints": {
+        "component_range": [30, 60],
+        "net_range": [40, 80],
+        "layers": 2,
+        "features": ["rf_antenna", "mcu", "ferrite_beads", "testpoints"]
+      },
+      "blocks": [
+        {"name": "RF/antenna", "refs": ["ANT1", "VDD_RF"], "note": "antenna ở rìa board, VDD_RF rail riêng — neo hình học, keepout theo P07"},
+        {"name": "MCU", "refs": ["IC1", "U1"], "note": "khối xử lý trung tâm; clock/crystal nếu có thuộc P05"},
+        {"name": "power/bead", "refs": ["L1", "FB1", "FB2", "VCC"], "note": "bead ferrite + rail nguồn, nhóm theo signal/power flow (P02)"},
+        {"name": "io/switch", "refs": ["J1", "J2", "JP1", "SW1"], "note": "connector + testpoint (TP1-TP3, BZ, BZ1, CH1, TEMP, D1-D3, C1-C8, R1-R5)"}
+      ],
+      "sensitive_regions": [
+        "Vùng quanh ANT1: keepout theo datasheet module, không via dưới (P07)",
+        "Net VDD_RF: rail RF riêng, tránh chạy song song dài với net commutation (R10)"
+      ],
+      "render_views": ["top:full", "bottom:full", "zoom:antenna_area"],
+      "agent_notes": [
+        "File đang ở trạng thái 0 track/0 via — dùng làm tham chiếu PLACEMENT + block topology, không tham chiếu routing hình học.",
+        "47 component / 60 net trong ngưỡng class light → một session đọc được chỉ với digest này + render_views, không cần parse .kicad_pcb."
+      ]
+    }
+  ]
+}
