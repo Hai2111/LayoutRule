@@ -1,8 +1,8 @@
-# 001 — General layout & clearance starter (PROPOSED, DRAFT parameters)
+# 001 — General layout & clearance starter (APPROVED starter rule, DRAFT parameters)
 
-**Status:** PROPOSED (parameters still DRAFT — not validated against any fab; do not treat as pass/fail gate)
+**Status:** APPROVED (owner Hai, 2026-11-20, merge `7a8584a`) — **scope: the rule exists as the documented starter for 2–4 layer FR-4 prototype boards. Parameters below remain DRAFT** (not validated against any fab; do not treat as pass/fail gate) until the validation plan in this file is executed.
 **Tier:** HEURISTIC (starting values only, per `rules/layout_defaults.json` precedence: project > fab > vendor > these)
-**Owner:** Hai · **Proposed:** 2026-11-20 · **Base commit:** 071417f
+**Owner:** Hai · **Proposed:** 2026-11-20 · **Approved:** 2026-11-20 · **Base commit:** 071417f
 
 ## Scope / Applies to
 

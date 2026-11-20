@@ -1,7 +1,8 @@
 {
   "schema_version": "0.1.0",
   "updated": "2026-11-20",
-  "status": "PROPOSED",
+  "status": "APPROVED",
+  "approval_note": "Format approved by owner Hai 2026-11-20 (merge b08e9d5). class_boundaries and digest RD-RA01 remain PROPOSED until the owner confirms the light/medium/heavy thresholds.",
   "title": "Topology digests — input nhỏ để một agent session đọc và hiểu ref design mà không parse toàn bộ .kicad_pcb",
   "how_to_use": [
     "Mỗi entry là digest của MỘT ref design: đủ để đối chiếu với board đích (số component, refdes chính, class, các neo hình học) và làm seed cho layout_intent.json khi topology trùng class.",

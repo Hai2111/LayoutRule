@@ -1,6 +1,6 @@
 # ITERATIVE ROUTING PLAYBOOK — vòng lặp placement ↔ routing theo phân vùng
 
-**Trạng thái:** `PROPOSED` (2026-11-20). Chưa được owner duyệt. Xem [GOVERNANCE.md](GOVERNANCE.md).
+**Trạng thái:** `APPROVED` (owner Hai, 2026-11-20, merge `b08e9d5`) — scope: phương pháp thực thi theo vùng + 3 bất biến INV-1/2/3, không phải thay đổi nội dung luật A/P/R/G. Các ngưỡng class trong `rules/topology_digests.json` vẫn PROPOSED. Xem [GOVERNANCE.md](GOVERNANCE.md).
 **Dùng cùng:** [AGENT_LAYOUT_PLAYBOOK.md](AGENT_LAYOUT_PLAYBOOK.md) (phases + intent), [LAYOUT_RULES.md](LAYOUT_RULES.md) (A/P/R/G), [rules/topology_digests.json](rules/topology_digests.json) (digest input nhỏ cho ref design).
 
 Chênh lệch so với playbook phẳng hiện có: **không** làm 1 lần "placement xong → routing xong". Thay vào đó, chia board thành **phân vùng (region)** và chạy **vòng lặp** trong mỗi vùng, chỉ mở rộng vùng khi vùng hiện tại **đạt cổng**. Mỗi vòng lặp:
