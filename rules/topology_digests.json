@@ -2,7 +2,7 @@
   "schema_version": "0.1.0",
   "updated": "2026-11-20",
   "status": "APPROVED",
-  "approval_note": "Format approved by owner Hai 2026-11-20 (merge b08e9d5). class_boundaries and digest RD-RA01 remain PROPOSED until the owner confirms the light/medium/heavy thresholds.",
+  "approval_note": "Format approved by owner Hai 2026-11-20 (merge b08e9d5). Owner then explicitly approved class_boundaries and digest RD-RA01 on 2026-11-20, cross-checked against the 10-project ref set: components 28–286, unique nets 45–501 — light (≤50/≤70) fits 1908/RA01/BikeTrack-class boards, medium (≤300/≤400) fits BLE2LTE/LTE/ColdChain/LoraGw/SR01, heavy (>300 or >400 nets) fits DaLogg-class boards.",
   "title": "Topology digests — input nhỏ để một agent session đọc và hiểu ref design mà không parse toàn bộ .kicad_pcb",
   "how_to_use": [
     "Mỗi entry là digest của MỘT ref design: đủ để đối chiếu với board đích (số component, refdes chính, class, các neo hình học) và làm seed cho layout_intent.json khi topology trùng class.",
@@ -11,9 +11,11 @@
     "render_views: danh sách view nên có (ảnh) khi session cần đối chiếu trực quan — digest không nhúng ảnh."
   ],
   "class_boundaries": {
+    "status": "APPROVED",
+    "approved_by": "owner Hai, 2026-11-20 (follow-up after merge b08e9d5)",
     "light": {"components_max": 50, "nets_max": 70, "note": "1 trục chức năng, không BGA, RF đơn giản hoặc không có"},
     "medium": {"components_max": 300, "nets_max": 400, "note": "RF + MCU + nguồn, có thể BGA pitch thường"},
-    "heavy": {"components_max": null, "nets_max": null, "note": ">300 comp hoặc BGA multi-rail; chưa có mẫu"}
+    "heavy": {"components_max": null, "nets_max": null, "note": ">300 comp hoặc BGA multi-rail; chưa có digest mẫu"}
   },
   "digests": [
     {

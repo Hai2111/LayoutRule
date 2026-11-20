@@ -1,6 +1,6 @@
 # 001 — General layout & clearance starter (APPROVED starter rule, DRAFT parameters)
 
-**Status:** APPROVED (owner Hai, 2026-11-20, merge `7a8584a`) — **scope: the rule exists as the documented starter for 2–4 layer FR-4 prototype boards. Parameters below remain DRAFT** (not validated against any fab; do not treat as pass/fail gate) until the validation plan in this file is executed.
+**Status:** APPROVED (owner Hai, 2026-11-20, merge `7a8584a`) — **scope: the rule exists as the documented starter for 2–4 layer FR-4 prototype boards. Parameters below remain DRAFT** (fab-cross-checked 2026-11-20, DRC validation pending; do not treat as pass/fail gate).
 **Tier:** HEURISTIC (starting values only, per `rules/layout_defaults.json` precedence: project > fab > vendor > these)
 **Owner:** Hai · **Proposed:** 2026-11-20 · **Approved:** 2026-11-20 · **Base commit:** 071417f
 
@@ -52,6 +52,18 @@ Owner requested a starter rule so agents doing generic prototype boards have exp
 1. Pick two of the 10 converted ref projects, run `tools/drc_body_keepout.py` + KiCad DRC with these DRAFT values as board-setup constraints, record violations.
 2. Compare each violation against fab capability sheet (JLCPCB standard: min 0.12 mm/0.12 mm, min drill 0.3 mm) — expect 0.2 mm clearances to pass; document which do not.
 3. Owner adjudicates per GOVERNANCE: scope (2-layer prototypes only?), then promote/adjust in `LAYOUT_RULES.md` and, if machine-enforced, add a matching entry in `rules/technical_checks.json` (next free TC ID).
+
+## Validation record — 2026-11-20 (fab cross-check only, static)
+
+Owner approved the rule on 2026-11-20 and asked the open validation items to be closed. Status per item:
+
+| # | Item | Status | Evidence |
+|---|---|---|---|
+| 1 | DRC on 2 ref projects | **PENDING — blocked** | All 10 converted ref boards in `../ref/Kicad/` are **unrouted snapshots** (0 tracks / 0 vias each, checked 2026-11-20); running clearance DRC on them validates nothing. Rerun this step after at least one ref board is routed, or on a project board after its first routing pass. |
+| 2 | Fab capability cross-check | **DONE (static)** | DRAFT values vs JLCPCB standard 2-layer published minimums (trace 0.1 mm, clearance 0.1 mm, drill 0.3 mm): every DRAFT value in this file (0.2 clearance, 0.2 signal track, 0.3/0.4 via drills, 0.15 annular) is **looser** than the fab minimum → manufacturable on the standard tier. Caveat per A02: the JLCPCB numbers come from the fab's design-guide table, **re-verify against the live page at routing time** (fab specs shift; free-tier values were 0.15 mm in older revisions). |
+| 3 | Owner adjudication | **DONE** | Owner approved 2026-11-20 (merge `7a8584a` + follow-up), scope: 2–4 layer FR-4 prototype, starter/HEURISTIC. |
+
+**Result:** rule stays APPROVED-as-starter; parameters remain **DRAFT with fab cross-check recorded**, NOT VALIDATED, until step 1 produces a real DRC run.
 
 ## Rollback
 
