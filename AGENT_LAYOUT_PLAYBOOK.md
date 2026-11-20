@@ -3,6 +3,8 @@
 **Trạng thái:** `PROPOSED` (2026-11-17). Chưa được owner duyệt, chưa kiểm chứng trên board thật. Xem [GOVERNANCE.md](GOVERNANCE.md).
 **Dùng cùng:** [LAYOUT_RULES.md](LAYOUT_RULES.md) (luật A/P/R/G), [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) (PTnn), [rules/layout_defaults.json](rules/layout_defaults.json) (giá trị khởi điểm D-…), [tools/layout_audit.py](tools/layout_audit.py) (đo hình học).
 
+> **Cách thực thi theo vùng (PROPOSED 2026-11-20):** thay vì chạy G2→G3/G4/G5 một lượt phẳng, xem [ITERATIVE_ROUTING_PLAYBOOK.md](ITERATIVE_ROUTING_PLAYBOOK.md): chia board thành phân vùng R1 (khối chức năng), chạy vòng lặp *placement → routing (agent quyết định, tool thực thi) → xử lý ảnh → xử lý logic* trong từng vùng, đạt thì khóa vùng; sau khi các R1 con hoàn thành, chạy lại cổng ảnh + logic ở R2, R3 rồi toàn mạch. Ba bất biến: mọi net luôn routable-ready, mọi component luôn relocatable, mọi quyết định routing có giải trình trong ledger.
+
 Các tài liệu khác trong repo trả lời câu hỏi "điều gì không được coi là luật". Tài liệu này trả lời câu hỏi còn thiếu: **agent làm gì, theo thứ tự nào, đo cái gì, đạt bao nhiêu thì được đi tiếp, và khi nào phải quay lại.**
 
 ## 0. Ba nguyên tắc vận hành
