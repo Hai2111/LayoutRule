@@ -29,6 +29,7 @@ When the task is to **produce** a layout rather than review one, follow **`ITERA
 
 ## Before acting on a PCB
 - Read current schematic/board, datasheets, manufacturability, stackup and **project-local** constraints.
+- **One-command routing candidate:** after setup, run `powershell -NoProfile -ExecutionPolicy Bypass -File tools\\route_pipeline.ps1 -Board BOARD.kicad_pcb`. It exports DSN, runs the pinned Freerouting JAR, imports SES into a separate candidate, runs native DRC, and renders an image. Never overwrite the source. A candidate with any DRC/unconnected findings is NOT accepted; use the region loop (agent decides → tool executes → visual + logic pass → iterate placement/routing). See `setup/SMOKE_TEST.md` for known limits and `tools/route_pipeline.ps1` for options.
 - **Toolchain:** run `powershell -NoProfile -ExecutionPolicy Bypass -File setup\setup.ps1` (or equivalent check on non-Windows) before first use of kicad-cli, Freerouting or the Python audit tools. Pinned versions: [setup/MANIFEST.json](setup/MANIFEST.json).
 - Detect and respect manually edited placements and tracks; diff before applying any change.
 - Classify each candidate action with `rule_id`, net/refdes, known facts, confidence, evidence, expected tradeoff, rollback path.

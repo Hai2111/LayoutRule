@@ -71,6 +71,8 @@ Thứ tự net trong vùng (mở rộng R02/R03 cho phạm vi vùng):
 
 Với **mỗi** net: agent ghi entry ledger (lớp, vị trí via, lý do + rule ID) → gọi tool thực thi → tool trả kết quả → agent **đọc kết quả bằng mắt (ảnh) trước khi route net kế**; kẹt thì áp H1 ngay. Không gom "chạy hết rồi mới xem".
 
+**Cách gọi tool thực thi (recipe, 1 lệnh):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools\route_pipeline.ps1 -Board BOARD.kicad_pcb` — xuất DSN → chạy Freerouting JAR pinned (setup/MANIFEST.json) → import SES vào **candidate riêng** (không ghi đè board gốc) → DRC native → render ảnh. Pipeline xong ≠ vùng đạt: agent vẫn phải chạy 3.3/3.4 (ảnh + logic) trên candidate, ghi ledger, mới được khóa vùng. Limitations: xem `setup/SMOKE_TEST.md` (board convert Altium chưa export được DSN).
+
 ### 3.3 Xử lý ảnh (visual pass) — scan 3 tầng, từ xa đến gần (chuẩn kỹ sư review)
 Render chuẩn: **1 ảnh F.Cu + 1 ảnh B.Cu** (cùng zoom), bật copper + silkscreen + courtyard; zoom vừa đủ thấy cả vùng + ranh giới. Scan theo 3 tầng, KHÔNG liệt kê ngang nhau:
 

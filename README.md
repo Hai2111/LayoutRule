@@ -13,10 +13,11 @@
 - [rules/001-general-layout.md](rules/001-general-layout.md) — rule starter "general layout & clearance" cho board prototype FR-4 2–4 lớp; tham số DRAFT (đã cross-check fab, DRC validation PENDING).
 - [rules/topology_digests.json](rules/topology_digests.json) — digest "input nhỏ" để 1 session đọc/hiểu ref design không cần parse cả file CAD; class boundaries light/medium/heavy đã chốt.
 - [tools/layout_audit.py](tools/layout_audit.py) — đo hình học `.kicad_pcb` so với `layout_intent.json`; mới thử trên board tổng hợp trong `tests/fixtures/`, chưa thử trên board KiCad 10 thật.
+- [tools/route_pipeline.ps1](tools/route_pipeline.ps1) — **1 lệnh chạy cả chuỗi routing**: DSN → Freerouting JAR → import SES vào candidate riêng → native DRC → render ảnh. Không ghi đè board gốc; candidate cần agent visual + logic review (không tự tuyên bố PASS). Trạng thái + limitations: [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md).
 
 ## Routing engine (bổ sung 2026-11-15)
 - [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md) — so sánh Freerouting DSN/SES và PCBWorld/CADET, luật routing + cách kiểm tra native DRC. Code thử nghiệm đã commit trong [Hai2111/Training/routing](https://github.com/Hai2111/Training/tree/main/routing).
-- KiCad 10 export/import Specctra DSN/SES được xác minh trong API chính thức. Adapter Python mới **chưa thực thi với KiCad/Java thật trên máy người dùng**, chỉ compile và plan-only test.
+- [tools/route_pipeline.ps1](tools/route_pipeline.ps1) (bổ sung 2026-11-20) — chuỗi DSN→Freerouting JAR→import→DRC→render đã **chạy thực tế trên machine** (fixture: đủ 5 bước, xem [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md)); native CLI Freerouting crash, dùng JAR pinned. Board **convert từ Altium vẫn chưa export được DSN** — chưa claim end-to-end cho nhóm này.
 
 ## Tư liệu tham khảo (CHỈ agent cần đào sâu đọc — không thuộc quy trình mặc định, xem START_HERE.md)
 1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.

@@ -15,7 +15,8 @@
 | KiCad → DSN export (fixture) | PASS | `pcbnew.ExportSpecctraDSN(board, output)` writes valid DSN for `tests/fixtures/demo_good.kicad_pcb` and `demo_bad.kicad_pcb` |
 | KiCad → DSN export (RA01 converted ref) | **BLOCKED** | Same API returns `False` and writes no file for RA01 (version `20260206`; fixtures `20241229`). Removing 4 empty-ref footprints did not fix it. Needs KiCad-native resave/project context or converter cleanup. |
 | SES → KiCad import (fixture) | PASS | `pcbnew.ImportSpecctraSES` returns true and saves routed board copy |
-| Native DRC after SES import (fixture) | **FAIL (expected test result)** | DRC runs and reports 23 violations + 1 unconnected item. This proves the return path works, not that the fixture route is acceptable. Freerouting itself reported 2 violations. |
+| One-command pipeline (fixture) | PASS | `tools\route_pipeline.ps1 -Board tests\fixtures\demo_good.kicad_pcb` completed all 5 steps (DSN → JAR route → import candidate → native DRC → 3D image) with `-AllowDrcViolations`; input board untouched |
+| Native DRC after SES import (fixture) | **FAIL (expected test result)** | DRC runs and reports 23 violations + 1 unconnected item. Freerouting itself flagged the 2 **pre-existing** fixed-item clearance violations (FixedVia#32/33 on net +3V3) that cannot be fixed by routing — board author must fix in EDA. This proves the return path works, not that the fixture route is acceptable. |
 | Full converted-board routing | **NOT READY** | RA01 cannot export DSN; do not claim end-to-end routing for converted refs until that is fixed. |
 
 ## Exact smoke commands
