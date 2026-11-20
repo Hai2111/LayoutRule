@@ -51,26 +51,42 @@ Quy tắc chia:
 
 ### 3.1 Placement (vùng)
 Theo P01–P11, thu hẹp vào phạm vi vùng. Đầu vào: `layout_intent.json` (phases 0–1 của AGENT_LAYOUT_PLAYBOOK) + digest của vùng nếu board khớp một topology trong `rules/topology_digests.json`.
-- Áp INV-2: **mọi component trong vùng được đặt cùng vị trí dự phòng (fallback)** trước khi sang bước routing. Fallback = vị trí khác hợp lệ đã kiểm (không overlap, còn đường đi cho net, giữ locked items).
-- Locked items (P01, mechanical, connector, antenna) không có fallback — chúng là neo.
+- **Thứ tự đặt "cứng → mềm" (chuẩn kỹ sư):**
+  1. Neo bất động: connector, mount hole, antenna, battery, SMD thụ động to (P01) — không xê được, đặt trước.
+  2. **Vòng nóng**: đặt IC nguồn trước, rồi `C-in → L → C-out` *bao quanh IC* thành vòng khép nhỏ nhất (P03). Decap nằm giữa pin nguồn và IC, không phải "gần theo thước" (P04).
+  3. IC chủ (MCU/RF FE): đặt sao net quan trọng ngắn; **nhìn ratsnest xuyên ngang board = dấu hiệu phải dời cả khối**, không chỉnh từng linh kiện.
+  4. Passive còn lại: lấp theo từng net/khối.
+- Áp INV-2: **mọi component trong vùng được đặt cùng vị trí dự phòng (fallback)** trước khi sang bước routing. Fallback = vị trí khác hợp lệ đã kiểm (không overlap, còn đường đi cho net, giữ locked items). Neo không có fallback.
 
 ### 3.2 Routing (vùng) — agent quyết định, tool thực thi (INV-3)
+**2 hành vi chuẩn, bắt buộc trong mọi vòng lặp:**
+- **H1 — Route ⇄ xê linh kiện xuyên suốt (không đợi route xong mới đặt lại):** kỹ sư route được vài net là đã xê 1 IC. Quy tắc: net nào đi không lọt (kẹt, vòng quá to, cắt plane) → **xê linh kiện gần đó, route lại đúng chỗ đó, ngay trong vòng lặp hiện tại**. Chỉ dừng lại để visual pass khi không còn net "không lọt" nào. Ghi mỗi lần xê vào ledger (`placement_changes`).
+- **H2 — Ảnh ratsnest/congestion là bản đồ đầu vào của mỗi vòng lặp:** trước khi route (và trước mỗi visual pass), render **1 ảnh ratsnest của vùng** (sợi chằng chịt + mật độ). Ảnh này là "bản đồ" quyết định: chỗ nào sợi đặc nhất → linh kiện/khối nào cần xê trước; chỗ nào đã trống → route được ngay. Không có ảnh bản đồ → chưa được bắt đầu vòng lặp.
+
 Thứ tự net trong vùng (mở rộng R02/R03 cho phạm vi vùng):
 1. `switch_node`/hot loop và decoupling liên quan (P03/P04) — route cùng lúc, không tách.
 2. Net bị ràng buộc: crystal, RF, differential, clock, ADC input (R02).
 3. Power rail còn lại, theo D-WIDTH/D-VDROP.
 4. Net thông thường.
 
-Với **mỗi** net: agent ghi entry ledger (lớp, vị trí via, lý do + rule ID) → gọi tool thực thi → tool trả kết quả → agent **đọc kết quả bằng mắt (ảnh) trước khi route net kế**. Không gom "chạy hết rồi mới xem".
+Với **mỗi** net: agent ghi entry ledger (lớp, vị trí via, lý do + rule ID) → gọi tool thực thi → tool trả kết quả → agent **đọc kết quả bằng mắt (ảnh) trước khi route net kế**; kẹt thì áp H1 ngay. Không gom "chạy hết rồi mới xem".
 
-### 3.3 Xử lý ảnh (visual pass)
-Render 2–3 view của vùng (KiCad 2D F.Cu/B.Cu, zoom vùng) và kiểm:
-- Trace chạy dưới thân component (body keepout — P04, D-SMPS)
-- Vòng dòng có nhỏ/đúng hình học không (di/dt loop, decoupling path)
-- Plane GND có bị xẻ/khe hở dưới các net (R05/R06, D-VIA "không khoét khe")
-- Courtyard/courtyard overlap, silkscreen trên pad
-- Congestion: vùng nào còn "chặt" — đây là tín hiệu để quay lại placement
-**Kết quả:** danh sách tìm kiếm, mỗi item ghi `vị trí | vấn đề | ảnh hưởng (rule ID)`.
+### 3.3 Xử lý ảnh (visual pass) — scan 3 tầng, từ xa đến gần (chuẩn kỹ sư review)
+Render chuẩn: **1 ảnh F.Cu + 1 ảnh B.Cu** (cùng zoom), bật copper + silkscreen + courtyard; zoom vừa đủ thấy cả vùng + ranh giới. Scan theo 3 tầng, KHÔNG liệt kê ngang nhau:
+
+**Tầng 1 — board-level (zoom xa nhất, ~30 giây):** bố cục khối đúng đường (nguồn→MCU→RF), các neo đúng chỗ (antenna rìa board, connector, mount), mật độ bất thường (đặc = nút nghẽn).
+
+**Tầng 2 — scan khối theo thứ tự RỦI RO ĐIỆN (không theo tên net):**
+| Ưu tiên | Vùng/rủi ro | Dấu hiệu thị giác | Hành động sửa |
+|---|---|---|---|
+| 1 | Vòng nóng (buck/boost) | diện tích vòng VIN→SW→L→out lớn; decap không nằm giữa pin–IC | xê C-in/L/C-out vào sát IC (P03), thu vòng |
+| 2 | RF/antenna | trace/via chui vào keepout; matching xa đầu antenna | mở rộng keepout, dời matching sát antenna (P07) |
+| 3 | Clock/crystal | đường dài, có via, song song dài với net khác | rút ngắn, bỏ via, tách song song (P05/R10) |
+| 4 | Return path (mặt B.Cu) | plane bị xẻ/khe hở dưới net tốc độ cao, via đổi lớp không có stitching | bổ sung stitching, dời via (R05/R06/G03) |
+
+**Tầng 3 — chi tiết (zoom sát):** via mọc thành đám (nhiễu/dòng), trace dưới thân component, silkscreen trên pad, testpoint không chạm được (DFM).
+
+**Kết quả:** danh sách vấn đề theo đúng thứ tự trên (rủi ro cao đứng trước), mỗi item: `vị trí | vấn đề | ảnh hưởng (rule ID) | sửa thế nào`.
 
 ### 3.4 Xử lý logic (logical pass)
 Kiểm trên netlist/hình học (không cần ảnh):
