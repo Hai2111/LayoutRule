@@ -78,6 +78,7 @@ Các luật A/P/R/G ở trên nêu điều kiện và ngoại lệ nhưng không
 
 - [AGENT_LAYOUT_PLAYBOOK.md](AGENT_LAYOUT_PLAYBOOK.md): trình tự pha, cổng kiểm đo được, quy tắc quay lui.
 - [rules/layout_defaults.json](rules/layout_defaults.json): giá trị khởi điểm D-…. Đây **không** phải ngưỡng PASS/FAIL phổ quát và không mâu thuẫn A02/PT03: số của dự án, nhà máy và hãng luôn ghi đè; mỗi giá trị đã dùng phải được ghi thành giả định; vượt mốc `review` thì sửa hoặc giải trình.
+- [rules/001-general-layout.md](rules/001-general-layout.md) (PROPOSED 2026-11-20, chưa được owner duyệt): rule starter "general layout & clearance" cho board prototype FR-4 2–4 lớp; tham số DRAFT (PRACTICE, không phải gate PASS/FAIL), bao gồm 3 mục DFM không có trong D-FAB (silkscreen-to-pad, body-to-body, access/testpoint). Không thay đổi luật A/P/R/G hiện có; xem validation plan trong file trước khi nâng cấp VALIDATED.
 
 | ID đề xuất | Level | Rule | Kiểm tra |
 |---|---|---|---|
