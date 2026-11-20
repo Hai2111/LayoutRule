@@ -3,6 +3,8 @@
 ## Repo này là gì
 "Quy tắc xếp bảng mạch" cho agent (Claude/Codex). Agent đọc rồi layout/routing; **owner (Hai) không cần hiểu kỹ thuật — owner chỉ cần xem ảnh.**
 
+**Giao bài "thiết kế 1 board hoàn thiện"?** → trả lời 10 câu hỏi trong [PROJECT_INTAKE.md](PROJECT_INTAKE.md) (trống câu nào agent tự dùng giá trị khởi điểm + ghi giả định, không dừng hỏi lại).
+
 ## Quy trình (3 bước)
 
 ```
@@ -34,6 +36,7 @@
 | File | Ai đọc |
 |---|---|
 | `START_HERE.md` (file này) | chủ + agent |
+| `PROJECT_INTAKE.md` | chủ trả lời khi giao project mới |
 | `LAYOUT_RULES.md` | agent (bộ quy tắc) |
 | `ITERATIVE_ROUTING_PLAYBOOK.md` | agent (cách làm theo vùng) |
 | `rules/*.json` | agent (số liệu) |

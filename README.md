@@ -2,7 +2,7 @@
 
 > Cơ sở tri thức phục vụ **KiCadAutoLayout / Codex / Claude**: placement, routing, PCB review, DRC, DFM.
 
-**Đọc trước tiên:** [START_HERE.md](START_HERE.md) — 1 trang quy trình cho cả owner và agent.
+**Đọc trước tiên:** [START_HERE.md](START_HERE.md) — 1 trang quy trình cho cả owner và agent. Đề bài board mới: [PROJECT_INTAKE.md](PROJECT_INTAKE.md) — 10 câu hỏi giao bài; thông tin thiếu được ghi thành giả định, không dừng flow.
 
 **Cập nhật:** 2026-11-20 · **Trạng thái:** core approved — quy tắc A/P/R/G (LAYOUT_RULES), playbook vòng lặp theo vùng (ITERATIVE_ROUTING_PLAYBOOK, H1/H2 + visual scan 3 tầng), rule 001 starter (tham số DRAFT, fab cross-checked, DRC chưa chạy) và topology digest format (class boundaries đã chốt). Phần catalog video/reference vẫn là research v0.3: metadata/chapters, chưa xác minh toàn văn.
 
