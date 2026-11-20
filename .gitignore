@@ -8,3 +8,11 @@
 report/
 __pycache__/
 *.pyc
+**/routing_candidate/
+**/*.kicad_prl
+**/*.dsn
+**/*.ses
+**/*-drc.json
+**/*-routed.kicad_pcb
+**/*-routed.kicad_pro
+**/*-routed.png

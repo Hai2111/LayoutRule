@@ -1,0 +1,63 @@
+{
+  "board": {
+    "3dviewers": [],
+    "compressed_line_widths": [],
+    "compressed_trace_widths": [],
+    "layer_constraints": [],
+    "layer_presets": [],
+    "layer_table": []
+  },
+  "board_design_settings": {
+    "design_rules": {
+      "board_async_removals": [],
+      "drc_exclusions": [],
+      "rules": {
+        "min_clearance": 0.2,
+        "min_track_width": 0.2,
+        "min_via_drill": 0.3
+      }
+    }
+  },
+  "meta": {
+    "filename": "sample-router.kicad_pro",
+    "version": 1
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "clearance": 0.2,
+        "trace_width": 0.2,
+        "via_hole_size": 0.4,
+        "via_diameter": 0.8
+      }
+    ],
+    "rules": []
+  },
+  "pcbnew": {
+    "page_layout_descr_file": ""
+  },
+  "project": {
+    "boards_list": [
+      "sample-router.kicad_pcb"
+    ],
+    "description": "LayoutRule sample project - clean KiCad-native 2-layer board with 6 parts, 10 nets, partial routing, DSN export verified working.",
+    "keywords": "layoutrule sample routing demo",
+    "lib_table": [],
+    "meta": {
+      "filename": "sample-router.kicad_pro",
+      "version": 1
+    },
+    "project_uri": "sample-router.kicad_pro",
+    "schemas_uri": "board/1",
+    "sheets_list": []
+  },
+  "schematic": {
+    "drawing_sheet_count": 0,
+    "legacy_dpi": 0,
+    "page_layout_descr_file": "",
+    "page_size": {
+      "height": 0.0,
+      "width": 0.0
+    }
+  }
+}

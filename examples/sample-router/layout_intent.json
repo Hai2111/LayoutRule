@@ -1,0 +1,83 @@
+{
+  "_comment": "Synthetic fixture for tools/layout_audit.py. Not a real design; values chosen to exercise each check.",
+  "board": {
+    "layers": 2,
+    "reference_layer": "B.Cu",
+    "copper_oz": 1
+  },
+  "assumptions": [
+    "D-FAB",
+    "D-WIDTH",
+    "D-VIA",
+    "D-DECAP",
+    "D-SMPS",
+    "D-XTAL",
+    "D-DIFF",
+    "D-2L"
+  ],
+  "nets": {
+    "GND": {
+      "class": "gnd"
+    },
+    "+5V": {
+      "class": "power",
+      "current_a": 1.0,
+      "rail_v": 5.0
+    },
+    "+3V3": {
+      "class": "power",
+      "current_a": 1.0,
+      "rail_v": 3.3
+    },
+    "SW": {
+      "class": "switch_node",
+      "current_a": 1.0,
+      "max_vias": 0
+    },
+    "XI": {
+      "class": "crystal",
+      "max_vias": 0,
+      "max_length_mm": 15
+    },
+    "XO": {
+      "class": "crystal",
+      "max_vias": 0
+    }
+  },
+  "diff_pairs": [
+    {
+      "name": "USB",
+      "p": "USB_DP",
+      "n": "USB_DN",
+      "type": "usb_fs_ls"
+    }
+  ],
+  "decoupling": [
+    {
+      "pin": "U1.1",
+      "cap": "C3",
+      "gnd_pin": "U1.2"
+    }
+  ],
+  "hot_loops": [
+    {
+      "name": "U2 buck input loop",
+      "pads": [
+        "C1.2",
+        "U2.5",
+        "U2.4",
+        "C1.1"
+      ]
+    }
+  ],
+  "proximity": [
+    {
+      "a": "L1.2",
+      "b": "U2.6",
+      "target_mm": 3.0,
+      "review_mm": 6.0,
+      "rule_ids": "P03",
+      "why": "keep SW node small"
+    }
+  ]
+}
