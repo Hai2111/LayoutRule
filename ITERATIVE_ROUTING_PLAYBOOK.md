@@ -82,6 +82,15 @@ Kiểm trên netlist/hình học (không cần ảnh):
 
 **Cổng vùng:** 3.3 + 3.4 không có item FAIL nào thuộc scope vùng (item ngoài vùng được ghi nhận, không chặn) → **khóa vùng**: component `locked=yes`, vùng ghi vào `region_ledger.json` với hash board file.
 
+### 3.5 Báo cáo vùng cho owner (định dạng CHUẨN, chủ không đọc DRC log)
+
+Mỗi cổng vùng (và mỗi cổng ranh giới R2/R3/R4), agent gửi owner **đúng 2 thứ** — không gửi thêm:
+
+1. **Một bức ảnh** render vùng (2D KiCad, F.Cu/B.Cu, zoom vừa đủ thấy cả vùng + ranh giới), kèm marker/đánh số các điểm vấn đề.
+2. **Danh sách ≤ 5 dòng**, mỗi dòng: `#.marker | vấn đề | sửa thế nào (1 câu)`.
+
+Owner chỉ cần **chỉ vào marker nào trong ảnh** ("sửa cái 2, bỏ qua cái 3") hoặc gật "khóa vùng". Toàn bộ DRC log, ledger json, iteration count là **của agent** — owner không bao giờ phải đọc chúng. Nếu vấn đề > 5, agent tự gom/cắt theo rủi ro, chỉ giữ 5 quan trọng nhất; phần còn lại nằm trong ledger (agent quản, không hiện cho owner).
+
 Chưa đạt → **quay lại 3.1** nhưng theo quy tắc: **giữ nguyên vị trí đã route tốt, chỉ thử placement lại những component liên quan đến net chưa đạt** (re-route tại vị trí cũ = không làm lại toàn bộ, chỉ re-route phần còn nợ). Lặp.
 
 > Giới hạn lặp: nếu 2 vòng liên tiếp cùng vùng không tiến bộ (cùng item FAIL), dừng trong vùng đó và ghi `NEEDS_REVIEW` kèm 2 phương án placement thay thế cho owner — không tự bịa vòng thứ 3.

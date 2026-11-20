@@ -3,6 +3,7 @@
 This repository is the **canonical PCB layout reference**, NOT an automatically validated standards database. Owner-controlled update rules: [GOVERNANCE.md](GOVERNANCE.md). Downstream repos may submit evidence and proposals, but do not modify the upstream rulebook automatically.
 
 ## Read order
+-0. **`START_HERE.md`** — 1 trang duy nhất: quy trình 3 bước + "chủ chỉ cần xem ảnh". Đọc file này trước khi đọc bất cứ file nào khác.
 0. `GOVERNANCE.md` — owner approval and one-way dependency
 1. `README.md`
 2. `LAYOUT_RULES.md`
