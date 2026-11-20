@@ -19,6 +19,16 @@
 1. **Ảnh layout + danh sách vấn đề** của từng vùng → "sửa chỗ X" / "được, khóa".
 2. **Rule mới/sửa** (hiếm): agent đưa bằng chứng, chủ gật hay lắc.
 
+## Trạng thái nhanh (cái nào đã chốt, cái nào chưa)
+
+| Hạng mục | Trạng thái | Ý nghĩa với chủ |
+|---|---|---|
+| Quy tắc A/P/R/G (`LAYOUT_RULES.md`) | ✅ APPROVED | luật đã chốt |
+| Vòng lặp theo vùng + INV + H1/H2 + báo cáo 1 ảnh (`ITERATIVE_ROUTING_PLAYBOOK.md`) | ✅ APPROVED | cách làm đã chốt |
+| Rule 001 starter (số clearance/track) | ⚠️ APPROVED nhưng **tham số DRAFT** | số dùng tạm; DRC thật chưa chạy |
+| Ngưỡng class digest light/medium/heavy | ✅ APPROVED | đã chốt |
+| Catalog video / reference / research | ⚠️ research, chưa xác minh toàn văn | tư liệu, chưa phải chuẩn |
+
 ## Map nhanh các file
 
 | File | Ai đọc |

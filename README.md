@@ -2,18 +2,23 @@
 
 > Cơ sở tri thức phục vụ **KiCadAutoLayout / Codex / Claude**: placement, routing, PCB review, DRC, DFM.
 
-**Cập nhật:** 2026-11-15 · **Trạng thái:** research v0.3, có metadata/video chapters và một số reference PDF visual-inspected; **chưa xác minh video toàn văn; đã đọc một phần tọa độ linh kiện/net trong 1 tệp CAD, chưa parse hình học/DRC đầy đủ**.
+**Đọc trước tiên:** [START_HERE.md](START_HERE.md) — 1 trang quy trình cho cả owner và agent.
 
-## Quy trình cho agent tự làm layout (đề xuất 2026-11-17, chờ owner duyệt)
-- [AGENT_LAYOUT_PLAYBOOK.md](AGENT_LAYOUT_PLAYBOOK.md) — quy trình 5 pha có cổng kiểm: intent → floorplan → placement → routing → kiểm chức năng; kèm quy tắc quay lui và danh sách lỗi agent hay mắc.
-- [rules/layout_defaults.json](rules/layout_defaults.json) — giá trị khởi điểm (bề rộng theo dòng, số via đổi lớp, khoảng cách decoupling, vòng nóng…) dùng khi dự án/nhà máy/hãng không cho số; mỗi giá trị ghi rõ `VENDOR` / `CALC` / `PRACTICE`.
-- [tools/layout_audit.py](tools/layout_audit.py) — đo hình học `.kicad_pcb` so với `layout_intent.json`; mới thử trên board tổng hợp trong `tests/fixtures/` (`python tests/test_layout_audit.py`), chưa thử trên board KiCad 10 thật.
+**Cập nhật:** 2026-11-20 · **Trạng thái:** core approved — quy tắc A/P/R/G (LAYOUT_RULES), playbook vòng lặp theo vùng (ITERATIVE_ROUTING_PLAYBOOK, H1/H2 + visual scan 3 tầng), rule 001 starter (tham số DRAFT, fab cross-checked, DRC chưa chạy) và topology digest format (class boundaries đã chốt). Phần catalog video/reference vẫn là research v0.3: metadata/chapters, chưa xác minh toàn văn.
+
+## Quy trình cho agent tự làm layout (approved 2026-11-20, owner Hai)
+- [ITERATIVE_ROUTING_PLAYBOOK.md](ITERATIVE_ROUTING_PLAYBOOK.md) — **cách làm chính hiện hành**: chia vùng R1→R4, vòng lặp *đặt → route (agent quyết định, tool thực thi) → ảnh 3 tầng → logic*, 3 bất biến INV-1/2/3, 2 hành vi chuẩn H1 (route ⇄ xê linh kiện xuyên suốt) + H2 (ảnh ratsnest là bản đồ đầu vào), báo cáo vùng = **1 ảnh + ≤5 dòng** cho owner.
+- [AGENT_LAYOUT_PLAYBOOK.md](AGENT_LAYOUT_PLAYBOOK.md) — quy trình 5 pha có cổng kiểm (intent → floorplan → placement → routing → kiểm chức năng), giữ làm nền cho các cổng.
+- [rules/layout_defaults.json](rules/layout_defaults.json) — giá trị khởi điểm (bề rộng theo dòng, số via đổi lớp, khoảng cách decoupling, vòng nóng…); mỗi giá trị ghi rõ `VENDOR` / `CALC` / `PRACTICE`.
+- [rules/001-general-layout.md](rules/001-general-layout.md) — rule starter "general layout & clearance" cho board prototype FR-4 2–4 lớp; tham số DRAFT (đã cross-check fab, DRC validation PENDING).
+- [rules/topology_digests.json](rules/topology_digests.json) — digest "input nhỏ" để 1 session đọc/hiểu ref design không cần parse cả file CAD; class boundaries light/medium/heavy đã chốt.
+- [tools/layout_audit.py](tools/layout_audit.py) — đo hình học `.kicad_pcb` so với `layout_intent.json`; mới thử trên board tổng hợp trong `tests/fixtures/`, chưa thử trên board KiCad 10 thật.
 
 ## Routing engine (bổ sung 2026-11-15)
 - [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md) — so sánh Freerouting DSN/SES và PCBWorld/CADET, luật routing + cách kiểm tra native DRC. Code thử nghiệm đã commit trong [Hai2111/Training/routing](https://github.com/Hai2111/Training/tree/main/routing).
 - KiCad 10 export/import Specctra DSN/SES được xác minh trong API chính thức. Adapter Python mới **chưa thực thi với KiCad/Java thật trên máy người dùng**, chỉ compile và plan-only test.
 
-## Bắt đầu
+## Tư liệu tham khảo (CHỈ agent cần đào sâu đọc — không thuộc quy trình mặc định, xem START_HERE.md)
 1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.
 2. [VIDEO_REVIEWS_EXTERNAL.md](VIDEO_REVIEWS_EXTERNAL.md) — **25 video review** ngoài hai kênh: Robert Feranec/FEDEVEL, EEVblog, element14.
 3. [REFERENCE_DESIGN_CATALOG.md](REFERENCE_DESIGN_CATALOG.md) — **36 nguồn reference PCB/hãng**, mức xác minh khác nhau.
