@@ -134,8 +134,12 @@ def candidate_check(base, candidate, required, rid, label):
     except (OSError, ValueError) as exc:
         problems.append(f"board: {exc}")
         board_sha = None
+    image_records = candidate.get("images")
+    if not isinstance(image_records, dict):
+        problems.append("candidate.images must be an object keyed by copper layer")
+        image_records = {}
     for layer in required:
-        images[layer] = panel(base, (candidate.get("images") or {}).get(layer),
+        images[layer] = panel(base, image_records.get(layer),
                               problems, f"{rid}/{label} {layer}")
     counts = {}
     try:
@@ -156,6 +160,14 @@ def candidate_check(base, candidate, required, rid, label):
         if not isinstance(acounts, dict):
             raise ValueError("audit counts missing")
         counts["audit"] = acounts
+        actual_counts = {}
+        for row in audit["results"]:
+            if not isinstance(row, dict) or row.get("status") not in ("PASS", "FAIL", "NEEDS_REVIEW", "NA"):
+                raise ValueError("audit contains an ungraded or invalid row")
+            status = row["status"]
+            actual_counts[status] = actual_counts.get(status, 0) + 1
+        if acounts != actual_counts:
+            problems.append("audit summary counts do not match result rows")
         if acounts.get("FAIL", 0) or acounts.get("NEEDS_REVIEW", 0):
             problems.append(f"layout audit findings: {acounts}")
         if audit.get("summary", {}).get("board_sha256") != board_sha:
@@ -170,8 +182,10 @@ def candidate_check(base, candidate, required, rid, label):
         if ledger.get("board_sha256") != board_sha:
             problems.append("routing ledger board SHA256 mismatch")
         for net in nets:
-            if not isinstance(net, dict) or not all(net.get(k) for k in ("net", "layer", "reason", "tool", "outcome")):
-                problems.append("routing ledger has unexplained net")
+            if (not isinstance(net, dict)
+                    or not all(net.get(k) for k in ("net", "layer", "reason", "tool", "outcome"))
+                    or net.get("outcome") != "PASS"):
+                problems.append("routing ledger has missing rationale or non-PASS outcome")
                 break
     except (OSError, ValueError, TypeError, AttributeError, json.JSONDecodeError) as exc:
         problems.append(f"routing ledger unavailable/invalid: {exc}")
@@ -218,6 +232,20 @@ def svg_review(rows, output):
 
 
 def review(manifest, base, result, output):
+    # GLOBAL STOP: never inspect/endorse partial candidate work after a blocked preflight.
+    if result["status"] == "BLOCKED":
+        output.mkdir(parents=True, exist_ok=True)
+        report = {"session_id": manifest.get("session_id"), "status": "BLOCKED",
+                  "preflight": result, "issues": result["issues"],
+                  "owner_approval": "PENDING", "montage": None, "candidates": {}}
+        (output / "technical_evidence.json").write_text(json.dumps(report, indent=2, ensure_ascii=False), encoding="utf-8")
+        lines = [f"# {manifest.get('session_id', 'Session')} — BLOCKED",
+                 "Reference: thiếu bằng chứng bắt buộc; GLOBAL STOP toàn PCB.",
+                 "Candidate: không đánh giá khi reference chưa đủ.",
+                 f"Vấn đề: {len(result['issues'])} mục (xem technical_evidence.json).",
+                 "Quyết định: chờ owner duyệt một lần; KHÔNG sửa/merge PCB."]
+        (output / "OWNER_REVIEW.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return "BLOCKED"
     evidence, pictures, issues = {}, [], list(result["issues"])
     refs = {r["id"]: r for r in result["regions"]}
     for region in manifest.get("regions", []):
@@ -228,10 +256,13 @@ def review(manifest, base, result, output):
         candidates = region.get("candidates") or {}
         r = candidate_check(base, candidates.get("ref"), refs[rid]["required_layers"], rid, "REF")
         o = candidate_check(base, candidates.get("opt"), refs[rid]["required_layers"], rid, "OPT")
+        if r.get("board_sha256") and r.get("board_sha256") == o.get("board_sha256"):
+            issues.append(f"{rid}: REF and OPT boards are byte-identical; no meaningful comparison")
         if r.get("branch") and r.get("branch") == o.get("branch"):
             issues.append(f"{rid}: REF and OPT must be separate Git branches")
-        evidence[rid] = {"reference_id": region.get("reference", {}).get("id"),
-                         "source_region": region.get("reference", {}).get("source_region"),
+        source = region.get("reference") or {}
+        evidence[rid] = {"reference_id": source.get("id"),
+                         "source_region": source.get("source_region"),
                          "ref": r, "opt": o}
         for label, value in (("REF", r), ("OPT", o)):
             if value["status"] != "ELIGIBLE":
