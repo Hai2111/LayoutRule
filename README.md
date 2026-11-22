@@ -13,11 +13,11 @@
 - [rules/001-general-layout.md](rules/001-general-layout.md) — rule starter "general layout & clearance" cho board prototype FR-4 2–4 lớp; tham số DRAFT (đã cross-check fab, DRC validation PENDING).
 - [rules/topology_digests.json](rules/topology_digests.json) — digest "input nhỏ" để 1 session đọc/hiểu ref design không cần parse cả file CAD; class boundaries light/medium/heavy đã chốt.
 - [tools/layout_audit.py](tools/layout_audit.py) — đo hình học `.kicad_pcb` so với `layout_intent.json`; mới thử trên board tổng hợp trong `tests/fixtures/`, chưa thử trên board KiCad 10 thật.
-- [tools/route_pipeline.ps1](tools/route_pipeline.ps1) — **1 lệnh chạy cả chuỗi routing**: DSN → Freerouting JAR → import SES vào candidate riêng → native DRC → render ảnh. Không ghi đè board gốc; candidate cần agent visual + logic review (không tự tuyên bố PASS). Trạng thái + limitations: [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md).
+- [SESSION_PIPELINE.md](SESSION_PIPELINE.md) — **ONE SESSION = ONE OWNER REVIEW**: reference phải đủ bằng chứng trước routing, thiếu là GLOBAL STOP; hai candidate trên branch riêng; 1 ảnh tổng hợp và tối đa 5 dòng để chủ duyệt cuối phiên.
 
 ## Routing engine (bổ sung 2026-11-15)
 - [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md) — so sánh Freerouting DSN/SES và PCBWorld/CADET, luật routing + cách kiểm tra native DRC. Code thử nghiệm đã commit trong [Hai2111/Training/routing](https://github.com/Hai2111/Training/tree/main/routing).
-- [tools/route_pipeline.ps1](tools/route_pipeline.ps1) (bổ sung 2026-11-20) — chuỗi DSN→Freerouting JAR→import→DRC→render đã **chạy thực tế trên machine** (fixture: đủ 5 bước, xem [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md)); native CLI Freerouting crash, dùng JAR pinned. Board **convert từ Altium vẫn chưa export được DSN** — chưa claim end-to-end cho nhóm này.
+- [tools/route_pipeline.ps1](tools/route_pipeline.ps1) — cổng reference bắt buộc; nhận CandidateBoard do agent tạo hoặc FreeroutingProposal thử nghiệm; native KiCad DRC + geometry audit. Xem [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md) cho giới hạn đã xác minh.
 
 ## Tư liệu tham khảo (CHỈ agent cần đào sâu đọc — không thuộc quy trình mặc định, xem START_HERE.md)
 1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.
