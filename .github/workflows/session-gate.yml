@@ -1,0 +1,24 @@
+name: Session gate and geometry regression
+on:
+  push:
+    branches:
+      - main
+      - "agent/**"
+  pull_request:
+
+jobs:
+  stdlib-regression:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Python sources compile
+        run: python -m compileall -q tools tests
+      - name: Reference global-stop / one-session review
+        run: python -m unittest discover -s tests -p "test_session_gate.py" -v
+      - name: Existing layout geometry tests
+        run: python -m unittest discover -s tests -p "test_layout_audit.py" -v
