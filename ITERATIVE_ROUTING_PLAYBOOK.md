@@ -71,7 +71,7 @@ Thứ tự net trong vùng (mở rộng R02/R03 cho phạm vi vùng):
 
 Với **mỗi** net: agent ghi entry ledger (lớp, vị trí via, lý do + rule ID) → gọi tool thực thi → tool trả kết quả → agent **đọc kết quả bằng mắt (ảnh) trước khi route net kế**; kẹt thì áp H1 ngay. Không gom "chạy hết rồi mới xem".
 
-**Cách gọi tool thực thi (recipe, 1 lệnh):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools\route_pipeline.ps1 -Board BOARD.kicad_pcb` — xuất DSN → chạy Freerouting JAR pinned (setup/MANIFEST.json) → import SES vào **candidate riêng** (không ghi đè board gốc) → DRC native → render ảnh. Pipeline xong ≠ vùng đạt: agent vẫn phải chạy 3.3/3.4 (ảnh + logic) trên candidate, ghi ledger, mới được khóa vùng. Limitations: xem `setup/SMOKE_TEST.md` (board convert Altium chưa export được DSN).
+**Cách gọi tool thực thi (recipe, 1 lệnh):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools\route_pipeline.ps1 -Board BOARD.kicad_pcb -SessionManifest session.json -CandidateBoard AGENT_BOARD.kicad_pcb -IntentPath layout_intent.json` — xuất DSN → chạy Freerouting JAR pinned (setup/MANIFEST.json) → import SES vào **candidate riêng** (không ghi đè board gốc) → DRC native → render ảnh. Pipeline xong ≠ vùng đạt: agent vẫn phải chạy 3.3/3.4 (ảnh + logic) trên candidate, ghi ledger, mới được khóa vùng. Limitations: xem `setup/SMOKE_TEST.md` (board convert Altium chưa export được DSN).
 
 ### 3.3 Xử lý ảnh (visual pass) — scan 3 tầng, từ xa đến gần (chuẩn kỹ sư review)
 Render chuẩn: **1 ảnh F.Cu + 1 ảnh B.Cu** (cùng zoom), bật copper + silkscreen + courtyard; zoom vừa đủ thấy cả vùng + ranh giới. Scan theo 3 tầng, KHÔNG liệt kê ngang nhau:
@@ -100,14 +100,18 @@ Kiểm trên netlist/hình học (không cần ảnh):
 
 **Cổng vùng:** 3.3 + 3.4 không có item FAIL nào thuộc scope vùng (item ngoài vùng được ghi nhận, không chặn) → **khóa vùng**: component `locked=yes`, vùng ghi vào `region_ledger.json` với hash board file.
 
-### 3.5 Báo cáo vùng cho owner (định dạng CHUẨN, chủ không đọc DRC log)
+### 3.5 Evidence theo vùng (NỘI BỘ; không hỏi owner giữa phiên)
 
-Mỗi cổng vùng (và mỗi cổng ranh giới R2/R3/R4), agent gửi owner **đúng 2 thứ** — không gửi thêm:
+Agent lưu ảnh PCB 2D KiCad, findings tối đa 5 dòng, reference ID + vùng nguồn đã học,
+hai candidate REF/OPT và ledger cho từng R1/R2/R3/R4. **Không gửi yêu cầu duyệt
+từng vùng.** Khi thiếu ảnh/lớp reference bắt buộc: GLOBAL STOP toàn PCB,
+chỉ được tìm kiếm tài liệu và chuẩn bị báo cáo BLOCKED.
 
-1. **Một bức ảnh** render vùng (2D KiCad, F.Cu/B.Cu, zoom vừa đủ thấy cả vùng + ranh giới), kèm marker/đánh số các điểm vấn đề.
-2. **Danh sách ≤ 5 dòng**, mỗi dòng: `#.marker | vấn đề | sửa thế nào (1 câu)`.
-
-Owner chỉ cần **chỉ vào marker nào trong ảnh** ("sửa cái 2, bỏ qua cái 3") hoặc gật "khóa vùng". Toàn bộ DRC log, ledger json, iteration count là **của agent** — owner không bao giờ phải đọc chúng. Nếu vấn đề > 5, agent tự gom/cắt theo rủi ro, chỉ giữ 5 quan trọng nhất; phần còn lại nằm trong ledger (agent quản, không hiện cho owner).
+**ONE SESSION = ONE OWNER REVIEW:** Kết thúc ở G1/G3/G5 hoặc khi bị chặn;
+xuất một ảnh tổng hợp Reference / Candidate REF / Candidate OPT
+và tối đa 5 dòng tổng kết cho owner. Log DRC/geometry/history để agent lưu riêng.
+Bắt buộc owner duyệt batch trước khi thay thế PCB chính thức hay merge rule.
+Cách chạy và schema: SESSION_PIPELINE.md.
 
 Chưa đạt → **quay lại 3.1** nhưng theo quy tắc: **giữ nguyên vị trí đã route tốt, chỉ thử placement lại những component liên quan đến net chưa đạt** (re-route tại vị trí cũ = không làm lại toàn bộ, chỉ re-route phần còn nợ). Lặp.
 
@@ -150,7 +154,7 @@ Mỗi vùng sinh `region_ledger.json` (1 file/vùng, nằm cùng project, không
 }
 ```
 
-Owner review đọc ledger trước, đọc board sau.
+Agent lưu ledger để tự kiểm; owner chỉ cần xem ảnh tổng hợp và các quyết định cuối phiên.
 
 ---
 
@@ -175,9 +179,9 @@ Ngưỡng class (đề xuất, chưa owner duyệt):
 
 ---
 
-## 7. Khi nào dừng / hỏi owner (mở rộng mục 7 của AGENT_LAYOUT_PLAYBOOK)
+## 7. Khi nào dừng phiên / báo owner một lần (mở rộng mục 7 của AGENT_LAYOUT_PLAYBOOK)
 
-Chỉ hỏi owner khi: (a) 2 vòng lặp bế tắc trong cùng vùng (§3), (b) INV-2 không thể thỏa cho component nào (không còn fallback hợp lệ), (c) digest không khớp class của board đích và không có ref khác. Mọi trường hợp khác: tiếp tục theo vòng lặp.
+Agent kết thúc phiên và gom vào báo cáo cuối khi: (a) đạt cổng G1/G3/G5, (b) 2 vòng lặp bế tắc trong cùng vùng (§3), (c) INV-2 không thể thỏa, (d) thiếu reference/bằng chứng lớp cần thiết. Trường hợp (d) kích hoạt GLOBAL STOP: không tiếp tục sửa bất kỳ vùng PCB nào. Agent được tiếp tục nghiên cứu, nhưng không hỏi owner từng mục.
 
 ---
 
