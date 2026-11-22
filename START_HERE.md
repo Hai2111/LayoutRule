@@ -17,9 +17,10 @@
    DRC log, ledger, json... là của agent, chủ KHÔNG phải đọc
 ```
 
-## Chủ (owner) chỉ duyệt 2 loại
-1. **Ảnh layout + danh sách vấn đề** của từng vùng → "sửa chỗ X" / "được, khóa".
-2. **Rule mới/sửa** (hiếm): agent đưa bằng chứng, chủ gật hay lắc.
+## Owner review (batch, một lần sau mỗi phiên)
+1. Agent tự nghiên cứu reference, tự thử Candidate REF/OPT, kiểm tra và ghi ledger từng vùng; **không hỏi duyệt lẻ**.
+2. Agent kết thúc phiên tại cổng G1/G3/G5 hoặc GLOBAL STOP khi thiếu reference bắt buộc; chỉ xuất **1 ảnh tổng hợp + tối đa 5 dòng** để owner duyệt một lần.
+3. Rule mới/sửa vẫn là **đề xuất** chờ owner duyệt theo GOVERNANCE.md, không tự merge vào main. Xem SESSION_PIPELINE.md.
 
 ## Trạng thái nhanh (cái nào đã chốt, cái nào chưa)
 
