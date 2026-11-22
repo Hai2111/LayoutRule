@@ -114,7 +114,6 @@ class SessionGateTest(unittest.TestCase):
         self.save()
         p = self.run_gate("preflight")
         self.assertEqual(p.returncode, 3)
-        self.assertIn("GLOBAL", "GLOBAL STOP")  # contract: nonzero forbids pipeline
         rep = json.loads((self.root / "review" / "preflight.json").read_text())
         self.assertEqual(rep["status"], "BLOCKED")
         self.assertTrue(any("R1-crystal" in x for x in rep["issues"]))
@@ -150,6 +149,26 @@ class SessionGateTest(unittest.TestCase):
     def test_same_branch_is_not_two_candidates(self):
         self.manifest["regions"][0]["candidates"]["opt"]["branch"] = "candidate/ref"
         self.save()
+        self.assertEqual(self.run_gate("review").returncode, 4)
+
+    def test_blocked_review_reports_once_without_montage(self):
+        self.manifest["regions"][0]["reference"]["evidence"].pop("B.Cu")
+        self.save()
+        p = self.run_gate("review")
+        self.assertEqual(p.returncode, 3, p.stderr + p.stdout)
+        self.assertIn("BLOCKED", (self.root / "review" / "OWNER_REVIEW.md").read_text())
+        self.assertFalse((self.root / "review" / "session_comparison.svg").exists())
+
+    def test_invalid_audit_summary_does_not_pass(self):
+        obj = json.loads((self.root / "opt-audit.json").read_text())
+        obj["summary"]["counts"] = {"PASS": 2}
+        write_json(self.root / "opt-audit.json", obj)
+        self.assertEqual(self.run_gate("review").returncode, 4)
+
+    def test_failed_routing_ledger_does_not_pass(self):
+        obj = json.loads((self.root / "ref-ledger.json").read_text())
+        obj["nets_ledger"][0]["outcome"] = "FAIL"
+        write_json(self.root / "ref-ledger.json", obj)
         self.assertEqual(self.run_gate("review").returncode, 4)
 
     def test_invalid_or_missing_roi_blocks_reference(self):
