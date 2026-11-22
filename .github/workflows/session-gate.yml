@@ -20,5 +20,16 @@ jobs:
         run: python -m compileall -q tools tests
       - name: Reference global-stop / one-session review
         run: python -m unittest discover -s tests -p "test_session_gate.py" -v
+      - name: PowerShell routing wrapper syntax
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          $file = (Resolve-Path tools/route_pipeline.ps1).Path
+          [System.Management.Automation.Language.Parser]::ParseFile($file, [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
       - name: Existing layout geometry tests
         run: python -m unittest discover -s tests -p "test_layout_audit.py" -v
