@@ -4,7 +4,7 @@
 
 **Đọc trước tiên:** [START_HERE.md](START_HERE.md) — 1 trang quy trình cho cả owner và agent. Đề bài board mới: [PROJECT_INTAKE.md](PROJECT_INTAKE.md) — 10 câu hỏi giao bài; thông tin thiếu được ghi thành giả định, không dừng flow.
 
-**Cập nhật:** 2026-11-20 · **Trạng thái:** core approved — quy tắc A/P/R/G (LAYOUT_RULES), playbook vòng lặp theo vùng (ITERATIVE_ROUTING_PLAYBOOK, H1/H2 + visual scan 3 tầng), rule 001 starter (tham số DRAFT, fab cross-checked, DRC chưa chạy) và topology digest format (class boundaries đã chốt). Phần catalog video/reference vẫn là research v0.3: metadata/chapters, chưa xác minh toàn văn.
+**Cập nhật:** 2026-11-23 (đang đề xuất PR #5) · **Trạng thái:** core approved — quy tắc A/P/R/G (LAYOUT_RULES), playbook vòng lặp theo vùng (ITERATIVE_ROUTING_PLAYBOOK, H1/H2 + visual scan 3 tầng), rule 001 starter (tham số DRAFT, fab cross-checked, DRC chưa chạy) và topology digest format (class boundaries đã chốt). Phần catalog video/reference vẫn là research v0.3: metadata/chapters, chưa xác minh toàn văn.
 
 ## Quy trình cho agent tự làm layout (approved 2026-11-20, owner Hai)
 - [ITERATIVE_ROUTING_PLAYBOOK.md](ITERATIVE_ROUTING_PLAYBOOK.md) — **cách làm chính hiện hành**: chia vùng R1→R4, vòng lặp *đặt → route (agent quyết định, tool thực thi) → ảnh 3 tầng → logic*, 3 bất biến INV-1/2/3, 2 hành vi chuẩn H1 (route ⇄ xê linh kiện xuyên suốt) + H2 (ảnh ratsnest là bản đồ đầu vào), báo cáo vùng = **1 ảnh + ≤5 dòng** cho owner.
@@ -13,11 +13,14 @@
 - [rules/001-general-layout.md](rules/001-general-layout.md) — rule starter "general layout & clearance" cho board prototype FR-4 2–4 lớp; tham số DRAFT (đã cross-check fab, DRC validation PENDING).
 - [rules/topology_digests.json](rules/topology_digests.json) — digest "input nhỏ" để 1 session đọc/hiểu ref design không cần parse cả file CAD; class boundaries light/medium/heavy đã chốt.
 - [tools/layout_audit.py](tools/layout_audit.py) — đo hình học `.kicad_pcb` so với `layout_intent.json`; mới thử trên board tổng hợp trong `tests/fixtures/`, chưa thử trên board KiCad 10 thật.
-- [tools/route_pipeline.ps1](tools/route_pipeline.ps1) — **1 lệnh chạy cả chuỗi routing**: DSN → Freerouting JAR → import SES vào candidate riêng → native DRC → render ảnh. Không ghi đè board gốc; candidate cần agent visual + logic review (không tự tuyên bố PASS). Trạng thái + limitations: [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md).
+- [CLOSED_LOOP_RUNBOOK.md](CLOSED_LOOP_RUNBOOK.md) — **vòng lặp local thật**: Codex/Claude quyết định → Python `pcbnew` sửa candidate → KiCad DRC + ảnh F.Cu/B.Cu → KEEP/ROLLBACK; chưa xác minh end-to-end bằng KiCad host.
+- [tools/layout_controller.py](tools/layout_controller.py) — điều phối vòng lặp; `layout_observer.py`, `kicad_executor.py`, `candidate_evaluator.py` thực thi/kiểm chứng, không khóa board.
+- [rules/owner_decisions.json](rules/owner_decisions.json) — **dữ liệu gốc Q01–Q35**: 32 lựa chọn A/B/C, Q22 xác nhận bằng lời, Q14/Q35 chưa chọn; các quyết định mới thay thế được đánh dấu rõ để agent không áp dụng rule cũ.
+- [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md) — **owner chỉ review bản cuối sau báo cáo**, agent giữ nguyên văn góp ý, đọc lại ở phiên sau; không khóa vùng/linh kiện trừ neo cơ khí và không tự công nhận rule.\n- [SESSION_PIPELINE.md](SESSION_PIPELINE.md) — **ONE SESSION = ONE OWNER REVIEW**: reference phải đủ bằng chứng trước routing, thiếu là GLOBAL STOP; hai candidate trên branch riêng; 1 ảnh tổng hợp và tối đa 5 dòng để chủ duyệt cuối phiên.
 
 ## Routing engine (bổ sung 2026-11-15)
 - [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md) — so sánh Freerouting DSN/SES và PCBWorld/CADET, luật routing + cách kiểm tra native DRC. Code thử nghiệm đã commit trong [Hai2111/Training/routing](https://github.com/Hai2111/Training/tree/main/routing).
-- [tools/route_pipeline.ps1](tools/route_pipeline.ps1) (bổ sung 2026-11-20) — chuỗi DSN→Freerouting JAR→import→DRC→render đã **chạy thực tế trên machine** (fixture: đủ 5 bước, xem [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md)); native CLI Freerouting crash, dùng JAR pinned. Board **convert từ Altium vẫn chưa export được DSN** — chưa claim end-to-end cho nhóm này.
+- [tools/route_pipeline.ps1](tools/route_pipeline.ps1) — cổng reference bắt buộc; nhận CandidateBoard do agent tạo hoặc FreeroutingProposal thử nghiệm; native KiCad DRC + geometry audit. Xem [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md) cho giới hạn đã xác minh.
 
 ## Tư liệu tham khảo (CHỈ agent cần đào sâu đọc — không thuộc quy trình mặc định, xem START_HERE.md)
 1. [VIDEO_CATALOG.md](VIDEO_CATALOG.md) — **43 video** Phil's Lab / Altium Academy.

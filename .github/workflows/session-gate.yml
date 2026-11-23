@@ -1,0 +1,41 @@
+name: Session gate and geometry regression
+on:
+  push:
+    branches:
+      - main
+      - "agent/**"
+  pull_request:
+
+jobs:
+  stdlib-regression:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check Python sources compile
+        run: python -m compileall -q tools tests
+      - name: Reference global-stop / one-session review
+        run: python -m unittest discover -s tests -p "test_session_gate.py" -v
+      - name: PowerShell routing wrapper syntax
+        shell: pwsh
+        run: |
+          $tokens = $null
+          $errors = $null
+          $file = (Resolve-Path tools/route_pipeline.ps1).Path
+          [System.Management.Automation.Language.Parser]::ParseFile($file, [ref]$tokens, [ref]$errors) | Out-Null
+          if ($errors.Count -gt 0) {
+            $errors | ForEach-Object { Write-Error $_.Message }
+            exit 1
+          }
+      - name: Owner decision register integrity
+        run: python -m unittest discover -s tests -p "test_owner_decisions.py" -v
+      - name: Owner feedback learning ledger
+        run: python -m unittest discover -s tests -p "test_review_feedback.py" -v
+      - name: Local PCB closed-loop decision, keep and rollback tests
+        run: python -m unittest discover -s tests -p "test_closed_loop.py" -v
+      - name: Existing layout geometry tests
+        run: python -m unittest discover -s tests -p "test_layout_audit.py" -v

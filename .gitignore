@@ -16,4 +16,8 @@ __pycache__/
 **/*-routed.kicad_pcb
 **/*-routed.kicad_pro
 **/*-routed.png
+**/session_review/
+**/*-audit.json
+**/*-pipeline-summary.json
+**/*-keepout.txt
 examples/sample-router/.history/

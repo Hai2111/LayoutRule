@@ -8,18 +8,24 @@
 ## Quy trình (3 bước)
 
 ```
-1. Agent đọc: LAYOUT_RULES.md + ITERATIVE_ROUTING_PLAYBOOK.md
+1. Agent đọc: CLOSED_LOOP_RUNBOOK.md (code thực thi local)
+   + rules/owner_decisions.json (quyết định mới ghi đè cũ)
+   + LAYOUT_RULES.md + ITERATIVE_ROUTING_PLAYBOOK.md
    + digest của ref design (rules/topology_digests.json)
 2. Agent làm theo vùng: đặt → route → xem ảnh → kiểm logic
-   (chỉ khi nào vùng đạt mới khóa vùng, sang vùng kế)
-3. CHỦ nhận đúng 1 thứ: BỨC ẢNH + DANH SÁCH VẤN ĐỀ (≤ 5 dòng)
-   → chỉ vào chỗ nào trong ảnh cần sửa → agent sửa → gửi lại ảnh
-   DRC log, ledger, json... là của agent, chủ KHÔNG phải đọc
+   (qua checkpoint thì ghi snapshot, không khóa vùng/copper; chỉ giữ neo cơ khí)
+3. Agent hoàn thiện bản cuối phiên + báo cáo trước; CHỦ chỉ review 1 lần
+   qua 1 ẢNH PCB THẬT + KẾT LUẬN ≤ 5 dòng, hoặc báo cáo BLOCKED.
+   Feedback được ghi nguyên văn, đưa vào vòng học ở phiên sau.
+   DRC log/ledger/JSON của agent; không có lệnh khóa layout sau review.
 ```
 
-## Chủ (owner) chỉ duyệt 2 loại
-1. **Ảnh layout + danh sách vấn đề** của từng vùng → "sửa chỗ X" / "được, khóa".
-2. **Rule mới/sửa** (hiếm): agent đưa bằng chứng, chủ gật hay lắc.
+## Owner review (batch, một lần sau mỗi phiên)
+1. Agent tự nghiên cứu reference, tự thử Candidate REF/OPT, kiểm tra và ghi ledger từng vùng; **không hỏi duyệt lẻ**.
+2. G1/G3/G5 là **checkpoint nội bộ**; chỉ sau khi agent hoàn thiện bản cuối và báo cáo (hoặc GLOBAL STOP) mới gửi **1 ảnh tổng hợp + tối đa 5 dòng** để owner duyệt một lần.
+3. Owner quyết định layout đạt hay chưa; sau mỗi review agent lưu feedback và tự học cho phiên sau theo [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md). **Không khóa layout**, trừ neo phải khớp cơ khí. Rule mới/sửa vẫn chỉ là đề xuất theo GOVERNANCE.md.
+
+**Scope:** chưa có PCB benchmark được owner giao; demo USB-C ở chat là thử nghiệm riêng, **không** phải project đưa vào LayoutRule. Thiếu số liệu fab/stackup thì dùng giả định có ghi nguồn, không xin owner quyết định sớm.
 
 ## Trạng thái nhanh (cái nào đã chốt, cái nào chưa)
 
@@ -38,7 +44,10 @@
 | `START_HERE.md` (file này) | chủ + agent |
 | `PROJECT_INTAKE.md` | chủ trả lời khi giao project mới |
 | `LAYOUT_RULES.md` | agent (bộ quy tắc) |
+| `CLOSED_LOOP_RUNBOOK.md` | agent (lệnh chạy local closed-loop, giới hạn) |
+| `rules/owner_decisions.json` | agent (35 xác nhận và các ngoại lệ sau này) |
 | `ITERATIVE_ROUTING_PLAYBOOK.md` | agent (cách làm theo vùng) |
+| `REVIEW_LEARNING_LOOP.md` | agent (học sau mỗi phản hồi bản cuối) |
 | `rules/*.json` | agent (số liệu) |
 | `tools/*.py` | agent chạy, **chủ không đọc** |
 | `VIDEO_CATALOG` / `TECHNICAL_SOURCES` / `AI_LAYOUT_RESEARCH` | tư liệu nghiên cứu, **không thuộc quy trình** |
