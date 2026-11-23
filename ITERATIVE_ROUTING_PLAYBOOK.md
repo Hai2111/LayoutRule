@@ -10,7 +10,7 @@ placement(vùng) → routing(vùng) → xử lý ảnh → xử lý logic
        ↑                                        │
        └── chưa đạt: thử placement lại ──────────┤
               (routing giữ nguyên vị trí đã đặt, chỉ re-route phần chưa đạt)
-                                            đạt → khóa vùng, sang vùng kế
+                                            đạt → ghi snapshot/ledger, sang vùng kế (KHÔNG khóa)
 ```
 
 Sau khi các vùng cấp 1 hoàn thành, chạy lại cổng **xử lý ảnh + xử lý logic ở cấp 2** (các vùng ghép nhau), rồi cấp 3, cuối cùng **cấp 4 = toàn mạch**.
@@ -24,7 +24,7 @@ Sau khi các vùng cấp 1 hoàn thành, chạy lại cổng **xử lý ảnh + 
 | ID | Bất biến | Ý nghĩa cụ thể | Kiểm tra |
 |---|---|---|---|
 | **INV-1** | **Mọi net luôn ở trạng thái "routable-ready"** | Không net nào bị kẹt: còn ít nhất 1 đường đi hình học khả thi (bề rộng + via + lớp) đến pad đích với clearance hiện hành. Không để airwire "cắt ngang" vùng chưa route. | Mỗi vòng: liệt kê net chưa hoàn thành trong vùng; với mỗi net, agent ghi 1 câu "đường đi khả thi: từ pad X qua lớp Y, qua via Z". Không viết được câu đó → INV-1 vi phạm → quay lại placement |
-| **INV-2** | **Mọi component luôn ở trạng thái "relocatable"** | Placement trong vùng chưa khóa là **tạm (tentative)**: agent phải có thể di chuyển/rotate mà không phá INV-1. Chỉ đặt flag `locked` khi cả 4 bước vùng đã đạt. Không "vẽ xong rồi mới phát hiện phải dời IC" ở trạng thái không thể quay lại. | Ledger `region_ledger.json` mỗi vùng: `component | vị trí hiện | vị trí dự phòng (fallback) | locked?`. Fallback = vị trí thay thế đã tính, không phải "sẽ nghĩ sau" |
+| **INV-2** | **Mọi component luôn ở trạng thái "relocatable"** | Placement/routing là **tạm (tentative)** kể cả sau khi checkpoint đạt và sau khi owner review. Agent có thể di chuyển/rotate hoặc rip-up/re-route khi đánh giá toàn board tốt hơn. **Chỉ neo đã xác nhận phải khớp cơ khí mới bất động.** | Ledger `region_ledger.json`: `component | vị trí hiện | fallback | mechanical_anchor?`; mọi thay đổi lưu hash/snapshot để rollback |
 | **INV-3** | **Routing = quyết định của agent + tool thực thi, không phải tool tự chạy** | Agent ra quyết định (thứ tự net, lớp, vị trí via, topology vòng dòng, khi nào re-route), tool (Freerouting/DSN/KiCad) **chỉ thực thi** quyết định đó. Không có bước "chạy tool rồi xem được gì". | Mỗi net được route phải có entry trong ledger: `net | quyết định (lớp/via/vòng) | lý do (rule ID) | tool chạy | kết quả`. Net nào không có entry = chưa được route theo nghĩa của playbook này |
 
 > INV-3 là khác biệt lớn nhất so với dùng routing engine trần: engine có thể DRC-pass nhưng không giải thích được *vì sao* via đặt ở đó, vòng SW đi theo hình học nào. Ledger bắt buộc việc giải trình; đó là bằng chứng để owner review.
@@ -52,11 +52,11 @@ Quy tắc chia:
 ### 3.1 Placement (vùng)
 Theo P01–P11, thu hẹp vào phạm vi vùng. Đầu vào: `layout_intent.json` (phases 0–1 của AGENT_LAYOUT_PLAYBOOK) + digest của vùng nếu board khớp một topology trong `rules/topology_digests.json`.
 - **Thứ tự đặt "cứng → mềm" (chuẩn kỹ sư):**
-  1. Neo bất động: connector, mount hole, antenna, battery, SMD thụ động to (P01) — không xê được, đặt trước.
+  1. Neo cơ khí: chỉ connector, lỗ bắt vít, anten/vỏ và linh kiện có vị trí **bắt buộc theo khớp cơ khí thực** được bất động; không tự khóa battery hay SMD to nếu không có ràng buộc cơ khí.
   2. **Vòng nóng**: đặt IC nguồn trước, rồi `C-in → L → C-out` *bao quanh IC* thành vòng khép nhỏ nhất (P03). Decap nằm giữa pin nguồn và IC, không phải "gần theo thước" (P04).
   3. IC chủ (MCU/RF FE): đặt sao net quan trọng ngắn; **nhìn ratsnest xuyên ngang board = dấu hiệu phải dời cả khối**, không chỉnh từng linh kiện.
   4. Passive còn lại: lấp theo từng net/khối.
-- Áp INV-2: **mọi component trong vùng được đặt cùng vị trí dự phòng (fallback)** trước khi sang bước routing. Fallback = vị trí khác hợp lệ đã kiểm (không overlap, còn đường đi cho net, giữ locked items). Neo không có fallback.
+- Áp INV-2: **mọi component trong vùng được đặt cùng vị trí dự phòng (fallback)** trước khi sang bước routing. Fallback = vị trí khác hợp lệ đã kiểm (không overlap, còn đường đi cho net, giữ neo cơ khí bắt buộc). Neo không có fallback.
 
 ### 3.2 Routing (vùng) — agent quyết định, tool thực thi (INV-3)
 **2 hành vi chuẩn, bắt buộc trong mọi vòng lặp:**
@@ -71,7 +71,7 @@ Thứ tự net trong vùng (mở rộng R02/R03 cho phạm vi vùng):
 
 Với **mỗi** net: agent ghi entry ledger (lớp, vị trí via, lý do + rule ID) → gọi tool thực thi → tool trả kết quả → agent **đọc kết quả bằng mắt (ảnh) trước khi route net kế**; kẹt thì áp H1 ngay. Không gom "chạy hết rồi mới xem".
 
-**Cách gọi tool thực thi (recipe, 1 lệnh):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools\route_pipeline.ps1 -Board BOARD.kicad_pcb -SessionManifest session.json -CandidateBoard AGENT_BOARD.kicad_pcb -IntentPath layout_intent.json` — xuất DSN → chạy Freerouting JAR pinned (setup/MANIFEST.json) → import SES vào **candidate riêng** (không ghi đè board gốc) → DRC native → render ảnh. Pipeline xong ≠ vùng đạt: agent vẫn phải chạy 3.3/3.4 (ảnh + logic) trên candidate, ghi ledger, mới được khóa vùng. Limitations: xem `setup/SMOKE_TEST.md` (board convert Altium chưa export được DSN).
+**Cách gọi tool thực thi (recipe, 1 lệnh):** `powershell -NoProfile -ExecutionPolicy Bypass -File tools\route_pipeline.ps1 -Board BOARD.kicad_pcb -SessionManifest session.json -CandidateBoard AGENT_BOARD.kicad_pcb -IntentPath layout_intent.json` — nhận **candidate agent tự tạo**, sao chép vào thư mục tạm, chạy DRC native + audit + render ảnh; **Freerouting toàn board chỉ khi được gọi với `-FreeroutingProposal` như thử nghiệm, không chứng minh INV-3**. Pipeline xong ≠ vùng đạt: agent vẫn phải chạy 3.3/3.4 (ảnh + logic), ghi ledger và snapshot; **không khóa vùng**. Limitations: xem `setup/SMOKE_TEST.md` (board convert Altium chưa export được DSN).
 
 ### 3.3 Xử lý ảnh (visual pass) — scan 3 tầng, từ xa đến gần (chuẩn kỹ sư review)
 Render chuẩn: **1 ảnh F.Cu + 1 ảnh B.Cu** (cùng zoom), bật copper + silkscreen + courtyard; zoom vừa đủ thấy cả vùng + ranh giới. Scan theo 3 tầng, KHÔNG liệt kê ngang nhau:
@@ -93,12 +93,12 @@ Render chuẩn: **1 ảnh F.Cu + 1 ảnh B.Cu** (cùng zoom), bật copper + sil
 ### 3.4 Xử lý logic (logical pass)
 Kiểm trên netlist/hình học (không cần ảnh):
 - **INV-1 check**: với mọi net chưa hoàn thành trong + ngoài vùng, xác nhận còn đường đi khả thi (đặc biệt các net xuyên vùng — xem §4)
-- **INV-2 check**: mọi component chưa locked trong vùng có fallback hợp lệ (fallback chưa bị bước 3.2/3.3 chiếm chỗ)
+- **INV-2 check**: mọi component không phải neo cơ khí vẫn có phương án dịch/rotate/rollback; không gắn cờ `locked` khi chỉ vì một vùng đã đạt
 - **INV-3 check**: ledger đầy đủ cho 100% net đã route trong vùng
 - DRC scoped (clearance, hole/copper, unconnected): chạy `tools/drc_body_keepout.py` + KiCad DRC scoped theo vùng
 - ERC/net-to-pad: không net nào đổi tính chất sau routing
 
-**Cổng vùng:** 3.3 + 3.4 không có item FAIL nào thuộc scope vùng (item ngoài vùng được ghi nhận, không chặn) → **khóa vùng**: component `locked=yes`, vùng ghi vào `region_ledger.json` với hash board file.
+**Checkpoint vùng (nội bộ):** 3.3 + 3.4 không có item FAIL thuộc scope vùng → **ghi snapshot + board hash + ledger**, cho phép mở rộng sang vùng kế. **Không khóa component, copper hay region**; quay lại sửa nếu phát hiện tối ưu toàn board tốt hơn.
 
 ### 3.5 Evidence theo vùng (NỘI BỘ; không hỏi owner giữa phiên)
 
@@ -107,27 +107,27 @@ hai candidate REF/OPT và ledger cho từng R1/R2/R3/R4. **Không gửi yêu c�
 từng vùng.** Khi thiếu ảnh/lớp reference bắt buộc: GLOBAL STOP toàn PCB,
 chỉ được tìm kiếm tài liệu và chuẩn bị báo cáo BLOCKED.
 
-**ONE SESSION = ONE OWNER REVIEW:** Kết thúc ở G1/G3/G5 hoặc khi bị chặn;
+**ONE SESSION = ONE OWNER REVIEW:** G1/G3/G5 chỉ là checkpoint nội bộ; owner **chỉ review bản cuối** của phiên sau khi agent đã hoàn tất báo cáo (hoặc một báo cáo BLOCKED khi thiếu bằng chứng);
 xuất một ảnh tổng hợp Reference / Candidate REF / Candidate OPT
 và tối đa 5 dòng tổng kết cho owner. Log DRC/geometry/history để agent lưu riêng.
-Bắt buộc owner duyệt batch trước khi thay thế PCB chính thức hay merge rule.
+Bắt buộc owner duyệt batch trước khi thay thế PCB chính thức hay merge rule. **Sau khi owner review cũng không tự khóa layout**: agent ghi nguyên văn feedback, nguyên nhân giả thuyết và kiểm thử trong phiên sau theo REVIEW_LEARNING_LOOP.md.
 Cách chạy và schema: SESSION_PIPELINE.md.
 
 Chưa đạt → **quay lại 3.1** nhưng theo quy tắc: **giữ nguyên vị trí đã route tốt, chỉ thử placement lại những component liên quan đến net chưa đạt** (re-route tại vị trí cũ = không làm lại toàn bộ, chỉ re-route phần còn nợ). Lặp.
 
-> Giới hạn lặp: nếu 2 vòng liên tiếp cùng vùng không tiến bộ (cùng item FAIL), dừng trong vùng đó và ghi `NEEDS_REVIEW` kèm 2 phương án placement thay thế cho owner — không tự bịa vòng thứ 3.
+> Giới hạn lặp: nếu 2 vòng liên tiếp cùng vùng không tiến bộ, ghi `NEEDS_REVIEW`, thử phương án vùng/placement thay thế hoặc kết thúc phiên bằng **một báo cáo cuối** với các lựa chọn; không hỏi owner lẻ.
 
 ---
 
 ## 4. Cổng liên vùng (R2 → R3 → R4)
 
-Khi các R1 con của một R2 đều đã khóa:
+Khi các R1 con của một R2 đạt checkpoint nội bộ:
 
 1. **Xử lý ảnh ở ranh giới:** render các R1 con nằm cạnh nhau (1 ảnh tổng, zoom đường ranh giới). Kiểm: trace xuyên ranh giới có chạy gọn không, có "căng" (cong vòng qua vùng con) không, net xuyên R1 có giữ đường ngắn/đúng lớp không, via xuyên vùng có vi phạm D-VIA (khe plane) không.
 2. **Xử lý logic ở ranh giới:** mọi net thuộc ≥2 R1 đã hoàn thành phải khớp (cùng net class, không conflict via/plane). Chạy liên thông net (tool `layout_audit.py` union-find) cho tập R2.
-3. R2 đạt → khóa, lên R3, lặp lại với ranh giới R2. R4 (toàn mạch) = ảnh + logic toàn board + DRC/ERC đầy đủ + checklist REVIEW_CHECKLIST.md.
+3. R2 đạt → ghi checkpoint, lên R3 (không khóa vùng), lặp lại với ranh giới R2. R4 = ảnh + logic toàn board + DRC/ERC đầy đủ + checklist REVIEW_CHECKLIST.md.
 
-Ranh giới nào FAIL → không mở khóa lại các R1 con ngay: trước tiên thử **chỉ re-route các net xuyên ranh giới** (giữ placement, rẻ nhất). Chỉ khi không đạt mới mở khóa R1 con (giữ hash để rollback).
+Ranh giới nào FAIL → thử trước **re-route các net xuyên ranh giới** với placement giữ nguyên để giảm chi phí. Nếu không cải thiện, được phép dịch lại R1/R2 liên quan (giữ snapshot/hash để rollback); không cần cơ chế mở khóa.
 
 ---
 
@@ -146,7 +146,8 @@ Mỗi vùng sinh `region_ledger.json` (1 file/vùng, nằm cùng project, không
      "logic_findings": [{"net": "VOUT", "inv": "INV-1", "ok": true}],
      "result": "loop"}
   ],
-  "locked_at_iteration": 2,
+  "checkpoint_iteration": 2,
+  "mechanical_anchors": ["J1: mating position fixed"],
   "nets_ledger": [
     {"net": "SW", "layer": "F.Cu", "vias": 0, "reason": "switch_node, max_vias:0 (A02/class)", "tool": "agent+freerouting", "outcome": "PASS"}
   ],
@@ -181,7 +182,7 @@ Ngưỡng class (đề xuất, chưa owner duyệt):
 
 ## 7. Khi nào dừng phiên / báo owner một lần (mở rộng mục 7 của AGENT_LAYOUT_PLAYBOOK)
 
-Agent kết thúc phiên và gom vào báo cáo cuối khi: (a) đạt cổng G1/G3/G5, (b) 2 vòng lặp bế tắc trong cùng vùng (§3), (c) INV-2 không thể thỏa, (d) thiếu reference/bằng chứng lớp cần thiết. Trường hợp (d) kích hoạt GLOBAL STOP: không tiếp tục sửa bất kỳ vùng PCB nào. Agent được tiếp tục nghiên cứu, nhưng không hỏi owner từng mục.
+Agent **chỉ trình bản cuối** sau khi đã tự xử lý các checkpoint G1/G3/G5, đánh giá toàn mạch và viết xong báo cáo. Nếu bế tắc hoặc thiếu bằng chứng reference bắt buộc (GLOBAL STOP) thì đóng phiên bằng **một báo cáo BLOCKED**, không gửi bản dở dang để duyệt. Sau feedback owner, agent ghi bài học cho phiên sau; không khóa placement/routing.
 
 ---
 
