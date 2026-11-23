@@ -10,15 +10,17 @@ This repository is the **canonical PCB layout reference**, NOT an automatically 
 3. `TECHNICAL_SOURCES.md` (official CAD docs, vendors, IPC standard scope and contradictory advice)
 4. `REFERENCE_DESIGN_CATALOG.md`, `references/index.json`, `PLACEMENT_PATTERNS.md` (vendor-specific overrides)
 5. `PLACEMENT_ROUTING_WORKFLOW.md`
-5a. **`ITERATIVE_ROUTING_PLAYBOOK.md` — phương pháp làm theo vùng**: vòng lặp INV-1/2/3 + H1/H2 + visual scan 3 tầng; checkpoint nội bộ, owner chỉ xem bản cuối
-5b. `AGENT_LAYOUT_PLAYBOOK.md` + `rules/layout_defaults.json` — nền 5 pha + giá trị khởi điểm D-…
-5c. `rules/001-general-layout.md` (starter, tham số DRAFT) + `rules/topology_digests.json` (digest đọc ref design, class boundaries đã chốt)
+5a. **`CLOSED_LOOP_RUNBOOK.md`** — local observe → decide → pcbnew action → KiCad DRC/2D images → keep/rollback, with no owner prompts mid-session.
+5b. **`ITERATIVE_ROUTING_PLAYBOOK.md` — phương pháp làm theo vùng**: vòng lặp INV-1/2/3 + H1/H2 + visual scan 3 tầng; checkpoint nội bộ, owner chỉ xem bản cuối
+5c. `AGENT_LAYOUT_PLAYBOOK.md` + `rules/layout_defaults.json` — nền 5 pha + giá trị khởi điểm D-…
+5d. `rules/001-general-layout.md` (starter, tham số DRAFT) + `rules/topology_digests.json` (digest đọc ref design, class boundaries đã chốt)
 6. `REVIEW_CHECKLIST.md`
 7. `VIDEO_CATALOG.md` + `VIDEO_REVIEWS_EXTERNAL.md` for video chapter, URLs and evidence status
 8. `AI_LAYOUT_RESEARCH.md` for experimental routing benchmarks and new academic results (not automatic quality standards)
 9. `ROUTING_ENGINE_INTEGRATION.md` for safe Claude routing controller/decision rules and Freerouting KiCad10 tool contracts
 
-## Doing placement and routing (foundation approved; final-only review update proposed)
+## Doing placement and routing (foundation approved; closed-loop executor is experimental)
+**Local execution:** start `tools/layout_controller.py` from `CLOSED_LOOP_RUNBOOK.md`, not by routing every net manually. Model emits JSON geometry actions; KiCad executor edits only a copy. Native DRC, image exports and geometric checks feed the next model iteration. Keep only independently measured improvements, rollback on regressions, and never replace board master or approve without owner.
 **Decision precedence:** Load `rules/owner_decisions.json` before old playbook prose. Explicit `overrides` supersede earlier selected options; `UNCONFIRMED` entries are not permissions. Mechanical-only anchors and final-only owner review take precedence over old region-lock/gate-review text.
 When the task is to **produce** a layout rather than review one, follow **`ITERATIVE_ROUTING_PLAYBOOK.md`** (region loop: place → route (agent decides, tool executes) → 3-layer visual scan → logic check; H1 route⇄move continuously, H2 ratsnest map as loop input; internal region evidence; ONE owner review at end of session). Its foundation phases and gates:
 1. Write `layout_intent.json` from the schematic before placing anything (net classes with currents, hot loops, decoupling map, blocks, anchors) — see `AGENT_LAYOUT_PLAYBOOK.md`.
