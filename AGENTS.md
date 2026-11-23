@@ -4,7 +4,7 @@ This repository is the **canonical PCB layout reference**, NOT an automatically 
 
 ## Read order
 -0. **`START_HERE.md`** — 1 trang duy nhất: quy trình 3 bước + "chủ chỉ cần xem ảnh". Đọc file này trước khi đọc bất cứ file nào khác.
-0. `GOVERNANCE.md` — owner approval and one-way dependency
+0. **`rules/owner_decisions.json`** — 35 owner confirmations + explicit later overrides (Q14/Q35 unconfirmed; do not infer), followed by `GOVERNANCE.md` for owner approvals and one-way dependency.
 1. `README.md`
 2. `LAYOUT_RULES.md`
 3. `TECHNICAL_SOURCES.md` (official CAD docs, vendors, IPC standard scope and contradictory advice)
@@ -19,6 +19,7 @@ This repository is the **canonical PCB layout reference**, NOT an automatically 
 9. `ROUTING_ENGINE_INTEGRATION.md` for safe Claude routing controller/decision rules and Freerouting KiCad10 tool contracts
 
 ## Doing placement and routing (foundation approved; final-only review update proposed)
+**Decision precedence:** Load `rules/owner_decisions.json` before old playbook prose. Explicit `overrides` supersede earlier selected options; `UNCONFIRMED` entries are not permissions. Mechanical-only anchors and final-only owner review take precedence over old region-lock/gate-review text.
 When the task is to **produce** a layout rather than review one, follow **`ITERATIVE_ROUTING_PLAYBOOK.md`** (region loop: place → route (agent decides, tool executes) → 3-layer visual scan → logic check; H1 route⇄move continuously, H2 ratsnest map as loop input; internal region evidence; ONE owner review at end of session). Its foundation phases and gates:
 1. Write `layout_intent.json` from the schematic before placing anything (net classes with currents, hot loops, decoupling map, blocks, anchors) — see `AGENT_LAYOUT_PLAYBOOK.md`.
 2. Floorplan → place inside blocks → route by risk order → functional check. Each phase has a gate; do not pass a gate with an open `FAIL`.
