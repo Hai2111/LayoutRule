@@ -232,6 +232,18 @@ def svg_review(rows, output):
 
 
 def review(manifest, base, result, output):
+    # Owner sees only FINAL submission. G1/G3/G5 are internal checkpoints.
+    if result["status"] != "BLOCKED" and manifest.get("submission_stage") != "FINAL":
+        output.mkdir(parents=True, exist_ok=True)
+        (output / "OWNER_REVIEW.md").unlink(missing_ok=True)
+        (output / "session_comparison.svg").unlink(missing_ok=True)
+        (output / "internal_status.json").write_text(json.dumps({
+            "session_id": manifest.get("session_id"),
+            "status": "NOT_FINAL",
+            "submission_stage": manifest.get("submission_stage"),
+            "reason": "Internal checkpoint only; do not send owner report before FINAL",
+        }, indent=2), encoding="utf-8")
+        return "NOT_FINAL"
     # GLOBAL STOP: never inspect/endorse partial candidate work after a blocked preflight.
     if result["status"] == "BLOCKED":
         output.mkdir(parents=True, exist_ok=True)
@@ -322,7 +334,7 @@ def main():
             print(f"- {item}")
         return 0 if result["status"] == "READY" else 3
     status = review(manifest, mfile.parent, result, output)
-    print(f"{status}: {output / 'OWNER_REVIEW.md'}")
+    print(f"{status}: {output / 'OWNER_REVIEW.md' if status != 'NOT_FINAL' else output / 'internal_status.json'}")
     return 0 if status == "READY_FOR_OWNER" else 3 if status == "BLOCKED" else 4
 
 
