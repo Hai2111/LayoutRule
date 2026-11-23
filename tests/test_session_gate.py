@@ -48,6 +48,7 @@ class SessionGateTest(unittest.TestCase):
         self.manifest = {
             "schema_version": 1,
             "session_id": "demo-session",
+            "submission_stage": "FINAL",
             "board": "source.kicad_pcb",
             "regions": [{
                 "id": "R1-power",
@@ -118,6 +119,16 @@ class SessionGateTest(unittest.TestCase):
         self.assertEqual(rep["status"], "BLOCKED")
         self.assertTrue(any("R1-crystal" in x for x in rep["issues"]))
         self.assertEqual(hashlib.sha256(self.original.read_bytes()).hexdigest(), self.original_sha)
+
+    def test_internal_checkpoint_does_not_emit_owner_review(self):
+        self.manifest["submission_stage"] = "G3"
+        self.save()
+        p = self.run_gate("review")
+        self.assertEqual(p.returncode, 4, p.stderr + p.stdout)
+        self.assertFalse((self.root / "review" / "OWNER_REVIEW.md").exists())
+        self.assertFalse((self.root / "review" / "session_comparison.svg").exists())
+        report = json.loads((self.root / "review" / "internal_status.json").read_text())
+        self.assertEqual(report["status"], "NOT_FINAL")
 
     def test_review_generates_single_embedded_visual_and_evidence(self):
         p = self.run_gate("review")
