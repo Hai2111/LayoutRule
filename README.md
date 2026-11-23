@@ -13,6 +13,8 @@
 - [rules/001-general-layout.md](rules/001-general-layout.md) — rule starter "general layout & clearance" cho board prototype FR-4 2–4 lớp; tham số DRAFT (đã cross-check fab, DRC validation PENDING).
 - [rules/topology_digests.json](rules/topology_digests.json) — digest "input nhỏ" để 1 session đọc/hiểu ref design không cần parse cả file CAD; class boundaries light/medium/heavy đã chốt.
 - [tools/layout_audit.py](tools/layout_audit.py) — đo hình học `.kicad_pcb` so với `layout_intent.json`; mới thử trên board tổng hợp trong `tests/fixtures/`, chưa thử trên board KiCad 10 thật.
+- [CLOSED_LOOP_RUNBOOK.md](CLOSED_LOOP_RUNBOOK.md) — **vòng lặp local thật**: Codex/Claude quyết định → Python `pcbnew` sửa candidate → KiCad DRC + ảnh F.Cu/B.Cu → KEEP/ROLLBACK; chưa xác minh end-to-end bằng KiCad host.
+- [tools/layout_controller.py](tools/layout_controller.py) — điều phối vòng lặp; `layout_observer.py`, `kicad_executor.py`, `candidate_evaluator.py` thực thi/kiểm chứng, không khóa board.
 - [rules/owner_decisions.json](rules/owner_decisions.json) — **dữ liệu gốc Q01–Q35**: 32 lựa chọn A/B/C, Q22 xác nhận bằng lời, Q14/Q35 chưa chọn; các quyết định mới thay thế được đánh dấu rõ để agent không áp dụng rule cũ.
 - [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md) — **owner chỉ review bản cuối sau báo cáo**, agent giữ nguyên văn góp ý, đọc lại ở phiên sau; không khóa vùng/linh kiện trừ neo cơ khí và không tự công nhận rule.\n- [SESSION_PIPELINE.md](SESSION_PIPELINE.md) — **ONE SESSION = ONE OWNER REVIEW**: reference phải đủ bằng chứng trước routing, thiếu là GLOBAL STOP; hai candidate trên branch riêng; 1 ảnh tổng hợp và tối đa 5 dòng để chủ duyệt cuối phiên.
 
