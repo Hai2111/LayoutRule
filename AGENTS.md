@@ -10,7 +10,7 @@ This repository is the **canonical PCB layout reference**, NOT an automatically 
 3. `TECHNICAL_SOURCES.md` (official CAD docs, vendors, IPC standard scope and contradictory advice)
 4. `REFERENCE_DESIGN_CATALOG.md`, `references/index.json`, `PLACEMENT_PATTERNS.md` (vendor-specific overrides)
 5. `PLACEMENT_ROUTING_WORKFLOW.md`
-5a. **`ITERATIVE_ROUTING_PLAYBOOK.md` — phương pháp làm chính hiện hành (approved 2026-11-20)**: vòng lặp theo vùng + INV-1/2/3 + H1/H2 + visual scan 3 tầng + báo cáo "1 ảnh + ≤5 dòng"
+5a. **`ITERATIVE_ROUTING_PLAYBOOK.md` — phương pháp làm theo vùng**: vòng lặp INV-1/2/3 + H1/H2 + visual scan 3 tầng; checkpoint nội bộ, owner chỉ xem bản cuối
 5b. `AGENT_LAYOUT_PLAYBOOK.md` + `rules/layout_defaults.json` — nền 5 pha + giá trị khởi điểm D-…
 5c. `rules/001-general-layout.md` (starter, tham số DRAFT) + `rules/topology_digests.json` (digest đọc ref design, class boundaries đã chốt)
 6. `REVIEW_CHECKLIST.md`
@@ -18,7 +18,7 @@ This repository is the **canonical PCB layout reference**, NOT an automatically 
 8. `AI_LAYOUT_RESEARCH.md` for experimental routing benchmarks and new academic results (not automatic quality standards)
 9. `ROUTING_ENGINE_INTEGRATION.md` for safe Claude routing controller/decision rules and Freerouting KiCad10 tool contracts
 
-## Doing placement and routing (approved 2026-11-20, owner Hai)
+## Doing placement and routing (foundation approved; final-only review update proposed)
 When the task is to **produce** a layout rather than review one, follow **`ITERATIVE_ROUTING_PLAYBOOK.md`** (region loop: place → route (agent decides, tool executes) → 3-layer visual scan → logic check; H1 route⇄move continuously, H2 ratsnest map as loop input; internal region evidence; ONE owner review at end of session). Its foundation phases and gates:
 1. Write `layout_intent.json` from the schematic before placing anything (net classes with currents, hot loops, decoupling map, blocks, anchors) — see `AGENT_LAYOUT_PLAYBOOK.md`.
 2. Floorplan → place inside blocks → route by risk order → functional check. Each phase has a gate; do not pass a gate with an open `FAIL`.
@@ -29,10 +29,10 @@ When the task is to **produce** a layout rather than review one, follow **`ITERA
 
 ## Before acting on a PCB
 - Read current schematic/board, datasheets, manufacturability, stackup and **project-local** constraints.
-- **Reference-gated candidate:** see SESSION_PIPELINE.md. Before ANY placement/routing mutation, run session_gate.py preflight for ALL reference regions/layers; missing reference = GLOBAL STOP. Validate an independently generated agent candidate by running route_pipeline.ps1 with -Board, -SessionManifest, -CandidateBoard and -IntentPath. The script runs KiCad native DRC plus geometry/keepout audits and never approves or merges anything. -FreeroutingProposal is an explicit experiment, NOT evidence of INV-3 agent-owned routing. Generate a single end-of-session Reference / Candidate REF / Candidate OPT montage and a 5-line summary; owner reviews once.
+- **Reference-gated candidate:** see SESSION_PIPELINE.md and REVIEW_LEARNING_LOOP.md. Before ANY placement/routing mutation, run session_gate.py preflight for ALL reference regions/layers; missing reference = GLOBAL STOP. Validate an independently generated agent candidate by running route_pipeline.ps1 with -Board, -SessionManifest, -CandidateBoard and -IntentPath. The script runs KiCad native DRC plus geometry/keepout audits and never approves or merges anything. -FreeroutingProposal is an explicit experiment, NOT evidence of INV-3 agent-owned routing. Generate one Reference / Candidate REF / Candidate OPT montage and ≤5-line summary **only when the final candidate of the session is ready**. Owner reviews once after the report, not at G1/G3/G5. Capture owner feedback verbatim with board hash and region markers; next session must read it, attempt an evidence-backed repair, and log lessons and counterexamples.
 
 - **Toolchain:** run `powershell -NoProfile -ExecutionPolicy Bypass -File setup\setup.ps1` (or equivalent check on non-Windows) before first use of kicad-cli, Freerouting or the Python audit tools. Pinned versions: [setup/MANIFEST.json](setup/MANIFEST.json).
-- Detect and respect manually edited placements and tracks; diff before applying any change.
+- Preserve mechanical fit anchors (connector mating, mounting holes, enclosure constraints) as the only immutable placements. Nonmechanical placement, copper and regions remain movable **even after review**; save diffs/hashes and rollback candidates. Detect manually edited placements/tracks; inspect diffs rather than silently replacing them.
 - Classify each candidate action with `rule_id`, net/refdes, known facts, confidence, evidence, expected tradeoff, rollback path.
 - Never substitute these generic rules for component vendor design requirements.
 - Compare agent performance using same source PCB hashes, router/DRC versions, time budgets and reproducible action traces; see `AI_LAYOUT_RESEARCH.md`.
@@ -47,6 +47,8 @@ When the task is to **produce** a layout rather than review one, follow **`ITERA
 - Follow placement-first/critical-path routing, not arbitrary autoroute.
 - Do not silently change another repository's gate meanings. To integrate into host KicadAutoLayout, **explicitly map** rule IDs to its existing check phases.
 - Evidence reports must include a link/path to source PCB and revision hash.
+
+**User-specified scope:** No benchmark PCB assigned yet. The USB-C escape demo from chat is **not** a LayoutRule project/reference. If fab/stackup numbers have not been provided, do not force premature decisions: record conservative assumptions, perform checks, mark genuinely unverifiable risks NEEDS_REVIEW.
 
 ## Status reporting
 Use `PASS`, `FAIL`, `NEEDS_REVIEW`, `NA` per rule. Output terse actionable review, prioritize blocked risks. A tool failure or unavailable data is NOT a PASS.
