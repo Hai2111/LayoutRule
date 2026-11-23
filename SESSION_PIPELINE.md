@@ -1,6 +1,6 @@
 # Session-safe candidate pipeline (proposed; pending owner review)
 
-**Hard contract:** ONE SESSION = ONE OWNER REVIEW. No per-region approval prompts.
+**Hard contract:** ONE SESSION = ONE OWNER REVIEW OF THE FINAL CANDIDATE, AFTER REPORT. No region-level/G1/G3/G5 approval prompts and no layout locking beyond required mechanical anchors. The owner decides acceptance. See REVIEW_LEARNING_LOOP.md.
 This implementation does not edit canonical rules or merge a branch.
 
 ## Work flow
@@ -17,7 +17,7 @@ This implementation does not edit canonical rules or merge a branch.
    in a board-SHA-bound region ledger.
 4. Run native KiCad DRC, geometry audit and supplemental body-keepout audit.
    A clean DRC does not prove correct return paths, topology or EMC.
-5. End at a milestone or blocker; review is one SVG image containing original
+5. G1/G3/G5 are **internal checkpoints only**. End after the full final candidate has been checked and the report is ready (or end with one BLOCKED report); review is one SVG image containing original
    reference / REF / OPT panels (one row per region) plus 5-line OWNER_REVIEW.md.
    Full details go to technical_evidence.json. Owner approval is ALWAYS pending.
 
@@ -91,7 +91,7 @@ python -m unittest discover -s tests -p "test_session_gate.py"
 
 Session gate preflight exit: 0 READY, 3 BLOCKED.
 Session gate review exit: 0 READY_FOR_OWNER (not approved), 3 BLOCKED,
-4 NEEDS_REVIEW (DRC/audit/ledger or image problems). No automatic merge.
+4 NEEDS_REVIEW (DRC/audit/ledger/image problems or not marked FINAL). No automatic merge.
 
 **Known limitations:** The Freerouting mode must be explicitly requested with
 -FreeroutingProposal and is only an experimental whole-board proposal, not
@@ -99,3 +99,9 @@ agent-guided placement/routing (INV-3). The wrapper does not implement KiCad
 push-and-shove geometry or generate real copper screenshots itself. The RA01
 DSN-export issue and existing fixture DRC findings also remain unresolved.
 This pipeline must not be described as a complete autonomous router.
+
+## Sau khi owner xem bản cuối
+
+Owner chỉ nhận báo cáo **sau** khi agent đã kiểm tra candidate cuối. Owner có thể trả lời ACCEPT/REVISE/REJECT/DEFER bằng ngôn ngữ tự nhiên; agent lưu **nguyên văn** nhận xét cùng ảnh/vùng, board SHA, giả thuyết nguyên nhân, cách thử sửa và kiểm chứng ở phiên sau. Không bắt owner chấm điểm từng net. Không khóa placement/copper/vùng khi owner ACCEPT hoặc khi qua checkpoint nội bộ; vẫn giữ bản đã review để đối chiếu/rollback. Một câu ACCEPT cho layout **không** tự cấp phép đổi rule chung. Xem [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md).
+
+**Project scope:** chưa có benchmark board do owner chỉ định; demo USB-C trong chat chỉ là bài thử, không đưa vào LayoutRule. Thiếu nhà sản xuất/stackup cụ thể: dùng giả định có nguồn và ghi trong intent; chỉ báo NEEDS_REVIEW nếu thực sự ảnh hưởng kiểm chứng.
