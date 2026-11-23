@@ -86,10 +86,10 @@ powershell -NoProfile -ExecutionPolicy Bypass -File tools\route_pipeline.ps1 -Bo
 python tools\session_gate.py review project\session.json --output-dir project\session_review
 
 # Regression tests (stdlib-only)
-python -m unittest discover -s tests -p "test_session_gate.py"
+python -m unittest discover -s tests -p "test_session_gate.py"\npython -m unittest discover -s tests -p "test_review_feedback.py"
 ~~~
 
-Session gate preflight exit: 0 READY, 3 BLOCKED.
+Do not execute `review` at G1/G3/G5: it returns NOT_FINAL until `submission_stage` is `FINAL` (only preflight BLOCKED can produce one BLOCKED report).\n\nSession gate preflight exit: 0 READY, 3 BLOCKED.
 Session gate review exit: 0 READY_FOR_OWNER (not approved), 3 BLOCKED,
 4 NEEDS_REVIEW (DRC/audit/ledger/image problems or not marked FINAL). No automatic merge.
 
