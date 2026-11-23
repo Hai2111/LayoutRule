@@ -31,6 +31,8 @@ jobs:
             $errors | ForEach-Object { Write-Error $_.Message }
             exit 1
           }
+      - name: Owner decision register integrity
+        run: python -m unittest discover -s tests -p "test_owner_decisions.py" -v
       - name: Owner feedback learning ledger
         run: python -m unittest discover -s tests -p "test_review_feedback.py" -v
       - name: Existing layout geometry tests
