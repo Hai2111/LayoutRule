@@ -22,3 +22,10 @@ Sau đó agent làm đúng vòng lặp §3: visual pass 3 tầng + logic pass (I
 ## Chờ mong đợi khi owner xem
 - Ảnh 3D + 5 dòng vấn đề (đúng format §3.5).
 - DRC candidate có thể còn vi phạm/via không nối — điều này **cố ý**: pipeline chỉ tạo *candidate*, agent phải iter (H1: xê linh kiện → route lại) rồi mới giao. Freerouting "0 unrouted" không đồng nghĩa đạt chuẩn (rule R13/G05).
+
+## Kết quả hiện tại (baseline, 2026-11-23)
+- Board nguồn `sample-router.kicad_pcb` ở trạng thái **0 unconnected** (đã dọn các tự-xung-đột cũ của fixture).
+- Pipeline (MaxPasses 8) → candidate: **0 unconnected**, Freerouting score 1000 (0 unrouted / 0 router violation).
+- Ảnh `routing_candidate/sample-router-routed.png` được pipeline **tự sinh lại** mỗi lần chạy (không vẽ tay).
+- Vẫn còn (giữ làm **bài H1 cho agent**): ~3–4 góc vuông 90° ở cụm nguồn U2/L1/C1 (F.Cu) + ~4 trace 0.15 mm dưới min DRC 0.2 mm + 1 orphan via. **Cách xử lý đúng** = H1 trong playbook (xê linh kiện → route lại 45°), không phải chỉnh ảnh.
+- Lưu ý: mỗi lần xê linh kiện có thể sinh lỗi mới (đã kiểm chứng xê C1 → GND U2 mất nối), nên giữ baseline 0-unconnected; agent phải cân bằng.
