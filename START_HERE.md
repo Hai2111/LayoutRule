@@ -8,7 +8,8 @@
 ## Quy trình (3 bước)
 
 ```
-1. Agent đọc: rules/owner_decisions.json (quyết định mới ghi đè cũ)
+1. Agent đọc: CLOSED_LOOP_RUNBOOK.md (code thực thi local)
+   + rules/owner_decisions.json (quyết định mới ghi đè cũ)
    + LAYOUT_RULES.md + ITERATIVE_ROUTING_PLAYBOOK.md
    + digest của ref design (rules/topology_digests.json)
 2. Agent làm theo vùng: đặt → route → xem ảnh → kiểm logic
@@ -43,6 +44,7 @@
 | `START_HERE.md` (file này) | chủ + agent |
 | `PROJECT_INTAKE.md` | chủ trả lời khi giao project mới |
 | `LAYOUT_RULES.md` | agent (bộ quy tắc) |
+| `CLOSED_LOOP_RUNBOOK.md` | agent (lệnh chạy local closed-loop, giới hạn) |
 | `rules/owner_decisions.json` | agent (35 xác nhận và các ngoại lệ sau này) |
 | `ITERATIVE_ROUTING_PLAYBOOK.md` | agent (cách làm theo vùng) |
 | `REVIEW_LEARNING_LOOP.md` | agent (học sau mỗi phản hồi bản cuối) |
