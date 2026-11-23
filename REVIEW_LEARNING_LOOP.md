@@ -76,3 +76,15 @@ Owner chỉ cần cho biết điều **chưa ưng** và/hoặc nói đã **đạ
 - `BLOCKED`: agent không được sửa PCB thêm; chỉ báo cáo một lần với lý do và bằng chứng.
 
 Bảo vệ ràng buộc điện/cơ khí, làm việc trên nhánh/copy; không commit/merge main tự động. **Mỗi vòng lặp nội bộ được tự làm, chỉ bản cuối mỗi phiên mới đưa owner xem.**
+
+## Agent local — dùng được ngay
+
+Agent tự ghi file `owner_words.txt` chứa **đúng nguyên văn** góp ý của chủ (không yêu cầu chủ chạy script). Sau đó gọi:
+
+~~~bash
+python tools/review_feedback.py record --history PROJECT/reviews/owner_feedback.jsonl --session-id SESSION_ID --board PROJECT/final_candidate.kicad_pcb --feedback-file PROJECT/owner_words.txt --verdict REVISE --marker R1-P03
+# Trước phiên sau, bắt buộc đọc lại toàn bộ lịch sử
+python tools/review_feedback.py context --history PROJECT/reviews/owner_feedback.jsonl --json
+~~~
+
+Verdict `ACCEPT` chỉ được nhập khi owner **thực sự xác nhận**; không suy từ DRC hoặc im lặng. Công cụ lưu nguyên văn + SHA của PCB được review + marker + trạng thái chưa có rule được công nhận. Agent tự diễn giải kỹ thuật, tạo thử nghiệm và xác nhận hồi quy ở phiên sau. Ledger thuộc repo dự án, không tự đồng bộ vào rulebook chung.
