@@ -3,7 +3,9 @@
 **Trạng thái:** `APPROVED` as foundation (owner Hai, 2026-11-20). Production work follows [ITERATIVE_ROUTING_PLAYBOOK.md](ITERATIVE_ROUTING_PLAYBOOK.md); this file supplies intent and phase gates. Tool-specific limitations remain tracked in `setup/SMOKE_TEST.md`. Xem [GOVERNANCE.md](GOVERNANCE.md).
 **Dùng cùng:** [LAYOUT_RULES.md](LAYOUT_RULES.md) (luật A/P/R/G), [PLACEMENT_PATTERNS.md](PLACEMENT_PATTERNS.md) (PTnn), [rules/layout_defaults.json](rules/layout_defaults.json) (giá trị khởi điểm D-…), [tools/layout_audit.py](tools/layout_audit.py) (đo hình học).
 
-> **Cách thực thi theo vùng (PROPOSED 2026-11-20):** thay vì chạy G2→G3/G4/G5 một lượt phẳng, xem [ITERATIVE_ROUTING_PLAYBOOK.md](ITERATIVE_ROUTING_PLAYBOOK.md): chia board thành phân vùng R1 (khối chức năng), chạy vòng lặp *placement → routing (agent quyết định, tool thực thi) → xử lý ảnh → xử lý logic* trong từng vùng, đạt thì khóa vùng; sau khi các R1 con hoàn thành, chạy lại cổng ảnh + logic ở R2, R3 rồi toàn mạch. Ba bất biến: mọi net luôn routable-ready, mọi component luôn relocatable, mọi quyết định routing có giải trình trong ledger.
+> **Cách thực thi theo vùng (PROPOSED 2026-11-20):** thay vì chạy G2→G3/G4/G5 một lượt phẳng, xem [ITERATIVE_ROUTING_PLAYBOOK.md](ITERATIVE_ROUTING_PLAYBOOK.md): chia board thành phân vùng R1 (khối chức năng), chạy vòng lặp *placement → routing (agent quyết định, tool thực thi) → xử lý ảnh → xử lý logic* trong từng vùng, đạt thì ghi checkpoint/snapshot **không khóa vùng**; sau đó kiểm liên vùng R2, R3 và toàn mạch. Ba bất biến: mọi net luôn routable-ready, mọi component luôn relocatable, mọi quyết định routing có giải trình trong ledger.
+
+**Cập nhật quy trình review (đề xuất 2026-11-23):** G1/G3/G5 là checkpoint nội bộ, không gửi owner duyệt; chỉ bản cuối phiên sau báo cáo mới được review. Ngoài neo phải khớp cơ khí không khóa placement/copper/vùng, kể cả sau owner review. Bài demo USB-C không phải project đưa vào repo. Xem [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md).
 
 Các tài liệu khác trong repo trả lời câu hỏi "điều gì không được coi là luật". Tài liệu này trả lời câu hỏi còn thiếu: **agent làm gì, theo thứ tự nào, đo cái gì, đạt bao nhiêu thì được đi tiếp, và khi nào phải quay lại.**
 
@@ -79,7 +81,7 @@ Mẫu file: [tests/fixtures/demo_intent.json](tests/fixtures/demo_intent.json).
 
 ## Pha 1 — Floorplan (đặt khối, chưa đặt linh kiện nhỏ)
 
-**1.1 Đặt và khóa neo cơ khí.** Connector quay đúng hướng cắm, đúng cạnh. Không dời neo để rút ngắn dây (PT01).
+**1.1 Đặt và cố định chỉ neo bắt buộc theo khớp cơ khí.** Connector quay đúng hướng cắm, đúng cạnh. Không dời neo để rút ngắn dây (PT01).
 
 **1.2 Ước lượng diện tích khối:** tổng courtyard × hệ số D-PLACE (2,0 cho 2 lớp; 1,5 cho 4 lớp). Tổng diện tích khối vượt diện tích board thì báo ngay, đừng cố nén.
 
@@ -96,7 +98,7 @@ Mẫu file: [tests/fixtures/demo_intent.json](tests/fixtures/demo_intent.json).
 **1.5 Vạch hành lang:** đường nguồn chính từ cổng vào tới từng khối; hành lang cho cặp vi sai; vùng cấm quanh cuộn cảm/SW/thạch anh/anten; kênh fanout cạnh IC pitch nhỏ (D-PLACE, PT17).
 
 ### Cổng G1
-- [ ] Không khối nào chồng nhau hoặc lấn keepout; neo đúng vị trí và đã khóa.
+- [ ] Không khối nào chồng nhau hoặc lấn keepout; **chỉ neo cơ khí** đúng vị trí và được cố định.
 - [ ] Đường nguồn chính và mỗi net critical liên khối đi được mà không băng qua khối khác.
 - [ ] Converter không kề khối analog/thạch anh/anten; nếu buộc phải kề thì có lý do và có khoảng cách ghi rõ.
 - [ ] Đã so ít nhất 2 phương án floorplan khi board có từ 3 khối trở lên; ghi lý do chọn.
@@ -141,7 +143,7 @@ Luôn đặt theo thứ tự dưới đây, vì linh kiện ở trên bị ràng
 - [ ] `layout_audit.py`: `DECAP`, `DECAP-GND`, `HOT-LOOP-*`, `PROXIMITY` không còn `FAIL`; mỗi `NEEDS_REVIEW` có lý do viết ra.
 - [ ] Courtyard và keepout sạch trong DRC của KiCad.
 - [ ] Route thử 100% net critical thành công, không via trên net `max_vias: 0`.
-- [ ] Số giao cắt airwire không tăng so với floorplan; không linh kiện nào đã khóa bị dời (G06).
+- [ ] Số giao cắt airwire không tăng so với floorplan; không neo cơ khí nào bị dời (G06); linh kiện khác được phép điều chỉnh có kiểm chứng.
 - [ ] Ảnh chụp/tọa độ placement được lưu để so sánh khi phải quay lại.
 
 ---
@@ -181,7 +183,7 @@ Mỗi vòng lặp placement phải được ghi số thứ tự và lý do loạ
 
 **3.1 Dựng GND trước.** Vẽ outline zone GND trên lớp tham chiếu (và các lớp khác nếu có) ngay từ đầu để mọi quyết định sau nhìn thấy nó. Board 2 lớp: mỗi pad GND trên `F.Cu` có via xuống `B.Cu` ngay cạnh pad, hoặc nối vào vùng GND `F.Cu` có via gần đó (R06, PT06).
 
-**3.2 Vòng nóng của converter.** Dùng polygon/track rộng, một lớp, không via. Nối CIN–IC trước, rồi SW–L, rồi L–COUT, rồi GND chung. Sau đó khóa các net này.
+**3.2 Vòng nóng của converter.** Dùng polygon/track rộng, một lớp, không via. Nối CIN–IC trước, rồi SW–L, rồi L–COUT, rồi GND chung. Sau đó ghi snapshot các net này; không khóa trace, được re-route nếu cần tối ưu toàn board.
 
 **3.3 Decoupling.** Nối chân nguồn ↔ tụ bằng track ngắn và rộng nhất mà pad cho phép. Board 2 lớp: nguồn đi **qua pad tụ rồi mới tới chân IC**. Via GND/nguồn của tụ đặt sát pad tụ, không dùng chung một via cho nhiều tụ.
 
@@ -197,7 +199,7 @@ Mỗi vòng lặp placement phải được ghi số thứ tự và lý do loạ
 - Không để cụm via khoét thành khe trên plane GND; chừa đồng giữa các antipad.
 - Đường GND hồi về của tải đó cũng phải có số via tương đương.
 
-**3.7 Tín hiệu thường.** Lúc này mới được dùng autorouter (Freerouting, xem [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md)), với điều kiện mọi net ở 3.2–3.6 đã khóa và netclass đã mang đúng bề rộng. Sau khi import: xóa mọi đoạn autorouter đặt lên lớp tham chiếu dài quá mốc D-2L, route lại tay.
+**3.7 Tín hiệu thường.** Lúc này mới được dùng autorouter (Freerouting, xem [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md)), với điều kiện các net ở 3.2–3.6 đã đạt checkpoint nội bộ và netclass có bề rộng đúng; không tự khóa net. Sau khi import: xóa mọi đoạn autorouter đặt lên lớp tham chiếu dài quá mốc D-2L, route lại tay.
 
 **3.8 Luật riêng cho lớp tham chiếu trên board 2 lớp** (R05, R06, D-2L):
 - Track trên `B.Cu` chỉ là jumper: ngắn, thẳng, vuông góc với hướng dòng hồi chính nếu được.
@@ -212,7 +214,7 @@ Mỗi vòng lặp placement phải được ghi số thứ tự và lý do loạ
 ### Cổng G3 (sau bước 3.6) và G4 (sau bước 3.9)
 - [ ] G3: `HOT-LOOP-VIA`, `NET-VIAS`, `NET-LENGTH`, `DIFF-*`, `W-POWER`, `VIA-POWER` không còn `FAIL`.
 - [ ] G4: DRC KiCad 0 lỗi, 0 net chưa nối, zone đã refill; `REF-ZONE`, `REF-SLOT` không còn `FAIL`.
-- [ ] G4: mọi track nguồn đúng netclass; không còn đoạn nào của autorouter trên net đã khóa.
+- [ ] G4: mọi track nguồn đúng netclass; không có thay đổi ngoài ý đồ trên net critical đã qua checkpoint; kiểm lại nếu re-route.
 
 ---
 
@@ -252,7 +254,7 @@ Kết quả ghi theo [REVIEW_CHECKLIST.md](REVIEW_CHECKLIST.md): `PASS / FAIL / 
 
 Mỗi lần quay lui: lưu hash trước/sau, danh sách refdes/net bị đổi, số đo trước/sau, và giữ phương án cũ nếu phương án mới tệ hơn (PT17).
 
-## 7. Khi nào dừng để hỏi người
+## 7. Khi nào kết thúc phiên để báo cáo owner một lần
 
 Chỉ các trường hợp sau; mọi trường hợp khác dùng giá trị khởi điểm và ghi giả định:
 1. Không có outline board hoặc vị trí connector/lỗ vít.
@@ -261,10 +263,10 @@ Chỉ các trường hợp sau; mọi trường hợp khác dùng giá trị kh�
 4. Anten hoặc đường RF tự thiết kế không có hướng dẫn của hãng.
 5. Topology converter không xác định được vòng nóng từ datasheet.
 6. Giao tiếp cần trở kháng kiểm soát (USB HS, Ethernet…) trên stackup không đạt được.
-7. Phải dời hoặc route lại thứ người dùng đã khóa/sửa tay (G06).
+7. Phải dịch neo cơ khí đã chốt (G06); thay đổi thủ công khác được so sánh trước/sau, giữ hash và không ngầm ghi đè.
 8. Schematic có lỗi cản trở layout (thiếu tụ decoupling, footprint sai, net thiếu).
 
-Trong lúc chờ, tiếp tục các phần không phụ thuộc câu trả lời.
+Không hỏi owner lẻ trong phiên. Nếu thiếu đầu vào nghiêm trọng, agent tự nghiên cứu, ghi lại chặn và kết thúc phiên với một báo cáo BLOCKED. **Chỉ owner review bản cuối sau khi agent đã báo cáo**; feedback được ghi để học ở phiên kế tiếp theo REVIEW_LEARNING_LOOP.md.
 
 ## 8. Lỗi agent hay mắc (tra trước khi báo xong)
 
