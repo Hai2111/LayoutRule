@@ -94,7 +94,10 @@ def loop(board, manifest, intent, work_dir, *, provider="codex", iterations=8,
     obs = obser(best,work_dir/"baseline")
     history = []
     fails = 0
-    previous_feedback = read_feedback(work_dir/"reviews"/"owner_feedback.jsonl")
+    feedback_path = board.parent/"reviews"/"owner_feedback.jsonl"
+    if not feedback_path.is_file():
+        feedback_path = work_dir/"reviews"/"owner_feedback.jsonl"
+    previous_feedback = read_feedback(feedback_path)
     for i in range(1,iterations+1):
         dest = work_dir/f"iteration_{i:02d}"
         dest.mkdir(parents=True,exist_ok=True)
