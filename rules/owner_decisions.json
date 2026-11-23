@@ -1,0 +1,301 @@
+{
+  "schema_version": 1,
+  "title": "LayoutRule owner decision register",
+  "source": "Owner confirmations in project conversation (Q01–Q35) and subsequent explicit overrides; preserve unconfirmed items",
+  "last_consolidated": "2026-11-23",
+  "authority": "PROPOSED_IN_PR_NOT_MERGED_TO_MAIN",
+  "precedence": "Later explicit owner instruction overrides earlier selection on the same subject; technical safety/vendor constraints remain mandatory; an unselected option is never inferred from assistant recommendation.",
+  "stats": {
+    "numbered_questions": 35,
+    "selected_multiple_choice": 32,
+    "confirmed_freeform": 1,
+    "unconfirmed": 2,
+    "post_question_overrides": 7
+  },
+  "owner_workflow": {
+    "review_frequency": "ONE_REVIEW_AFTER_FINAL_SESSION_REPORT",
+    "owner_acceptance_required": true,
+    "mechanical_anchors_only": true,
+    "freeze_layout_after_review": false,
+    "reference_missing_behavior": "GLOBAL_STOP",
+    "benchmark_board": "NOT_ASSIGNED",
+    "usb_c_demo_in_scope": false
+  },
+  "questions": [
+    {
+      "id": "Q01",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Agent tối ưu tự chủ; owner duyệt tại điểm kiểm soát"
+    },
+    {
+      "id": "Q02",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Các điểm review G1/G3/G5 (đã bị quy định review cuối phiên thay thế)",
+      "superseded_by": [
+        "OVR-REVIEW-FINAL-ONLY"
+      ]
+    },
+    {
+      "id": "Q03",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Ưu tiên chất lượng điện; an toàn và khả năng sản xuất là bắt buộc"
+    },
+    {
+      "id": "Q04",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Thử thay đổi placement/routing cục bộ khi kẹt, xét net xung quanh"
+    },
+    {
+      "id": "Q05",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Review cục bộ sau thay đổi và kiểm tra toàn board theo chu kỳ/sự kiện"
+    },
+    {
+      "id": "Q06",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Soft-lock placement đã đạt, có thể mở khi cần (đã bị quy định không khóa thay thế)",
+      "superseded_by": [
+        "OVR-NO-LAYOUT-LOCK"
+      ]
+    },
+    {
+      "id": "Q07",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Thử 2–3 candidate thực sự khác nhau; loại lỗi nghiêm trọng"
+    },
+    {
+      "id": "Q08",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Agent ra quyết định hình học routing; engine chỉ thực thi"
+    },
+    {
+      "id": "Q09",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "KiCad interactive push-and-shove là hướng thực thi ban đầu",
+      "execution_nuanced_by": [
+        "Q11"
+      ]
+    },
+    {
+      "id": "Q10",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Agent quan sát PCB liên tục bằng hình ảnh"
+    },
+    {
+      "id": "Q11",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Ưu tiên API cho thao tác; GUI phục vụ quan sát, hạn chế thao tác GUI thủ công"
+    },
+    {
+      "id": "Q12",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Học từ PCB reference thực tế"
+    },
+    {
+      "id": "Q13",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Chọn reference theo thứ bậc cùng IC+topology → cùng IC → cùng topology → nguyên lý"
+    },
+    {
+      "id": "Q14",
+      "state": "UNCONFIRMED",
+      "decision": "Chưa chọn phạm vi kiến thức học từ reference (placement/routing/toàn bộ lý luận)"
+    },
+    {
+      "id": "Q15",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Thiếu reference bắt buộc thì dừng routing và xin xử lý qua báo cáo"
+    },
+    {
+      "id": "Q16",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Chứng minh bằng ảnh có khoanh vùng Reference ↔ Candidate và giải thích ngắn",
+      "presentation_updated_by": [
+        "Q18"
+      ]
+    },
+    {
+      "id": "Q17",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "So sánh candidate bám reference và candidate tự tối ưu"
+    },
+    {
+      "id": "Q18",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Một ảnh tổng hợp Reference | Candidate REF | Candidate OPT"
+    },
+    {
+      "id": "Q19",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Chấp nhận reference thị giác từ PCB/datasheet, không bắt buộc CAD"
+    },
+    {
+      "id": "Q20",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Thiếu ảnh/lớp reference cần thiết thì dừng; không suy diễn"
+    },
+    {
+      "id": "Q21",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Thiếu bằng chứng reference thì GLOBAL STOP toàn PCB"
+    },
+    {
+      "id": "Q22",
+      "state": "FREEFORM_CONFIRMED",
+      "decision": "Owner yêu cầu gom phát sinh theo phiên, tránh duyệt đơn lẻ; agent được nghiên cứu khi bị chặn"
+    },
+    {
+      "id": "Q23",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Adaptive Session: đến gate nội bộ hoặc khi bị chặn; gom báo cáo sau nghiên cứu"
+    },
+    {
+      "id": "Q24",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Visual + Decision + Evidence: owner đọc ngắn, agent lưu log riêng"
+    },
+    {
+      "id": "Q25",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Agent đề xuất bài học/rule mới theo phiên; owner duyệt hàng loạt"
+    },
+    {
+      "id": "Q26",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Một reference và một candidate đạt kiểm chứng là ngưỡng bằng chứng owner chọn cho rule mới",
+      "interpretation": "Ngưỡng bằng chứng; không tự phê duyệt/sửa rule chuẩn nếu owner chưa chấp thuận theo Q25 và GOVERNANCE.md"
+    },
+    {
+      "id": "Q27",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Rule mới xung đột rule cũ: thử cả hai trên candidate hợp lệ"
+    },
+    {
+      "id": "Q28",
+      "state": "SELECTED",
+      "selected_option": "A",
+      "decision": "Candidate mới tốt hơn cũng không tự thay PCB chính thức trước owner duyệt"
+    },
+    {
+      "id": "Q29",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Mỗi candidate hoàn chỉnh lưu ở Git branch riêng"
+    },
+    {
+      "id": "Q30",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Lưu trữ chọn lọc branch thất bại có giá trị, loại trùng lặp"
+    },
+    {
+      "id": "Q31",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Giữ candidate tốt nhất và candidate có bài học mới"
+    },
+    {
+      "id": "Q32",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Kết hợp đọc lịch sử lỗi, kiểm tra tự động và checklist"
+    },
+    {
+      "id": "Q33",
+      "state": "SELECTED",
+      "selected_option": "B",
+      "decision": "Đánh giá kỹ thuật từng vùng theo chức năng điện/reference, không chấm một điểm tổng"
+    },
+    {
+      "id": "Q34",
+      "state": "SELECTED",
+      "selected_option": "C",
+      "decision": "Nếu hai candidate tương đương về điện, ưu tiên phương án sát reference hơn"
+    },
+    {
+      "id": "Q35",
+      "state": "UNCONFIRMED",
+      "decision": "Chưa chọn cách xử lý khi board mới khác reference (A/B/C); cuộc hỏi chuyển sang quy định review cuối phiên"
+    }
+  ],
+  "overrides": [
+    {
+      "id": "OVR-REVIEW-FINAL-ONLY",
+      "from": "follow-up after Q35 and 2026-11-23",
+      "topic": "review_timing",
+      "decision": "Agent chỉ đưa bản cuối sau khi đã hoàn thiện cả phiên và báo cáo; owner review một lần. G1/G3/G5 và vùng R1–R4 chỉ là checkpoint nội bộ.",
+      "supersedes": [
+        "Q02"
+      ]
+    },
+    {
+      "id": "OVR-NO-LAYOUT-LOCK",
+      "from": "2026-11-23 user answer (không khoá)",
+      "topic": "layout_locking",
+      "decision": "Không khóa component/copper/net/vùng dù đã đạt checkpoint hay owner review. Chỉ giữ cố định các neo có yêu cầu khớp cơ khí thực sự; các thay đổi khác có snapshot để rollback.",
+      "supersedes": [
+        "Q06"
+      ]
+    },
+    {
+      "id": "OVR-OWNER-FINAL-ACCEPTANCE",
+      "from": "2026-11-23 answer #5",
+      "topic": "acceptance",
+      "decision": "Chỉ owner quyết định bố cục/layout cuối có đạt hay không; KiCad DRC và kiểm chứng là điều kiện kỹ thuật, không thay thế owner."
+    },
+    {
+      "id": "OVR-REVIEW-LEARNING",
+      "from": "2026-11-23 answer #5",
+      "topic": "continuous_learning",
+      "decision": "Sau mỗi review bản cuối, ghi nguyên văn feedback + PCB SHA/region, phân tích nguyên nhân, đưa thử nghiệm sang phiên tiếp theo; không tự nâng bài học thành rule đã duyệt."
+    },
+    {
+      "id": "OVR-NO-ASSIGNED-BOARD",
+      "from": "2026-11-23 answer #1",
+      "topic": "benchmark_scope",
+      "decision": "Chưa chọn board chuẩn; chờ owner giao đề bài sau. Không tự chọn board trong Training."
+    },
+    {
+      "id": "OVR-USB-C-OUT-OF-SCOPE",
+      "from": "2026-11-23 answer #2",
+      "topic": "demo_scope",
+      "decision": "Bài demo USB-C thoát dây trong chat không phải dự án đưa vào LayoutRule."
+    },
+    {
+      "id": "OVR-PROVISIONAL-FAB-INPUT",
+      "from": "2026-11-23 answer #4",
+      "topic": "manufacturing_constraints",
+      "decision": "Owner sẽ gửi yêu cầu fab/stackup khi cần; agent chưa yêu cầu chốt số liệu sớm, dùng giả định được ghi rõ và không bịa kết quả kiểm chứng."
+    }
+  ],
+  "open_items": [
+    "Q14: phạm vi học từ reference chưa được chọn A/B/C",
+    "Q35: khác biệt reference và target chưa được chọn A/B/C"
+  ],
+  "verification_scope": "This register captures explicit user selections, not evidence that autonomous KiCad routing is implemented or that any candidate meets DRC."
+}
