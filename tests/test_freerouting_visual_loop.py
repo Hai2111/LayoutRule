@@ -105,10 +105,19 @@ class FakeLocalKiCadLoop(unittest.TestCase):
             png.write_bytes(valid_png())
             images[layer]=str(png)
         board_sha=hashlib.sha256(board.read_bytes()).hexdigest()
-        proof={layer: {"layer":layer,"board_sha256":board_sha,
-                       "png_sha256":hashlib.sha256(Path(images[layer]).read_bytes()).hexdigest(),
-                       "export_command":["kicad-cli","pcb","export","png","--layers",layer],
-                       "export_exit_code":0} for layer in ("F.Cu","B.Cu")}
+        proof={}
+        for layer in ("F.Cu","B.Cu"):
+            svg=out/(layer.replace(".","_")+".svg")
+            svg.write_text('<svg xmlns="http://www.w3.org/2000/svg"></svg>')
+            proof[layer]={"layer":layer,"board_sha256":board_sha,
+                          "source_svg":str(svg),
+                          "svg_sha256":hashlib.sha256(svg.read_bytes()).hexdigest(),
+                          "png_path":images[layer],
+                          "png_sha256":hashlib.sha256(Path(images[layer]).read_bytes()).hexdigest(),
+                          "export_command":["kicad-cli","pcb","export","svg",
+                                            "--layers",layer,"--output",str(out),str(board)],
+                          "export_exit_code":0,
+                          "rasterizer":"MOCK_TEST_ONLY","rasterizer_exit_code":0}
         return {"board_sha256":board_sha,"image_evidence":proof,
                 "drc_errors":int("BAD" in data),
                 "unconnected":3 if "GOOD" in data else 4,
