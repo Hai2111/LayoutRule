@@ -176,7 +176,14 @@ class StageReport:
             json.dumps({"schema_version":1,"events":self.events},
                        ensure_ascii=False,indent=2,default=str),encoding="utf-8")
         cards=[]
-        for event in self.events:
+        overview=[]
+        for step_number,event in enumerate(self.events,1):
+            overview.append(
+                f'<tr><td><a href="#step-{step_number}">{step_number}</a></td>'
+                f'<td>{event["iteration"]}</td>'
+                f'<td>{html.escape(event["stage"])}</td>'
+                f'<td>{html.escape(event["status"])}</td>'
+                f'<td>{html.escape(event["reason"][:130])}</td></tr>')
             def pretty(x):
                 return html.escape(json.dumps(x,ensure_ascii=False,indent=2,default=str))
             pictures=[]
@@ -190,7 +197,7 @@ class StageReport:
                     f'<figure><figcaption>{html.escape(layer)}</figcaption>'
                     f'<img src="{html.escape(rel,quote=True)}" alt="KiCad {html.escape(layer)}"/></figure>')
             cards.append(
-                f'<section><h3>Iteration {event["iteration"]} · {html.escape(event["stage"])}'
+                f'<section id="step-{step_number}"><h3>Iteration {event["iteration"]} · {html.escape(event["stage"])}'
                 f' — {html.escape(event["status"])}</h3>'
                 f'<p>{html.escape(event["reason"])}</p>'
                 + "".join(pictures)
@@ -204,7 +211,15 @@ class StageReport:
                   'padding:1rem;margin:1rem 0}img{max-width:100%;max-height:520px;'
                   'border:1px solid #aaa}figure{display:inline-block;width:46%;'
                   'vertical-align:top;margin:1%}pre{white-space:pre-wrap;overflow:auto}'
+                  'table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #9995;'
+                  'padding:.5rem;text-align:left;vertical-align:top}th{position:sticky;top:0;'
+                  'background:#eee;color:#222}'
                   '</style><h1>LayoutRule — bằng chứng từng công đoạn</h1>'
                   '<p>Trạng thái mô tả thao tác; không đồng nghĩa layout đạt chuẩn điện.</p>'
+                  '<p><strong>Ảnh KiCad gốc</strong> và vùng khoanh agent là bằng chứng'
+                  ' để review, không tự chứng minh lỗi được nhận diện chính xác.</p>'
+                  '<table><thead><tr><th>#</th><th>Vòng</th><th>Công đoạn</th>'
+                  '<th>Kết quả</th><th>Lý do</th></tr></thead><tbody>'
+                  + "".join(overview)+'</tbody></table>'
                   + "".join(cards)+'</html>')
         (self.output/"STAGE_REPORT.html").write_text(html_doc,encoding="utf-8")
