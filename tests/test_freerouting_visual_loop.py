@@ -24,8 +24,8 @@ def valid_png():
     def chunk(tag, blob):
         return (struct.pack(">I",len(blob))+tag+blob+
                 struct.pack(">I",zlib.crc32(tag+blob) & 0xffffffff))
-    raw=b"\\x00"+b"\\x70\\x98\\x20"
-    return (b"\\x89PNG\\r\\n\\x1a\\n"+
+    raw=b"\x00"+b"\x70\x98\x20"
+    return (b"\x89PNG\r\n\x1a\n"+
             chunk(b"IHDR",struct.pack(">IIBBBBB",1,1,8,2,0,0,0))+
             chunk(b"IDAT",zlib.compress(raw))+
             chunk(b"IEND",b""))
