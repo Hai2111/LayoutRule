@@ -108,6 +108,13 @@ class EvidenceContract(unittest.TestCase):
         self.assertIn("ROLLBACK",page)
         self.assertIn("HYPOTHESIS",page)
         self.assertIn('finding.svg',page)
+        self.assertIn("Báo cáo layout",page)
+        self.assertIn("Ảnh PCB trước / sau",page)
+        self.assertIn("Các lần thử và quyết định",page)
+        self.assertIn("Chi tiết kỹ thuật",page)
+        self.assertIn("<details",page)
+        self.assertIn("Rollback: 0",page)
+        self.assertIn("CHƯA",page.upper())
 
 
 if __name__ == "__main__":
