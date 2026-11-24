@@ -83,6 +83,15 @@ nên được gắn `NEEDS_INDEPENDENT_VALIDATION` chứ không coi là kết qu
 
 ## Owner-facing output — chỉ cần mở một file
 
+Mỗi lần xử lý, **sơ đồ 10 công đoạn** trong `STAGE_REPORT.html` hiển thị
+trực quan trạng thái thực tế của từng bước: đầu vào → tham chiếu → route đầu →
+quan sát → agent phân tích → thử sửa → route lại → so sánh → KEEP/ROLLBACK →
+bản cuối. Bước chưa chạy phải hiện **Chưa chạy**, không được đoán PASS.
+Các công đoạn được trình bày bằng sơ đồ SVG sinh từ kết quả thực thi;
+**không yêu cầu chụp ảnh KiCad riêng cho từng bước**.
+
+
+
 **Chỉ mở `STAGE_REPORT.html`** để xem một trang ngắn: kết quả, ảnh PCB
 F.Cu trước/sau (B.Cu có thể mở thêm), tối đa 3 lỗi agent nghi ngờ,
 và mỗi lượt thử được KEEP hay ROLLBACK. Mọi chi tiết DSN/SES/SHA/lệnh/ảnh

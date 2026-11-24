@@ -11,7 +11,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "tools"))
 from visual_stage_report import (StageReport, png_metadata, validate_capture,
-                                  validate_findings, roi_svg)
+                                  validate_findings, roi_svg, stage_flow_svg)
 
 
 def png():
@@ -88,6 +88,34 @@ class EvidenceContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,"ROI"):
             validate_findings(self.plan,self.obs)
 
+    def test_process_flow_shows_each_stage_without_fake_pass(self):
+        events=[
+            {"iteration":0,"stage":"INPUT","status":"PASS","reason":"board exists"},
+            {"iteration":0,"stage":"REFERENCE_PREFLIGHT","status":"BLOCKED",
+             "reason":"missing B.Cu reference"},
+        ]
+        diagram=stage_flow_svg(events)
+        self.assertEqual(diagram.count("<rect "),10)
+        self.assertIn("Tham chiếu",diagram)
+        self.assertIn("Bị chặn",diagram)
+        self.assertIn("Chưa chạy",diagram)
+        self.assertNotIn("Giữ bản",diagram)
+        self.assertNotIn("KiCad copper",diagram)
+
+    def test_process_flow_tracks_rollback_only_when_reported(self):
+        events=[
+            {"iteration":0,"stage":"INPUT","status":"PASS","reason":""},
+            {"iteration":1,"stage":"AGENT_VISUAL_DIAGNOSIS",
+             "status":"HYPOTHESIS","reason":"R1 escape"},
+            {"iteration":1,"stage":"ROLLBACK",
+             "status":"RESTORED_BY_NO_COMMIT","reason":"DRC regression"}
+        ]
+        diagram=stage_flow_svg(events)
+        self.assertIn("Giả thuyết",diagram)
+        self.assertIn("Rollback",diagram)
+        self.assertIn("DRC regression",diagram)
+        self.assertIn("Chưa chạy",diagram)
+
     def test_real_pixel_roi_and_html_stage_outputs(self):
         crop=roi_svg(self.obs["images"]["F.Cu"],[0,0,1,1],self.root/"finding.svg")
         self.assertTrue(Path(crop["path"]).is_file())
@@ -109,6 +137,10 @@ class EvidenceContract(unittest.TestCase):
         self.assertIn("HYPOTHESIS",page)
         self.assertIn('finding.svg',page)
         self.assertIn("Báo cáo layout",page)
+        self.assertIn("Sơ đồ từng công đoạn",page)
+        self.assertIn("process-flow",page)
+        self.assertIn('aria-label="Sơ đồ tiến trình theo từng công đoạn"',page)
+        self.assertIn("Chưa chạy",page)
         self.assertIn("Ảnh PCB trước / sau",page)
         self.assertIn("Các lần thử và quyết định",page)
         self.assertIn("Chi tiết kỹ thuật",page)
