@@ -157,6 +157,22 @@ class FakeLocalKiCadLoop(unittest.TestCase):
         self.assertEqual(hashlib.sha256(self.board.read_bytes()).hexdigest(),self.start_hash)
         self.assertFalse(result["owner_approved"])
         self.assertTrue((self.work/"FINAL_CANDIDATE_SUMMARY.md").is_file())
+        steps=json.loads((self.work/"stage_results.json").read_text())["events"]
+        names=[x["stage"] for x in steps]
+        self.assertIn("BASELINE_IMAGE_AND_DRC",names)
+        self.assertIn("AGENT_VISUAL_DIAGNOSIS",names)
+        self.assertIn("TARGET_DEFECT_VISUAL_RECHECK",names)
+        self.assertIn("BEFORE_AFTER_EVALUATION",names)
+        self.assertIn("ROLLBACK",names)
+        self.assertIn("BEST_CANDIDATE_UPDATE",names)
+        self.assertTrue((self.work/"STAGE_REPORT.html").is_file())
+        self.assertTrue((self.work/"iteration_01"/"before_best_routed.kicad_pcb").is_file())
+        rollback=next(x for x in steps if x["stage"]=="ROLLBACK")
+        self.assertEqual(rollback["outputs"]["best_routed_sha256"],
+                         hashlib.sha256((self.work/"best_routed.kicad_pcb").read_bytes()).hexdigest())
+        crop=self.work/"iteration_01"/"finding_1_F.svg"
+        self.assertTrue(crop.is_file())
+        self.assertIn("data:image/png;base64",crop.read_text())
 
     def test_one_no_action_finishes_without_premature_review(self):
         result=self.exercise_loop(lambda ctx:{"rationale":"already acceptable for internal tests",
