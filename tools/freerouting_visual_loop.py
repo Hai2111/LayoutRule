@@ -218,6 +218,21 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
                       reason="KiCad PNG and board SHA verified; defect diagnosis remains a hypothesis",
                       outputs={"image_evidence":after.get("image_evidence",{})},
                       metrics=metrics(after),screenshots=after_proof)
+            before_after_crops={}
+            for idx,claim in enumerate(marked,1):
+                # Same normalized viewport, not necessarily same physical XY if
+                # a placement changes automatic plot extents. Never claim verified.
+                layer=claim["layer"]
+                after_crop=roi_svg(after["images"][layer],claim["roi"],
+                                   folder/f"finding_{idx}_{layer[0]}_AFTER.svg")
+                before_after_crops[f"Claim {idx} before {layer}"]=claim["crop"]["path"]
+                before_after_crops[f"Claim {idx} after {layer}"]=after_crop["path"]
+            if marked:
+                trail.add("TARGET_DEFECT_VISUAL_RECHECK","NEEDS_INDEPENDENT_VALIDATION",
+                          iteration=iteration,
+                          reason="Before/after ROI pixels supplied; location may shift with plot bounds. "
+                                 "Agent's claimed defect is not proved fixed by DRC count alone.",
+                          findings=marked,screenshots=before_after_crops)
             accept,reason=compare(best,after)
             trail.add("BEFORE_AFTER_EVALUATION","KEEP" if accept else "ROLLBACK",
                       iteration=iteration,reason=reason,
@@ -254,6 +269,20 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
                                    "best_routed_sha256":file_hash(routed),
                                    "rejected_candidate":str(route)})
         except (RuntimeError,ValueError,OSError,subprocess.TimeoutExpired) as exc:
+            # The intended rollback is 'no commit'; still recover if a
+            # partial filesystem write occurred during KEEP.
+            partial=(file_hash(layout)!=before_pre_hash or file_hash(routed)!=before_routed_hash)
+            if partial:
+                pre_snapshot=folder/"before_best_pre_route.kicad_pcb"
+                route_snapshot=folder/"before_best_routed.kicad_pcb"
+                if (not pre_snapshot.is_file() or not route_snapshot.is_file()
+                        or file_hash(pre_snapshot)!=before_pre_hash
+                        or file_hash(route_snapshot)!=before_routed_hash):
+                    raise RuntimeError("FATAL: cannot restore previous best from hash-verified snapshots") from exc
+                shutil.copy2(pre_snapshot,layout)
+                shutil.copy2(route_snapshot,routed)
+                if file_hash(layout)!=before_pre_hash or file_hash(routed)!=before_routed_hash:
+                    raise RuntimeError("FATAL: candidate rollback recovery hash mismatch") from exc
             entry.update(state="ERROR_ROLLBACK",reason=str(exc)[-1600:])
             trail.add("ITERATION_FAILURE","ERROR_ROLLBACK",iteration=iteration,
                       reason=str(exc)[-1600:],
