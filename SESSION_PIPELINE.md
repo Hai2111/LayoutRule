@@ -1,6 +1,6 @@
 # Session-safe candidate pipeline (proposed; pending owner review)
 
-**Hard contract:** ONE SESSION = ONE OWNER REVIEW OF THE FINAL CANDIDATE, AFTER REPORT. No region-level/G1/G3/G5 approval prompts and no layout locking beyond required mechanical anchors. The owner decides acceptance. See REVIEW_LEARNING_LOOP.md.
+**Hard contract:** ONE SESSION = ONE OWNER REVIEW OF THE FINAL CANDIDATE, AFTER REPORT. No region-level/G1/G3/G5 approval prompts and no layout locking beyond required mechanical anchors. The owner decides acceptance through exactly TWO final outcomes: PASS (ĐẠT) or FAIL (KHÔNG ĐẠT). Internal gate statuses are not owner outcomes. See REVIEW_LEARNING_LOOP.md.
 This implementation does not edit canonical rules or merge a branch.
 
 ## Work flow
@@ -106,6 +106,6 @@ This pipeline must not be described as a complete autonomous router.
 
 ## Sau khi owner xem bản cuối
 
-Owner chỉ nhận báo cáo **sau** khi agent đã kiểm tra candidate cuối. Owner có thể trả lời ACCEPT/REVISE/REJECT/DEFER bằng ngôn ngữ tự nhiên; agent lưu **nguyên văn** nhận xét cùng ảnh/vùng, board SHA, giả thuyết nguyên nhân, cách thử sửa và kiểm chứng ở phiên sau. Không bắt owner chấm điểm từng net. Không khóa placement/copper/vùng khi owner ACCEPT hoặc khi qua checkpoint nội bộ; vẫn giữ bản đã review để đối chiếu/rollback. Một câu ACCEPT cho layout **không** tự cấp phép đổi rule chung. Xem [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md).
+Owner chỉ nhận báo cáo **sau** khi agent đã kiểm tra candidate cuối. Owner chỉ trả lời **ĐẠT (PASS)** hoặc **KHÔNG ĐẠT (FAIL)**, có thể kèm góp ý bằng ngôn ngữ tự nhiên; agent lưu **nguyên văn** nhận xét cùng ảnh/vùng, board SHA, giả thuyết nguyên nhân, cách thử sửa và kiểm chứng ở phiên sau. Không bắt owner chấm điểm từng net. Không khóa placement/copper/vùng khi owner PASS hoặc khi qua checkpoint nội bộ; vẫn giữ bản đã review để đối chiếu/rollback. Một câu PASS cho layout **không** tự cấp phép đổi rule chung. Xem [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md).
 
 **Project scope:** chưa có benchmark board do owner chỉ định; demo USB-C trong chat chỉ là bài thử, không đưa vào LayoutRule. Thiếu nhà sản xuất/stackup cụ thể: dùng giả định có nguồn và ghi trong intent; chỉ báo NEEDS_REVIEW nếu thực sự ảnh hưởng kiểm chứng.
