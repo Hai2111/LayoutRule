@@ -20,6 +20,8 @@
    DRC log/ledger/JSON của agent; không có lệnh khóa layout sau review.
 ```
 
+**Tuỳ chọn Freerouting + AI xử lý ảnh:** [FREEROUTING_VISUAL_LOOP.md](FREEROUTING_VISUAL_LOOP.md) — thử nghiệm tự lặp với ảnh đồng KiCad thực, không thay thế final owner review.
+
 ## Owner review (batch, một lần sau mỗi phiên)
 1. Agent tự nghiên cứu reference, tự thử Candidate REF/OPT, kiểm tra và ghi ledger từng vùng; **không hỏi duyệt lẻ**.
 2. G1/G3/G5 là **checkpoint nội bộ**; chỉ sau khi agent hoàn thiện bản cuối và báo cáo (hoặc GLOBAL STOP) mới gửi **1 ảnh tổng hợp + tối đa 5 dòng** để owner duyệt một lần.
