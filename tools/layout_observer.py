@@ -10,7 +10,7 @@ import sys
 from pathlib import Path
 
 from layout_audit import Board, seg_len, parse_sexpr, kids, kid
-from visual_stage_report import png_metadata
+from kicad_2d_export import export_layer
 
 
 def call(args, *, timeout=180):
@@ -58,27 +58,13 @@ def observe(board, output, *, kicad_cli="kicad-cli", intent=None, export=True):
     counts["keepout_log"] = (ko.stdout + ko.stderr)[-6000:]
     if export:
         counts["image_evidence"] = {}
-        for layer in ("F.Cu", "B.Cu"):
-            image_dir = output / layer.replace(".", "_")
-            image_dir.mkdir(exist_ok=True)
-            # Stale exports are not evidence of the current PCB.
-            for old_png in image_dir.glob("*.png"):
-                old_png.unlink()
-            common = f"{layer[0]}.SilkS,{layer[0]}.CrtYd,Edge.Cuts"
-            command = [str(kicad_cli), "pcb", "export", "png",
-                       "--exclude-drawing-sheet", "--layers", layer,
-                       "--common-layers", common, "--output", str(image_dir), str(board)]
-            image_result = call(command)
-            images = sorted(image_dir.glob("*.png"))
-            if image_result.returncode != 0 or len(images) != 1:
-                raise RuntimeError(f"KiCad 2D {layer} export failed or ambiguous: {image_result.stderr}")
-            meta = png_metadata(images[0])
-            counts["images"][layer] = str(images[0])
-            counts["image_evidence"][layer] = {
-                "layer": layer, "board_sha256": geom.sha256,
-                "png_sha256": meta["sha256"], "dimensions_px": [meta["width"],meta["height"]],
-                "export_command": command, "export_exit_code": image_result.returncode
-            }
+        for layer in ("F.Cu","B.Cu"):
+            artifact = export_layer(board, layer, output/layer.replace(".","_"),
+                                    kicad_cli=kicad_cli)
+            if artifact["board_sha256"] != geom.sha256:
+                raise RuntimeError("image belongs to a different board revision")
+            counts["images"][layer] = artifact["png_path"]
+            counts["image_evidence"][layer] = artifact
         if Board(board).sha256 != geom.sha256:
             raise RuntimeError("board changed during copper image capture")
     (output / "observation.json").write_text(
