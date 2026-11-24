@@ -6,6 +6,7 @@ import tempfile
 from pathlib import Path
 
 from freerouting_prepare import validate_actions
+from visual_stage_report import validate_findings
 
 INSTRUCTIONS = """Act as an independent PCB design reviewer, not a net-completion bot.
 You are looking at ACTUAL KiCad F.Cu and B.Cu exports of a Freerouting candidate.
@@ -26,7 +27,18 @@ Prefer a targeted local alteration affecting 1 or 2 footprints/nets; evaluate
 neighboring connections globally. Do NOT simply route one net to completion.
 If the design is already as good as the evidence supports, return no actions.
 Return strict JSON: {"actions":[],"rationale":"specific visual/geometry finding",
-"expected_improvement":"testable hypothesis"}. No markdown or explanation outside JSON.
+"expected_improvement":"testable hypothesis","findings":[]}.
+For ANY non-empty actions, findings must have 1..8 records with
+{"layer":"F.Cu","roi":[0.1,0.2,0.4,0.5],"ref":"R1","net":"USB_DP",
+"problem":"observable problem","reason":"how the evidence supports this",
+"expected_change":"measurable expected effect"}.
+'roi' is normalized [left,top,right,bottom] on the WHOLE KiCad PNG,
+not arbitrary pixel dimensions. A valid ROI alone DOES NOT prove the defect.
+Use an EXISTING footprint ref and/or exact net from the observation,
+never invented net/ref. If uncertain, return no actions and say why.
+The system will generate an actual-pixel crop for each finding and
+label your diagnosis a HYPOTHESIS until checked against DRC/geometry.
+No markdown or explanation outside JSON.
 """
 
 
@@ -90,4 +102,5 @@ def ask(context, *, provider="codex", timeout=300, codex_bin="codex",
     except json.JSONDecodeError as exc:
         raise ValueError("visual agent must return a single strict JSON object") from exc
     validate_actions(plan)
+    validate_findings(plan, context["observation"])
     return plan
