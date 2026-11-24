@@ -81,6 +81,17 @@ ROI hợp lệ chứng minh crop trùng các pixel ảnh KiCad; mức chính xá
 Ảnh crop before/after có thể lệch khi KiCad thay đổi phạm vi plot tự động,
 nên được gắn `NEEDS_INDEPENDENT_VALIDATION` chứ không coi là kết quả PASS.
 
+## Owner-facing output — chỉ cần mở một file
+
+**Chỉ mở `STAGE_REPORT.html`** để xem một trang ngắn: kết quả, ảnh PCB
+F.Cu trước/sau (B.Cu có thể mở thêm), tối đa 3 lỗi agent nghi ngờ,
+và mỗi lượt thử được KEEP hay ROLLBACK. Mọi chi tiết DSN/SES/SHA/lệnh/ảnh
+vẫn lưu trong `stage_results.json` và chỉ xuất hiện khi mở phần kỹ thuật.
+File PCB để review là `best_routed.kicad_pcb`.
+
+**Lưu ý:** Báo cáo ngắn không đồng nghĩa QA bị rút gọn; agent vẫn phải
+chạy đủ toàn bộ bước kiểm chứng. Kết quả kỹ thuật chưa phải owner ACCEPT.
+
 ## Outputs
 
 - best_pre_route.kicad_pcb: preserved candidate placement.
