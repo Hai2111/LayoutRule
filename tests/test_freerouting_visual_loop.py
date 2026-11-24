@@ -98,7 +98,7 @@ class FakeLocalKiCadLoop(unittest.TestCase):
             f.write("\n"+plan["rationale"])
         return dest
 
-    def run(self,decider,iterations=5,preflight=None):
+    def exercise_loop(self,decider,iterations=5,preflight=None):
         return visual_loop(self.board,self.manifest,self.intent,self.work,
             iterations=iterations,router=self.router,observer=self.observe,
             preparer=self.preparer,decider=decider,
@@ -111,7 +111,7 @@ class FakeLocalKiCadLoop(unittest.TestCase):
             contexts.append(ctx)
             return {"rationale":next(plans),"actions":[
                 {"op":"move","ref":"R1","x_mm":6.0,"y_mm":7.0}]}
-        result=self.run(decider,iterations=2)
+        result=self.exercise_loop(decider,iterations=2)
         self.assertEqual([r["state"] for r in result["iterations"]],["KEEP","ROLLBACK"])
         self.assertEqual(result["best_metrics"]["unconnected"],3)
         self.assertEqual(result["best_metrics"]["drc_errors"],0)
@@ -125,7 +125,7 @@ class FakeLocalKiCadLoop(unittest.TestCase):
         self.assertTrue((self.work/"FINAL_CANDIDATE_SUMMARY.md").is_file())
 
     def test_one_no_action_finishes_without_premature_review(self):
-        result=self.run(lambda ctx:{"rationale":"already acceptable for internal tests",
+        result=self.exercise_loop(lambda ctx:{"rationale":"already acceptable for internal tests",
                                     "actions":[]},iterations=10)
         self.assertEqual(len(result["iterations"]),1)
         self.assertEqual(result["iterations"][0]["state"],"STOP_NO_SAFE_ACTION")
@@ -135,14 +135,14 @@ class FakeLocalKiCadLoop(unittest.TestCase):
         def decider(ctx):
             return {"rationale":"UNCHANGED","actions":[
                 {"op":"rotate","ref":"R1","degrees":0}]}
-        result=self.run(decider,iterations=10)
+        result=self.exercise_loop(decider,iterations=10)
         self.assertEqual(len(result["iterations"]),2)
         self.assertEqual([x["state"] for x in result["iterations"]],["ROLLBACK","ROLLBACK"])
 
     def test_reference_block_cannot_route_or_request_agent(self):
         def no_decider(ctx):
             self.fail("Agent must not run if reference is blocked")
-        out=self.run(no_decider,preflight=lambda m,b:{
+        out=self.exercise_loop(no_decider,preflight=lambda m,b:{
             "status":"BLOCKED","issues":["B.Cu reference missing"]})
         self.assertEqual(out["status"],"BLOCKED")
         self.assertEqual(self.record,[])
@@ -150,7 +150,7 @@ class FakeLocalKiCadLoop(unittest.TestCase):
     def test_reject_missing_mechanical_anchor_declaration(self):
         self.intent.write_text("{}")
         with self.assertRaisesRegex(ValueError,"mechanical_anchor_refs"):
-            self.run(lambda c:None)
+            self.exercise_loop(lambda c:None)
         self.assertEqual(self.record,[])
 
     def test_fails_without_final_internal_stage(self):
@@ -158,7 +158,7 @@ class FakeLocalKiCadLoop(unittest.TestCase):
         data["submission_stage"]="FINAL"
         self.manifest.write_text(json.dumps(data))
         with self.assertRaisesRegex(ValueError,"FINAL"):
-            self.run(lambda ctx:None)
+            self.exercise_loop(lambda ctx:None)
         self.assertEqual(self.record,[])
 
 
