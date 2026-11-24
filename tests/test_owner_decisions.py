@@ -55,6 +55,8 @@ class OwnerDecisionsTest(unittest.TestCase):
     def test_final_review_and_only_mechanical_anchors(self):
         workflow = self.data["owner_workflow"]
         self.assertEqual(workflow["review_frequency"], "ONE_REVIEW_AFTER_FINAL_SESSION_REPORT")
+        self.assertEqual(workflow["owner_review_outcomes"], ["PASS", "FAIL"])
+        self.assertEqual(workflow["owner_review_labels"], {"PASS":"ĐẠT","FAIL":"KHÔNG ĐẠT"})
         self.assertTrue(workflow["mechanical_anchors_only"])
         self.assertFalse(workflow["freeze_layout_after_review"])
         self.assertEqual(workflow["reference_missing_behavior"], "GLOBAL_STOP")
