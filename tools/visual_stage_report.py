@@ -154,6 +154,101 @@ def roi_svg(image_path, roi, output):
             "roi":roi,"crop_size_px":[cw,ch]}
 
 
+
+def stage_flow_svg(events, iteration=None):
+    """Visualize each processing stage; no synthetic PCB image required.
+
+    An absent stage remains PENDING. A technical stage's PASS is never the
+    owner's binary PASS/FAIL verdict.
+    """
+    steps = (
+        ("Đầu vào", ("INPUT",)),
+        ("Tham chiếu", ("REFERENCE_PREFLIGHT",)),
+        ("Route đầu", ("BASELINE_FREEROUTING",)),
+        ("Quan sát", ("BASELINE_IMAGE_AND_DRC",)),
+        ("Agent phân tích", ("AGENT_VISUAL_DIAGNOSIS",)),
+        ("Thử chỉnh sửa", ("PLACEMENT_AND_NET_RIPUP",)),
+        ("Route lại", ("FREEROUTING_REROUTE",)),
+        ("So sánh", ("BEFORE_AFTER_EVALUATION",)),
+        ("Giữ / rollback", ("BEST_CANDIDATE_UPDATE", "ROLLBACK",
+                              "ITERATION_FAILURE")),
+        ("Bản cuối", ("FINAL_INTERNAL_RESULT",)),
+    )
+    if iteration is None:
+        iteration = max((e.get("iteration", 0) for e in events), default=0)
+    all_events = [e for e in events if e.get("iteration", 0) in (0, iteration)]
+    label = {
+        "PASS": "Đã chạy",
+        "READY": "Sẵn sàng",
+        "PROVENANCE_PASS": "Ảnh hợp lệ",
+        "HYPOTHESIS": "Giả thuyết",
+        "KEEP": "Giữ bản",
+        "ROLLBACK": "Rollback",
+        "RESTORED_BY_NO_COMMIT": "Rollback",
+        "ERROR_ROLLBACK": "Lỗi & rollback",
+        "BLOCKED": "Bị chặn",
+        "NOT_OWNER_APPROVED": "Chờ duyệt",
+        "NEEDS_INDEPENDENT_VALIDATION": "Cần kiểm tra",
+        "STOP_NO_SAFE_ACTION": "Dừng thử",
+    }
+    colors = {
+        "complete": ("#eef7f0", "#35805b"),
+        "caution": ("#fff7e6", "#a7781b"),
+        "error": ("#fff1f1", "#ad4949"),
+        "pending": ("#f4f5f6", "#8e959b"),
+    }
+    nodes = []
+    for i, (name, event_names) in enumerate(steps):
+        subset = [e for e in all_events if e.get("stage") in event_names
+                  and (i < 4 and e.get("iteration", 0) == 0
+                       or i == 9 and e.get("iteration", 0) == 0
+                       or 4 <= i <= 8 and e.get("iteration", 0) == iteration)]
+        record = subset[-1] if subset else None
+        status = record.get("status", "") if record else ""
+        if not record:
+            category = "pending"
+        elif status in ("BLOCKED", "FAIL", "ERROR_ROLLBACK"):
+            category = "error"
+        elif status in ("HYPOTHESIS", "ROLLBACK", "RESTORED_BY_NO_COMMIT",
+                        "NOT_OWNER_APPROVED", "NEEDS_INDEPENDENT_VALIDATION"):
+            category = "caution"
+        else:
+            category = "complete"
+        x = 12 + (i if i < 5 else 9-i) * 196
+        y = 16 if i < 5 else 139
+        fill, stroke = colors[category]
+        visible = label.get(status, status.replace("_", " ").title()) if record else "Chưa chạy"
+        tooltip = record.get("reason", "") if record else "Chưa ghi nhận kết quả công đoạn"
+        tooltip = tooltip[:240] or visible
+        nodes.append(
+            f'<g><title>{html.escape(name+" — "+visible+": "+tooltip)}</title>'
+            f'<rect x="{x}" y="{y}" width="184" height="88" rx="9" '
+            f'fill="{fill}" stroke="{stroke}" stroke-width="1.7"/>'
+            f'<text x="{x+11}" y="{y+23}" font-size="14" font-weight="600" '
+            f'fill="#25323b">{i+1}. {html.escape(name)}</text>'
+            f'<text x="{x+11}" y="{y+52}" font-size="13" fill="{stroke}">'
+            f'{html.escape(visible[:22])}</text></g>')
+    arrows=[]
+    for i in range(4):
+        x=12+i*196+184
+        arrows.append(f'<path d="M{x} 60 H{x+12}" stroke="#929da7" fill="none" '
+                      'stroke-width="2" marker-end="url(#step-arrow)"/>')
+    arrows.append('<path d="M 882 104 V 139" stroke="#929da7" fill="none" '
+                  'stroke-width="2" marker-end="url(#step-arrow)"/>')
+    for i in range(5,9):
+        right_x=12+(9-i)*196
+        arrows.append(f'<path d="M{right_x} 183 H{right_x-12}" stroke="#929da7" '
+                      'fill="none" stroke-width="2" marker-end="url(#step-arrow)"/>')
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 246" '
+        'role="img" aria-label="Sơ đồ tiến trình theo từng công đoạn">'
+        '<defs><marker id="step-arrow" markerWidth="7" markerHeight="7" '
+        'refX="6" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7" '
+        'fill="#929da7"/></marker></defs>'
+        + ''.join(arrows) + ''.join(nodes) + '</svg>'
+    )
+
+
 class StageReport:
     def __init__(self, output):
         self.output=Path(output).resolve()
@@ -280,7 +375,7 @@ class StageReport:
                                   +esc(name)+'"></figure>')
             raw = {k:event[k] for k in ("inputs", "outputs", "metrics", "findings")}
             stage_details.append(
-                '<details class="step"><summary>#'+str(index)+' · Lượt '
+                '<details class="step" id="step-'+str(index)+'"><summary>#'+str(index)+' · Lượt '
                 +str(event["iteration"])+' · '+esc(event["stage"])+' — '
                 +esc(event["status"])+'</summary><p>'+esc(event["reason"])
                 +'</p><div class="photos">'+''.join(images)+'</div><pre>'
@@ -303,6 +398,9 @@ class StageReport:
             "summary{cursor:pointer;font-weight:500}pre{white-space:pre-wrap;"
             "overflow-wrap:anywhere;background:#f7f7f7;padding:12px}"
             ".step{margin-left:10px}.notice{color:#6b4c00}"
+            ".process-flow{overflow-x:auto;border:1px solid #ddd;border-radius:9px;"
+            "padding:8px;background:#fff}.process-flow svg{display:block;min-width:750px;"
+            "width:100%;height:auto}"
         )
         page = (
             '<!doctype html><html lang="vi"><meta charset="utf-8">'
@@ -318,15 +416,19 @@ class StageReport:
             '<span>DRC: '+metric(latest_image, "drc_errors")+'</span>'
             '<span>Chưa nối: '+metric(latest_image, "unconnected")+'</span>'
             '<span>Via: '+metric(latest_image, "via_count")+'</span></div></div>'
-            '<h2>1. Ảnh PCB trước / sau (F.Cu)</h2>'
+            '<h2>1. Sơ đồ từng công đoạn</h2>'
+            '<p class="sub">Mỗi ô có kết quả riêng. Màu xám = chưa chạy; vàng = cần kiểm tra. '
+            'Giữ / rollback là quyết định nội bộ, không phải duyệt của chủ.</p>'
+            '<div class="process-flow">' + stage_flow_svg(self.events) + '</div>'
+            '<h2>2. Ảnh PCB trước / sau (F.Cu)</h2>'
             '<div class="photos">'+pictures(initial, ("F.Cu",), "Trước")
             +pictures(latest_image, ("F.Cu",), "Sau / mới nhất")+'</div>'
             '<details><summary>Xem thêm ảnh lớp B.Cu</summary><div class="photos">'
             +pictures(initial, ("B.Cu",), "Trước")
             +pictures(latest_image, ("B.Cu",), "Sau / mới nhất")
             +'</div></details>'
-            '<h2>2. Lỗi đáng chú ý</h2><ul>'+''.join(focus)+'</ul>'
-            '<h2>3. Các lần thử và quyết định</h2>'
+            '<h2>3. Lỗi đáng chú ý</h2><ul>'+''.join(focus)+'</ul>'
+            '<h2>4. Các lần thử và quyết định</h2>'
             '<table><thead><tr><th>Lượt</th><th>Vấn đề</th>'
             '<th>DRC / kết nối trước → sau</th><th>Kết quả</th>'
             '</tr></thead><tbody>'+''.join(rows)+'</tbody></table>'
