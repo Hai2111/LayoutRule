@@ -39,5 +39,7 @@ jobs:
         run: python -m unittest discover -s tests -p "test_closed_loop.py" -v
       - name: Freerouting with real-image agent feedback (mocked EDA tests)
         run: python -m unittest discover -s tests -p "test_freerouting_visual_loop.py" -v
+      - name: KiCad copper image provenance and stage-report checks
+        run: python -m unittest discover -s tests -p "test_visual_stage_report.py" -v
       - name: Existing layout geometry tests
         run: python -m unittest discover -s tests -p "test_layout_audit.py" -v
