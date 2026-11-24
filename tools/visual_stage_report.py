@@ -77,9 +77,20 @@ def validate_capture(board, observation, *, require_provenance=True):
                     proof.get("export_exit_code") != 0):
                 raise ValueError(f"{layer} image provenance mismatch")
             command = proof.get("export_command", [])
-            if (not isinstance(command, list) or "--layers" not in command or
-                    command[command.index("--layers")+1] != layer):
-                raise ValueError(f"{layer} KiCad layer selection not evidenced")
+            if (not isinstance(command, list) or len(command)<7
+                    or command[1:4] != ["pcb","export","svg"]
+                    or "--layers" not in command
+                    or command.index("--layers")+1 >= len(command)
+                    or command[command.index("--layers")+1] != layer
+                    or Path(command[-1]).resolve()!=board):
+                raise ValueError(f"{layer} KiCad SVG layer/source selection not evidenced")
+            svg_file=Path(proof.get("source_svg",""))
+            if (not svg_file.is_file() or sha(svg_file)!=proof.get("svg_sha256")
+                    or "<svg" not in svg_file.read_text(encoding="utf-8")[:2000]
+                    or proof.get("rasterizer_exit_code")!=0
+                    or not proof.get("rasterizer")
+                    or Path(proof.get("png_path","")).resolve()!=image):
+                raise ValueError(f"{layer} SVG-to-PNG provenance chain incomplete")
         result[layer] = {"image":str(image), **meta,
                          "board_sha256":board_sha,
                          "provenance_status":"CHECKED" if require_provenance else "UNVERIFIED"}
