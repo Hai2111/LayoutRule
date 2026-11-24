@@ -39,11 +39,18 @@ class EvidenceContract(unittest.TestCase):
             file=self.root/(layer+".png")
             file.write_bytes(png())
             self.obs["images"][layer]=str(file)
+            svg=self.root/(layer+".svg")
+            svg.write_text('<svg xmlns="http://www.w3.org/2000/svg"></svg>')
             self.obs["image_evidence"][layer]={
                 "layer":layer,"board_sha256":self.sha,
+                "source_svg":str(svg),
+                "svg_sha256":hashlib.sha256(svg.read_bytes()).hexdigest(),
+                "png_path":str(file),
                 "png_sha256":hashlib.sha256(file.read_bytes()).hexdigest(),
+                "rasterizer":"MOCK_TEST_ONLY","rasterizer_exit_code":0,
                 "export_exit_code":0,
-                "export_command":["kicad-cli","pcb","export","png","--layers",layer]}
+                "export_command":["kicad-cli","pcb","export","svg",
+                                  "--layers",layer,"--output",str(self.root),str(self.board)]}
         self.plan={"actions":[{"op":"move","ref":"R1","x_mm":1,"y_mm":2}],
                    "rationale":"R1 blocks escape",
                    "findings":[{"layer":"F.Cu","roi":[0.1,0.1,0.9,0.9],
