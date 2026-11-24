@@ -172,54 +172,168 @@ class StageReport:
         return entry
 
     def save(self):
+        # Full machine-readable evidence remains intact; only the owner-facing
+        # HTML is intentionally condensed and progressive-disclosure based.
         (self.output/"stage_results.json").write_text(
-            json.dumps({"schema_version":1,"events":self.events},
-                       ensure_ascii=False,indent=2,default=str),encoding="utf-8")
-        cards=[]
-        overview=[]
-        for step_number,event in enumerate(self.events,1):
-            overview.append(
-                f'<tr><td><a href="#step-{step_number}">{step_number}</a></td>'
-                f'<td>{event["iteration"]}</td>'
-                f'<td>{html.escape(event["stage"])}</td>'
-                f'<td>{html.escape(event["status"])}</td>'
-                f'<td>{html.escape(event["reason"][:130])}</td></tr>')
-            def pretty(x):
-                return html.escape(json.dumps(x,ensure_ascii=False,indent=2,default=str))
-            pictures=[]
-            for layer,asset in event["screenshots"].items():
-                uri=asset["image"] if isinstance(asset,dict) and "image" in asset else asset
-                try:
-                    rel=Path(uri).resolve().relative_to(self.output).as_posix()
-                except (ValueError,TypeError):
-                    continue
-                pictures.append(
-                    f'<figure><figcaption>{html.escape(layer)}</figcaption>'
-                    f'<img src="{html.escape(rel,quote=True)}" alt="KiCad {html.escape(layer)}"/></figure>')
-            cards.append(
-                f'<section id="step-{step_number}"><h3>Iteration {event["iteration"]} · {html.escape(event["stage"])}'
-                f' — {html.escape(event["status"])}</h3>'
-                f'<p>{html.escape(event["reason"])}</p>'
-                + "".join(pictures)
-                +f'<details><summary>Input / Output / Metrics / Findings</summary>'
-                f'<pre>{pretty({k:event[k] for k in ("inputs","outputs","metrics","findings")})}</pre>'
-                "</details></section>")
-        html_doc=('<!doctype html><html lang="vi"><meta charset="utf-8">'
-                  '<title>LayoutRule: evidence per stage</title>'
-                  '<style>body{max-width:1100px;margin:2rem auto;font:15px system-ui;'
-                  'padding:0 1rem}section{border:1px solid #8885;border-radius:10px;'
-                  'padding:1rem;margin:1rem 0}img{max-width:100%;max-height:520px;'
-                  'border:1px solid #aaa}figure{display:inline-block;width:46%;'
-                  'vertical-align:top;margin:1%}pre{white-space:pre-wrap;overflow:auto}'
-                  'table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #9995;'
-                  'padding:.5rem;text-align:left;vertical-align:top}th{position:sticky;top:0;'
-                  'background:#eee;color:#222}'
-                  '</style><h1>LayoutRule — bằng chứng từng công đoạn</h1>'
-                  '<p>Trạng thái mô tả thao tác; không đồng nghĩa layout đạt chuẩn điện.</p>'
-                  '<p><strong>Ảnh KiCad gốc</strong> và vùng khoanh agent là bằng chứng'
-                  ' để review, không tự chứng minh lỗi được nhận diện chính xác.</p>'
-                  '<table><thead><tr><th>#</th><th>Vòng</th><th>Công đoạn</th>'
-                  '<th>Kết quả</th><th>Lý do</th></tr></thead><tbody>'
-                  + "".join(overview)+'</tbody></table>'
-                  + "".join(cards)+'</html>')
-        (self.output/"STAGE_REPORT.html").write_text(html_doc,encoding="utf-8")
+            json.dumps({"schema_version": 1, "events": self.events},
+                       ensure_ascii=False, indent=2, default=str), encoding="utf-8")
+
+        def esc(value):
+            return html.escape(str(value), quote=True)
+
+        def asset_path(asset):
+            uri = asset.get("image") if isinstance(asset, dict) else asset
+            if not isinstance(uri, str):
+                return None
+            try:
+                return Path(uri).resolve().relative_to(self.output).as_posix()
+            except ValueError:
+                return None
+
+        def pictures(event, layers, label):
+            if not event:
+                return ""
+            parts = []
+            for layer in layers:
+                asset = event.get("screenshots", {}).get(layer)
+                rel = asset_path(asset)
+                if rel:
+                    parts.append('<figure><figcaption>' + esc(label+" · "+layer)
+                                 + '</figcaption><img loading="lazy" src="'
+                                 + esc(rel) + '" alt="' + esc(label+" "+layer)
+                                 + '"></figure>')
+            return "".join(parts)
+
+        def metric(event, key):
+            if not event:
+                return "—"
+            value = event.get("metrics", {}).get(key)
+            return str(value) if isinstance(value, (int, float)) else "—"
+
+        initial = next((e for e in self.events
+                        if e["stage"] == "BASELINE_IMAGE_AND_DRC"), None)
+        final = next((e for e in reversed(self.events)
+                      if e["stage"] == "FINAL_INTERNAL_RESULT"), None)
+        latest_image = final or next(
+            (e for e in reversed(self.events)
+             if e["stage"] in ("IMAGE_CAPTURE_AND_DRC", "BASELINE_IMAGE_AND_DRC")),
+            None)
+        preflight = next((e for e in reversed(self.events)
+                          if e["stage"] == "REFERENCE_PREFLIGHT"), None)
+        blocked = bool(preflight and preflight["status"] == "BLOCKED")
+        verdict = ("BỊ CHẶN — thiếu bằng chứng" if blocked else
+                   "CHỜ REVIEW — chưa nghiệm thu" if final else
+                   "ĐANG XỬ LÝ — chưa có kết quả cuối")
+        decisions = [e for e in self.events
+                     if e["stage"] == "BEFORE_AFTER_EVALUATION"]
+        kept = sum(e["status"] == "KEEP" for e in decisions)
+        rolled = sum(e["status"] == "ROLLBACK" for e in decisions)
+        attempts = max((e["iteration"] for e in self.events), default=0)
+        recent_findings = [f for e in reversed(self.events)
+                           if e["stage"] == "AGENT_VISUAL_DIAGNOSIS"
+                           for f in e.get("findings", [])]
+
+        # Only meaningful results are visible by default; raw substage details
+        # and all screenshots remain expandable and fully traceable.
+        rows = []
+        for n in sorted({e["iteration"] for e in self.events if e["iteration"] > 0}):
+            events = [e for e in self.events if e["iteration"] == n]
+            evaluation = next((e for e in reversed(events)
+                               if e["stage"] == "BEFORE_AFTER_EVALUATION"), None)
+            diagnosis = next((e for e in events
+                              if e["stage"] == "AGENT_VISUAL_DIAGNOSIS"), None)
+            failure = next((e for e in reversed(events)
+                            if e["stage"] in ("ITERATION_FAILURE", "ROLLBACK")), None)
+            result = evaluation or failure or diagnosis or events[-1]
+            problem = (diagnosis.get("findings", [{}])[0].get("problem", "—")
+                       if diagnosis and diagnosis.get("findings") else "—")
+            before = result.get("inputs", {}).get("before", {})
+            after = result.get("outputs", {}).get("after", {})
+            change = ("DRC: " + str(before.get("drc_errors", "—")) + " → "
+                      + str(after.get("drc_errors", "—")) + "; Nối: "
+                      + str(before.get("unconnected", "—")) + " → "
+                      + str(after.get("unconnected", "—"))
+                      if evaluation else "Không có phép so sánh hoàn chỉnh")
+            rows.append("<tr><td>"+str(n)+"</td><td>"+esc(problem[:85])
+                        +"</td><td>"+esc(change)+"</td><td><strong>"
+                        +esc(result["status"])+"</strong></td></tr>")
+        if not rows:
+            rows.append('<tr><td colspan="4">Chưa có lượt thử.</td></tr>')
+
+        focus = []
+        for item in recent_findings[:3]:
+            target = item.get("ref") or item.get("net") or "không rõ"
+            focus.append('<li><strong>'+esc(str(target))+'</strong> — '
+                         +esc(item.get("problem", "Chưa mô tả"))
+                         +' <small>(giả thuyết, chưa xác nhận)</small></li>')
+        if not focus:
+            focus.append("<li>Chưa có lỗi định vị được để trình bày.</li>")
+
+        stage_details = []
+        for index, event in enumerate(self.events, 1):
+            images = []
+            for name, asset in event.get("screenshots", {}).items():
+                rel = asset_path(asset)
+                if rel:
+                    images.append('<figure><figcaption>'+esc(name)+'</figcaption>'
+                                  '<img loading="lazy" src="'+esc(rel)+'" alt="'
+                                  +esc(name)+'"></figure>')
+            raw = {k:event[k] for k in ("inputs", "outputs", "metrics", "findings")}
+            stage_details.append(
+                '<details class="step"><summary>#'+str(index)+' · Lượt '
+                +str(event["iteration"])+' · '+esc(event["stage"])+' — '
+                +esc(event["status"])+'</summary><p>'+esc(event["reason"])
+                +'</p><div class="photos">'+''.join(images)+'</div><pre>'
+                +esc(json.dumps(raw, ensure_ascii=False, indent=2, default=str))
+                +'</pre></details>')
+
+        style = (
+            "body{max-width:1020px;margin:30px auto;padding:0 18px;"
+            "font:15px system-ui,sans-serif;line-height:1.55;color:#202124}"
+            "h1{font-size:23px;margin-bottom:5px}h2{font-size:18px;margin-top:26px}"
+            ".sub{color:#555}.summary{border:1px solid #bbb;border-radius:10px;"
+            "padding:15px 18px;background:#fafafa}"
+            ".stats{display:flex;gap:14px;flex-wrap:wrap}.stats span{border:1px solid #ccc;"
+            "border-radius:7px;padding:7px 12px}.photos{display:flex;gap:12px;flex-wrap:wrap}"
+            "figure{flex:1 1 280px;margin:0}img{display:block;max-width:100%;max-height:360px;"
+            "border:1px solid #aaa;object-fit:contain}figcaption{font-weight:600;"
+            "padding:7px 0}table{width:100%;border-collapse:collapse}"
+            "td,th{border-bottom:1px solid #ddd;padding:9px;text-align:left}"
+            "th{background:#f1f1f1}details{border-top:1px solid #ddd;padding:8px 0}"
+            "summary{cursor:pointer;font-weight:500}pre{white-space:pre-wrap;"
+            "overflow-wrap:anywhere;background:#f7f7f7;padding:12px}"
+            ".step{margin-left:10px}.notice{color:#6b4c00}"
+        )
+        page = (
+            '<!doctype html><html lang="vi"><meta charset="utf-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            '<title>LayoutRule — Báo cáo dễ đọc</title><style>'+style+'</style>'
+            '<h1>LayoutRule · Báo cáo layout</h1>'
+            '<p class="sub">Một trang tóm tắt; chi tiết từng công đoạn được ẩn bên dưới.</p>'
+            '<div class="summary"><strong>Kết quả: '+esc(verdict)+'</strong>'
+            '<div class="stats"><span>Lượt thử: '+str(attempts)+'</span>'
+            '<span>Giữ: '+str(kept)+'</span><span>Rollback: '+str(rolled)+'</span>'
+            '<span>DRC: '+metric(latest_image, "drc_errors")+'</span>'
+            '<span>Chưa nối: '+metric(latest_image, "unconnected")+'</span>'
+            '<span>Via: '+metric(latest_image, "via_count")+'</span></div></div>'
+            '<h2>1. Ảnh PCB trước / sau (F.Cu)</h2>'
+            '<div class="photos">'+pictures(initial, ("F.Cu",), "Trước")
+            +pictures(latest_image, ("F.Cu",), "Sau / mới nhất")+'</div>'
+            '<details><summary>Xem thêm ảnh lớp B.Cu</summary><div class="photos">'
+            +pictures(initial, ("B.Cu",), "Trước")
+            +pictures(latest_image, ("B.Cu",), "Sau / mới nhất")
+            +'</div></details>'
+            '<h2>2. Lỗi đáng chú ý</h2><ul>'+''.join(focus)+'</ul>'
+            '<h2>3. Các lần thử và quyết định</h2>'
+            '<table><thead><tr><th>Lượt</th><th>Vấn đề</th>'
+            '<th>DRC / kết nối trước → sau</th><th>Kết quả</th>'
+            '</tr></thead><tbody>'+''.join(rows)+'</tbody></table>'
+            '<p class="notice">Lỗi do agent khoanh là giả thuyết. Giảm DRC/via '
+            'không tự chứng minh chất lượng điện hoặc sửa đúng lỗi.</p>'
+            '<details><summary>Chi tiết kỹ thuật — '
+            +str(len(self.events))+' công đoạn (bấm để mở)</summary>'
+            +''.join(stage_details)+'</details>'
+            '<p class="sub">Bằng chứng đầy đủ: stage_results.json. '
+            'Chỉ chủ dự án được nghiệm thu bản cuối.</p></html>'
+        )
+        (self.output/"STAGE_REPORT.html").write_text(page, encoding="utf-8")
