@@ -16,7 +16,9 @@
    (qua checkpoint thì ghi snapshot, không khóa vùng/copper; chỉ giữ neo cơ khí)
 3. Agent hoàn thiện bản cuối phiên + báo cáo trước; CHỦ chỉ review 1 lần
    qua 1 ẢNH PCB THẬT + KẾT LUẬN ≤ 5 dòng, hoặc báo cáo BLOCKED.
-   Feedback được ghi nguyên văn, đưa vào vòng học ở phiên sau.
+   Owner chỉ chọn 1 trong 2 kết quả: ĐẠT hoặc KHÔNG ĐẠT.
+   Nếu KHÔNG ĐẠT, agent tự học từ góp ý, xử lý trong phiên tiếp theo;
+   không được yêu cầu duyệt lẻ. Feedback được lưu nguyên văn.
    DRC log/ledger/JSON của agent; không có lệnh khóa layout sau review.
 ```
 
@@ -25,7 +27,7 @@
 ## Owner review (batch, một lần sau mỗi phiên)
 1. Agent tự nghiên cứu reference, tự thử Candidate REF/OPT, kiểm tra và ghi ledger từng vùng; **không hỏi duyệt lẻ**.
 2. G1/G3/G5 là **checkpoint nội bộ**; chỉ sau khi agent hoàn thiện bản cuối và báo cáo (hoặc GLOBAL STOP) mới gửi **1 ảnh tổng hợp + tối đa 5 dòng** để owner duyệt một lần.
-3. Owner quyết định layout đạt hay chưa; sau mỗi review agent lưu feedback và tự học cho phiên sau theo [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md). **Không khóa layout**, trừ neo phải khớp cơ khí. Rule mới/sửa vẫn chỉ là đề xuất theo GOVERNANCE.md.
+3. Owner chỉ trả kết quả **ĐẠT (PASS)** hoặc **KHÔNG ĐẠT (FAIL)**. Các trạng thái kiểm tra nội bộ (KEEP, ROLLBACK, BLOCKED, NEEDS_REVIEW) không phải kết quả để owner chọn. Sau mỗi review agent lưu feedback và tự học cho phiên sau theo [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md). **Không khóa layout**, trừ neo phải khớp cơ khí. Rule mới/sửa vẫn chỉ là đề xuất theo GOVERNANCE.md.
 
 **Scope:** chưa có PCB benchmark được owner giao; demo USB-C ở chat là thử nghiệm riêng, **không** phải project đưa vào LayoutRule. Thiếu số liệu fab/stackup thì dùng giả định có ghi nguồn, không xin owner quyết định sớm.
 
