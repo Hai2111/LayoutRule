@@ -57,15 +57,32 @@ def route_once(source, directory, *, kicad_python, freerouting_jar,
     copy_project(stage,routed)
     if not Path(freerouting_jar).is_file():
         raise FileNotFoundError(f"Freerouting JAR missing: {freerouting_jar}")
-    cmd([kicad_python,ROOT/"tools"/"export_dsn.py",stage,dsn],timeout=180)
-    if not dsn.is_file():
-        raise RuntimeError("KiCad did not write Specctra DSN")
-    cmd([java_bin,"-jar",freerouting_jar,"-de",dsn,"-do",ses,"-mp",passes],timeout=900)
-    if not ses.is_file():
-        raise RuntimeError("Freerouting did not write SES")
-    cmd([kicad_python,ROOT/"tools"/"import_ses.py",stage,ses,routed],timeout=180)
-    if not routed.is_file():
-        raise RuntimeError("KiCad SES import produced no PCB")
+    records=[]
+    def step(name, argv, artifact, timeout):
+        record={"stage":name,"command":list(map(str,argv)),
+                "artifact":str(artifact),"status":"STARTED"}
+        try:
+            result=cmd(argv,timeout=timeout)
+            if not Path(artifact).is_file():
+                raise RuntimeError(f"{name} missing output artifact")
+            record.update(status="PASS",sha256=file_hash(artifact),
+                          stdout=getattr(result,"stdout","")[-1500:],
+                          stderr=getattr(result,"stderr","")[-1500:])
+        except (OSError,RuntimeError,subprocess.TimeoutExpired) as exc:
+            record.update(status="FAIL",reason=str(exc)[-1000:])
+            records.append(record)
+            (directory/"command_steps.json").write_text(
+                json.dumps(records,ensure_ascii=False,indent=2),encoding="utf-8")
+            raise
+        records.append(record)
+        (directory/"command_steps.json").write_text(
+            json.dumps(records,ensure_ascii=False,indent=2),encoding="utf-8")
+    step("KICAD_DSN_EXPORT",
+         [kicad_python,ROOT/"tools"/"export_dsn.py",stage,dsn],dsn,180)
+    step("FREEROUTING_JAR",
+         [java_bin,"-jar",freerouting_jar,"-de",dsn,"-do",ses,"-mp",passes],ses,900)
+    step("KICAD_SES_IMPORT",
+         [kicad_python,ROOT/"tools"/"import_ses.py",stage,ses,routed],routed,180)
     return routed
 
 
@@ -144,7 +161,17 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
     decide=decider or (lambda ctx:vision_ask(ctx,provider=provider))
     prep=preparer or (lambda src,dst,plan:prepare_once(src,dst,plan,mechanical=anchors,
                                                         protected=protected,kicad_python=kicad_python))
+    def report_route_commands(directory,iter_no):
+        logfile=Path(directory)/"command_steps.json"
+        if logfile.is_file():
+            for info in json.loads(logfile.read_text(encoding="utf-8")):
+                trail.add(info["stage"],info["status"],iteration=iter_no,
+                          inputs={"command":info["command"]},
+                          outputs={"artifact":info["artifact"],
+                                   "artifact_sha256":info.get("sha256")},
+                          reason=info.get("reason") or info.get("stderr","")[-300:])
     baseline=runroute(layout,output/"baseline_route")
+    report_route_commands(output/"baseline_route",0)
     if not Path(baseline).is_file():
         raise RuntimeError("Freerouting baseline returned nonexistent PCB")
     trail.add("BASELINE_FREEROUTING", "PASS",
@@ -209,6 +236,7 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
                       outputs={"proposed_board":str(prepared),
                                "proposed_sha256":file_hash(prepared)})
             route=runroute(prepared,folder/"freerouting")
+            report_route_commands(folder/"freerouting",iteration)
             trail.add("FREEROUTING_REROUTE","PASS",iteration=iteration,
                       inputs={"prepared_sha256":file_hash(prepared)},
                       outputs={"routed_board":str(route),"routed_sha256":file_hash(route)})
