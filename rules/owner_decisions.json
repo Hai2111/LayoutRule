@@ -19,7 +19,16 @@
     "freeze_layout_after_review": false,
     "reference_missing_behavior": "GLOBAL_STOP",
     "benchmark_board": "NOT_ASSIGNED",
-    "usb_c_demo_in_scope": false
+    "usb_c_demo_in_scope": false,
+    "owner_review_outcomes": [
+      "PASS",
+      "FAIL"
+    ],
+    "owner_review_labels": {
+      "PASS": "ĐẠT",
+      "FAIL": "KHÔNG ĐẠT"
+    },
+    "owner_review_rule": "Exactly one owner review after the final batch report. Internal checkpoints never request owner decisions. Only PASS or FAIL may be recorded as final owner outcome."
   },
   "questions": [
     {
@@ -248,7 +257,7 @@
       "id": "OVR-REVIEW-FINAL-ONLY",
       "from": "follow-up after Q35 and 2026-11-23",
       "topic": "review_timing",
-      "decision": "Agent chỉ đưa bản cuối sau khi đã hoàn thiện cả phiên và báo cáo; owner review một lần. G1/G3/G5 và vùng R1–R4 chỉ là checkpoint nội bộ.",
+      "decision": "Agent chỉ trình bản cuối sau khi hoàn tất cả phiên và báo cáo; owner review đúng MỘT LẦN. Kết quả review chỉ ĐẠT (PASS) hoặc KHÔNG ĐẠT (FAIL). G1/G3/G5 và mọi KEEP/ROLLBACK/BLOCKED/NEEDS_REVIEW chỉ là trạng thái kiểm tra nội bộ, không được xin owner duyệt lẻ.",
       "supersedes": [
         "Q02"
       ]
