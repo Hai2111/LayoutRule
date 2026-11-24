@@ -47,6 +47,40 @@ tool; that image-ingestion path is not yet verified on the owner's PC.
   copper should never be stripped automatically.
 - Previous feedback: PROJECT/reviews/owner_feedback.jsonl (optional).
 
+## Kiểm chứng ảnh và giám sát từng công đoạn
+
+**KiCad 10 không còn lệnh `pcb export png` cho 2D copper**. Script
+`tools/kicad_2d_export.py` dùng **KiCad native `pcb export svg`**
+cho từng layer F.Cu/B.Cu, rồi chuyển các SVG gốc thành PNG bằng **CairoSVG**
+hoặc **Inkscape**. Trên Windows phải cài một trong hai: nếu không, pipeline
+báo lỗi rõ ràng, không tự vẽ ảnh thay thế hoặc tái sử dụng ảnh cũ.
+
+Mở file `<output>/STAGE_REPORT.html` trên máy sau mỗi phiên để xem:
+
+| Công đoạn | Thứ phải xuất ra | Mức chứng minh |
+|---|---|---|
+| Reference preflight | Mọi vùng + layer reference, status | Thiếu → GLOBAL STOP |
+| DSN → JAR → SES | File kèm SHA và command/exit | Đã chạy đúng chuỗi thao tác |
+| KiCad capture | SVG gốc, PNG, layer, kích thước, SHA board, lệnh export | Chứng minh nguồn ảnh, **không** chứng minh agent nhìn đúng |
+| Agent nhìn & khoanh lỗi | Layer, ROI chuẩn hóa, ref/net hiện hữu, `finding_X_F.svg`, lý do sửa | **Giả thuyết**, chưa tự xác minh đúng lỗi |
+| Sửa placement/rip-up | `decision.json`, candidate board, SHA | Thực thi/kiểm soát cơ khí |
+| Route lại | DSN/SES, candidate mới, SHA | Có board mới thực tế |
+| Đối chiếu | F.Cu/B.Cu trước/sau, DRC, unconnected, via, chiều dài, geometry | Bằng chứng số; cần xem lại vùng đã sửa |
+| KEEP/ROLLBACK | Đường dẫn bản thắng/bản bị loại, SHA và lý do | Bản gốc bất biến, best kiểm chứng SHA |
+| Final | Kết luận nội bộ + bản cuối | **Không** đồng nghĩa owner ACCEPT |
+
+Mỗi bước lưu ngay vào `stage_results.json` và cập nhật `STAGE_REPORT.html`.
+Nhật ký nằm trong thư mục output của project, không cần owner đọc từng file.
+Nếu xảy ra ROLLBACK thông thường, best không bị ghi đè; khi lỗi ghi file
+dở dang xảy ra, công cụ thử khôi phục bằng bản snapshot SHA đã xác minh.
+Nếu không khôi phục được, công cụ phải dừng với lỗi **FATAL**.
+
+**Không thể kết luận đã khoanh đúng lỗi chỉ bằng ROI hợp lệ.**
+ROI hợp lệ chứng minh crop trùng các pixel ảnh KiCad; mức chính xác của chẩn
+đoán phải dựa vào DRC/hình học/net/thiết kế điện, hoặc đánh giá bản cuối.
+Ảnh crop before/after có thể lệch khi KiCad thay đổi phạm vi plot tự động,
+nên được gắn `NEEDS_INDEPENDENT_VALIDATION` chứ không coi là kết quả PASS.
+
 ## Outputs
 
 - best_pre_route.kicad_pcb: preserved candidate placement.
@@ -54,6 +88,9 @@ tool; that image-ingestion path is not yet verified on the owner's PC.
 - baseline_route/ and baseline_observation/: real KiCad initial evidence.
 - iteration_NN/: decision JSON, Freerouting data, real copper images, audit.
 - iterations.json, session_progress.json, FINAL_CANDIDATE_SUMMARY.md.
+- **STAGE_REPORT.html** (mở bằng trình duyệt: bảng tổng công đoạn, ảnh,
+  crop, lỗi, quyết định KEEP/ROLLBACK), **stage_results.json** (dữ liệu đầy đủ),
+  và command_steps.json trong mỗi folder Freerouting.
 
 Two consecutive failed/no-improvement proposals stop the loop. DRC errors,
 unconnected items, audit and keepout are regression blockers. Without a
