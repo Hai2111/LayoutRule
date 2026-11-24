@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from layout_audit import Board, seg_len, parse_sexpr, kids, kid
+from kicad_2d_export import export_layer
 
 
 def call(args, *, timeout=180):
@@ -56,17 +57,16 @@ def observe(board, output, *, kicad_cli="kicad-cli", intent=None, export=True):
     counts["keepout_fail"] = 0 if ko.returncode == 0 else 1
     counts["keepout_log"] = (ko.stdout + ko.stderr)[-6000:]
     if export:
-        for layer in ("F.Cu", "B.Cu"):
-            image_dir = output / layer.replace(".", "_")
-            image_dir.mkdir(exist_ok=True)
-            common = f"{layer[0]}.SilkS,{layer[0]}.CrtYd,Edge.Cuts"
-            image_result = call([kicad_cli, "pcb", "export", "png",
-                                 "--exclude-drawing-sheet", "--layers", layer,
-                                 "--common-layers", common, "--output", image_dir, board])
-            images = sorted(image_dir.glob("*.png"))
-            if image_result.returncode != 0 or not images:
-                raise RuntimeError(f"KiCad 10 2D {layer} PNG export failed: {image_result.stderr}")
-            counts["images"][layer] = str(images[0])
+        counts["image_evidence"] = {}
+        for layer in ("F.Cu","B.Cu"):
+            artifact = export_layer(board, layer, output/layer.replace(".","_"),
+                                    kicad_cli=kicad_cli)
+            if artifact["board_sha256"] != geom.sha256:
+                raise RuntimeError("image belongs to a different board revision")
+            counts["images"][layer] = artifact["png_path"]
+            counts["image_evidence"][layer] = artifact
+        if Board(board).sha256 != geom.sha256:
+            raise RuntimeError("board changed during copper image capture")
     (output / "observation.json").write_text(
         json.dumps(counts, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
     return counts

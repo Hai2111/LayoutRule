@@ -19,6 +19,10 @@ This repository is the **canonical PCB layout reference**, NOT an automatically 
 8. `AI_LAYOUT_RESEARCH.md` for experimental routing benchmarks and new academic results (not automatic quality standards)
 9. `ROUTING_ENGINE_INTEGRATION.md` for safe Claude routing controller/decision rules and Freerouting KiCad10 tool contracts
 
+**Owner review contract (BINDING):** exactly ONE presentation/review at END of session. Owner verdict domain is ONLY `PASS` (ĐẠT) or `FAIL` (KHÔNG ĐẠT). Internal stage states like `KEEP`, `ROLLBACK`, `NEEDS_REVIEW`, `BLOCKED`, and `READY_FOR_OWNER` must never be presented as owner verdicts or require intermediate approval. `FAIL` means record feedback and retry internally in a future session, not request multiple incremental reviews.
+
+**Alternative Freerouting + visual route optimization (EXPERIMENTAL):** use `FREEROUTING_VISUAL_LOOP.md` and `tools/freerouting_visual_loop.py`. This is not a substitute for the canonical owner review contract. Agent inspects actual KiCad F.Cu/B.Cu exports, changes mechanical-safe placements / targeted reroute nets, reruns pinned Freerouting JAR, rejects DRC regressions and retains best isolated candidate. Do not mark as validated until real KiCad benchmark evidence exists.
+
 ## Doing placement and routing (foundation approved; closed-loop executor is experimental)
 **Local execution:** start `tools/layout_controller.py` from `CLOSED_LOOP_RUNBOOK.md`, not by routing every net manually. Model emits JSON geometry actions; KiCad executor edits only a copy. Native DRC, image exports and geometric checks feed the next model iteration. Keep only independently measured improvements, rollback on regressions, and never replace board master or approve without owner.
 **Decision precedence:** Load `rules/owner_decisions.json` before old playbook prose. Explicit `overrides` supersede earlier selected options; `UNCONFIRMED` entries are not permissions. Mechanical-only anchors and final-only owner review take precedence over old region-lock/gate-review text.
