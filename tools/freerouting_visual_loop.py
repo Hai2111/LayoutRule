@@ -18,6 +18,7 @@ from freerouting_visual_decider import ask as vision_ask
 from layout_observer import observe
 from review_feedback import load as read_feedback
 from session_gate import preflight
+from visual_stage_report import StageReport, validate_capture, validate_findings, roi_svg
 
 ROOT=Path(__file__).resolve().parents[1]
 
@@ -105,12 +106,19 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
     if output==board.parent or output in board.parents:
         raise ValueError("output directory must be distinct from board source")
     output.mkdir(parents=True,exist_ok=True)
+    trail=StageReport(output)
+    trail.add("INPUT", "PASS", inputs={"source_board":str(board), "source_sha256":file_hash(board),
+                                     "manifest":str(manifest), "intent":str(intent)})
     manifest_data=json.loads(manifest.read_text(encoding="utf-8"))
     if (manifest.parent/manifest_data.get("board","")).resolve()!=board:
         raise ValueError("manifest board does not match source")
     if manifest_data.get("submission_stage")=="FINAL":
         raise ValueError("run as internal stage; FINAL is reserved for owner review")
     reference=preflight_fn(manifest_data,manifest.parent)
+    trail.add("REFERENCE_PREFLIGHT", reference["status"],
+              reason="; ".join(reference.get("issues",[])),
+              outputs={"source_sha256":reference.get("board_sha256"),
+                       "region_count":len(reference.get("regions",[]))})
     if reference["status"]!="READY":
         result={"status":"BLOCKED","reasons":reference["issues"],"iterations":[]}
         (output/"blocked.json").write_text(json.dumps(result,indent=2),encoding="utf-8")
@@ -123,6 +131,8 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
     if not isinstance(protected,list) or not all(isinstance(x,str) for x in protected):
         raise ValueError("protected_net_names must be JSON list")
     original_hash=file_hash(board)
+    trail.add("MECHANICAL_AND_NET_CONSTRAINTS", "PASS",
+              outputs={"mechanical_anchors":anchors,"protected_nets":protected})
     layout=output/"best_pre_route.kicad_pcb"
     routed=output/"best_routed.kicad_pcb"
     shutil.copy2(board,layout)
@@ -137,7 +147,15 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
     baseline=runroute(layout,output/"baseline_route")
     if not Path(baseline).is_file():
         raise RuntimeError("Freerouting baseline returned nonexistent PCB")
+    trail.add("BASELINE_FREEROUTING", "PASS",
+              inputs={"pre_route_sha256":file_hash(layout)},
+              outputs={"routed_board":str(baseline),"routed_sha256":file_hash(baseline)})
     initial=look(baseline,output/"baseline_observation")
+    initial_proof=validate_capture(baseline,initial)
+    trail.add("BASELINE_IMAGE_AND_DRC", "PROVENANCE_PASS",
+              outputs={"image_evidence":initial.get("image_evidence",{})},
+              metrics=metrics(initial),screenshots=initial_proof,
+              reason="Layer/export/board SHA checked; this does not prove visual diagnosis")
     shutil.copy2(baseline,routed)
     copy_project(baseline,routed)
     best=initial
@@ -153,33 +171,96 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
                  "previous_attempts":history[-4:],"owner_feedback":feedback,
                  "rulebook_path":str(ROOT/"LAYOUT_RULES.md"),"intent_path":str(intent)}
         entry={"iteration":iteration,"state":"STARTED"}
+        before_pre_hash=file_hash(layout)
+        before_routed_hash=file_hash(routed)
+        trail.add("ITERATION_START","PASS",iteration=iteration,
+                  inputs={"best_pre_route_sha256":before_pre_hash,
+                          "best_routed_sha256":before_routed_hash},
+                  metrics=metrics(best),screenshots=initial_proof)
         try:
             plan=decide(context)
             validate_actions(plan)
+            findings=validate_findings(plan,best)
             (folder/"decision.json").write_text(json.dumps(plan,ensure_ascii=False,indent=2),
                                                  encoding="utf-8")
+            marked=[]
+            crop_artifacts={}
+            for index,finding in enumerate(findings,1):
+                crop=roi_svg(best["images"][finding["layer"]],finding["roi"],
+                             folder/f"finding_{index}_{finding['layer'][0]}.svg")
+                marked.append({**finding,"crop":crop,
+                               "verification":"AGENT_VISUAL_HYPOTHESIS_NOT_INDEPENDENTLY_PROVEN"})
+                crop_artifacts[f"Finding {index} — {finding['layer']}"]=crop["path"]
+            trail.add("AGENT_VISUAL_DIAGNOSIS",
+                      "HYPOTHESIS" if plan["actions"] else "NO_ACTION",iteration=iteration,
+                      reason=plan["rationale"],
+                      inputs={"board_sha256":best["board_sha256"]},
+                      outputs={"decision_file":str(folder/"decision.json"),
+                               "image_verification":"PROVENANCE_PASS_NOT_DIAGNOSIS_PROOF"},
+                      findings=marked,screenshots=crop_artifacts)
             if not plan["actions"]:
                 entry.update(state="STOP_NO_SAFE_ACTION",rationale=plan["rationale"])
                 history.append(entry)
                 break
             prepared=prep(layout,folder/"proposed_layout.kicad_pcb",plan)
+            trail.add("PLACEMENT_AND_NET_RIPUP","PASS",iteration=iteration,
+                      inputs={"best_pre_route_sha256":before_pre_hash,
+                              "actions":plan["actions"]},
+                      outputs={"proposed_board":str(prepared),
+                               "proposed_sha256":file_hash(prepared)})
             route=runroute(prepared,folder/"freerouting")
+            trail.add("FREEROUTING_REROUTE","PASS",iteration=iteration,
+                      inputs={"prepared_sha256":file_hash(prepared)},
+                      outputs={"routed_board":str(route),"routed_sha256":file_hash(route)})
             after=look(route,folder/"observation")
+            after_proof=validate_capture(route,after)
+            trail.add("IMAGE_CAPTURE_AND_DRC","PROVENANCE_PASS",iteration=iteration,
+                      reason="KiCad PNG and board SHA verified; defect diagnosis remains a hypothesis",
+                      outputs={"image_evidence":after.get("image_evidence",{})},
+                      metrics=metrics(after),screenshots=after_proof)
             accept,reason=compare(best,after)
+            trail.add("BEFORE_AFTER_EVALUATION","KEEP" if accept else "ROLLBACK",
+                      iteration=iteration,reason=reason,
+                      inputs={"before":metrics(best)},outputs={"after":metrics(after)},
+                      screenshots={**{f"Before {k}":v for k,v in initial_proof.items()},
+                                   **{f"After {k}":v for k,v in after_proof.items()}})
             entry.update(state="KEEP" if accept else "ROLLBACK",reason=reason,
                          rationale=plan["rationale"],actions=plan["actions"],
                          before=metrics(best),after=metrics(after))
             if accept:
+                # Retain exact previous best as an immutable, reviewable snapshot.
+                shutil.copy2(layout,folder/"before_best_pre_route.kicad_pcb")
+                shutil.copy2(routed,folder/"before_best_routed.kicad_pcb")
                 shutil.copy2(prepared,layout)
                 copy_project(prepared,layout)
                 shutil.copy2(route,routed)
                 copy_project(route,routed)
+                if file_hash(layout)!=file_hash(prepared) or file_hash(routed)!=file_hash(route):
+                    raise RuntimeError("KEEP copy hash mismatch; prior best saved in iteration folder")
                 best=after
+                initial_proof=after_proof
                 misses=0
+                trail.add("BEST_CANDIDATE_UPDATE","KEEP",iteration=iteration,
+                          outputs={"best_pre_route_sha256":file_hash(layout),
+                                   "best_routed_sha256":file_hash(routed),
+                                   "previous_best_snapshot":str(folder/"before_best_routed.kicad_pcb")})
             else:
+                if file_hash(layout)!=before_pre_hash or file_hash(routed)!=before_routed_hash:
+                    raise RuntimeError("ROLLBACK integrity failed: best candidate was overwritten")
                 misses+=1
+                trail.add("ROLLBACK","RESTORED_BY_NO_COMMIT",iteration=iteration,
+                          reason=reason,
+                          outputs={"best_pre_route_sha256":file_hash(layout),
+                                   "best_routed_sha256":file_hash(routed),
+                                   "rejected_candidate":str(route)})
         except (RuntimeError,ValueError,OSError,subprocess.TimeoutExpired) as exc:
             entry.update(state="ERROR_ROLLBACK",reason=str(exc)[-1600:])
+            trail.add("ITERATION_FAILURE","ERROR_ROLLBACK",iteration=iteration,
+                      reason=str(exc)[-1600:],
+                      inputs={"previous_best_pre_sha256":before_pre_hash,
+                              "previous_best_routed_sha256":before_routed_hash},
+                      outputs={"current_best_pre_sha256":file_hash(layout),
+                               "current_best_routed_sha256":file_hash(routed)})
             misses+=1
         history.append(entry)
         (output/"iterations.json").write_text(json.dumps(history,ensure_ascii=False,indent=2,default=str),
@@ -190,6 +271,12 @@ def visual_loop(board,manifest,intent,output,*,provider="codex",iterations=8,
             break
     if file_hash(board)!=original_hash:
         raise RuntimeError("source board modified")
+    trail.add("FINAL_INTERNAL_RESULT","NOT_OWNER_APPROVED",
+              reason="Only a final owner review can accept layout; full electrical quality is not proven",
+              outputs={"best_pre_route":str(layout),"best_routed":str(routed),
+                       "best_pre_route_sha256":file_hash(layout),
+                       "best_routed_sha256":file_hash(routed)},
+              metrics=metrics(best),screenshots=initial_proof)
     result={"status":"INTERNAL_CANDIDATE_ONLY","owner_approved":False,
             "source_sha256":original_hash,"best_routed":str(routed),
             "best_pre_route":str(layout),"best_metrics":metrics(best),
