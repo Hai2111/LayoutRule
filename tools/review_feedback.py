@@ -11,10 +11,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 
-VERDICTS = ("ACCEPT", "REVISE", "REJECT", "DEFER")
+VERDICTS = ("PASS", "FAIL")  # owner decision only; historical values remain readable
 
 
 def record(history, session_id, board, feedback, verdict, markers):
+    if verdict not in VERDICTS:
+        raise ValueError('owner verdict must be PASS (ĐẠT) or FAIL (KHÔNG ĐẠT)')
     text = feedback.read_text(encoding="utf-8").strip()
     if not text:
         raise ValueError("owner feedback is empty")
