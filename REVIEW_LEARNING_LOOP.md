@@ -29,11 +29,11 @@ Agent tự làm trọn phiên -> ảnh PCB thực + báo cáo ngắn -> OWNER RE
                      chỉ nâng thành rule sau khi owner duyệt rule đó
 ```
 
-Feedback cần phân biệt:
-- `ACCEPT`: owner nói **"được/đạt"**. Đây mới là quyết định chấp nhận layout; DRC PASS chỉ là điều kiện kỹ thuật cần thiết, không thay cho owner.
-- `REVISE`: owner thấy chưa đạt, chỉ ra marker/vùng hoặc tiêu chí. Agent ghi lại, tự sửa ở phiên **tiếp theo**, không yêu cầu xác nhận từng bước.
-- `REJECT`: phương án không được dùng làm thiết kế cuối, vẫn có thể lưu lỗi có giá trị học tập.
-- `DEFER`: owner chưa quyết định; giữ candidate ở nhánh riêng, không merge.
+**Owner chỉ có đúng hai quyết định cuối phiên:**
+- `PASS` — **ĐẠT**: owner chấp nhận đúng candidate PCB được review.
+- `FAIL` — **KHÔNG ĐẠT**: owner không chấp nhận candidate; agent lưu góp ý nguyên văn và tự chuẩn bị thử nghiệm tiếp theo. Không yêu cầu review giữa chừng.
+
+`BLOCKED`, `NEEDS_REVIEW`, `KEEP`, `ROLLBACK`, `TECHNICAL_READY` và `READY_FOR_OWNER` chỉ là trạng thái **nội bộ** của công cụ, không phải lựa chọn review của owner. Ledger cũ với ACCEPT/REVISE/REJECT/DEFER chỉ dùng để đọc lịch sử, không phát sinh verdict mới.
 
 **Không được suy diễn câu "được" thành chấp thuận một rule mới**. Sửa layout và đổi rule chuẩn là hai hành động riêng; việc đổi rule vẫn phải theo GOVERNANCE.md.
 
@@ -46,7 +46,7 @@ Mỗi phản hồi có một record như sau (có thể nằm ở repo dự án 
   "session_id": "example-session",
   "board_sha256": "<sha256 của PCB được review>",
   "owner_feedback_verbatim": "<nguyên văn owner nhận xét>",
-  "owner_verdict": "REVISE",
+  "owner_verdict": "FAIL",
   "markers": ["R1-P03"],
   "observations": ["Trace đi vòng do vị trí R1"],
   "hypotheses": ["R1 đang chặn kênh escape của U1"],
@@ -59,7 +59,7 @@ Mỗi phản hồi có một record như sau (có thể nằm ở repo dự án 
 }
 ```
 
-Owner chỉ cần cho biết điều **chưa ưng** và/hoặc nói đã **đạt**; agent tự phân tích, phân loại, thử sửa, ghi học và báo kết quả. Không buộc owner phải giải thích kỹ thuật.
+Owner chỉ cần chọn **ĐẠT / KHÔNG ĐẠT** và có thể ghi điều **chưa ưng**; agent tự phân tích, phân loại, thử sửa, ghi học và báo kết quả. Không buộc owner phải giải thích kỹ thuật.
 
 ## Cách nhận biết agent thực sự học được
 
@@ -72,7 +72,7 @@ Owner chỉ cần cho biết điều **chưa ưng** và/hoặc nói đã **đạ
 
 - `TECHNICAL_READY`: các check cần thiết hợp lệ, nhưng **chưa phải owner ACCEPT**.
 - `READY_FOR_OWNER`: agent đã hoàn thiện candidate cuối của phiên và đã tạo báo cáo cuối.
-- `OWNER_ACCEPTED`: owner xác nhận phương án cụ thể; không đồng nghĩa rule chung được duyệt.
+- `OWNER_ACCEPTED`: owner trả **ĐẠT / PASS** cho phương án cụ thể; nếu **KHÔNG ĐẠT / FAIL** thì lưu feedback, không nghiệm thu.
 - `BLOCKED`: agent không được sửa PCB thêm; chỉ báo cáo một lần với lý do và bằng chứng.
 
 Bảo vệ ràng buộc điện/cơ khí, làm việc trên nhánh/copy; không commit/merge main tự động. **Mỗi vòng lặp nội bộ được tự làm, chỉ bản cuối mỗi phiên mới đưa owner xem.**
@@ -82,9 +82,9 @@ Bảo vệ ràng buộc điện/cơ khí, làm việc trên nhánh/copy; không 
 Agent tự ghi file `owner_words.txt` chứa **đúng nguyên văn** góp ý của chủ (không yêu cầu chủ chạy script). Sau đó gọi:
 
 ~~~bash
-python tools/review_feedback.py record --history PROJECT/reviews/owner_feedback.jsonl --session-id SESSION_ID --board PROJECT/final_candidate.kicad_pcb --feedback-file PROJECT/owner_words.txt --verdict REVISE --marker R1-P03
+python tools/review_feedback.py record --history PROJECT/reviews/owner_feedback.jsonl --session-id SESSION_ID --board PROJECT/final_candidate.kicad_pcb --feedback-file PROJECT/owner_words.txt --verdict FAIL --marker R1-P03
 # Trước phiên sau, bắt buộc đọc lại toàn bộ lịch sử
 python tools/review_feedback.py context --history PROJECT/reviews/owner_feedback.jsonl --json
 ~~~
 
-Verdict `ACCEPT` chỉ được nhập khi owner **thực sự xác nhận**; không suy từ DRC hoặc im lặng. Công cụ lưu nguyên văn + SHA của PCB được review + marker + trạng thái chưa có rule được công nhận. Agent tự diễn giải kỹ thuật, tạo thử nghiệm và xác nhận hồi quy ở phiên sau. Ledger thuộc repo dự án, không tự đồng bộ vào rulebook chung.
+Verdict `PASS` chỉ được nhập khi owner **thực sự xác nhận ĐẠT**; không suy từ DRC hoặc im lặng. Công cụ lưu nguyên văn + SHA của PCB được review + marker + trạng thái chưa có rule được công nhận. Agent tự diễn giải kỹ thuật, tạo thử nghiệm và xác nhận hồi quy ở phiên sau. Ledger thuộc repo dự án, không tự đồng bộ vào rulebook chung.
