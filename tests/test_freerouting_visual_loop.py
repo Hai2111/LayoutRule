@@ -6,6 +6,8 @@ Tests the orchestrator only. A real KiCad10 + JAR smoke test remains required.
 import hashlib
 import json
 import shutil
+import struct
+import zlib
 import sys
 import tempfile
 import unittest
@@ -16,6 +18,24 @@ sys.path.insert(0,str(ROOT/"tools"))
 from freerouting_prepare import validate_actions
 from freerouting_visual_decider import select_context
 from freerouting_visual_loop import visual_loop
+
+
+def valid_png():
+    def chunk(tag, blob):
+        return (struct.pack(">I",len(blob))+tag+blob+
+                struct.pack(">I",zlib.crc32(tag+blob) & 0xffffffff))
+    raw=b"\\x00"+b"\\x70\\x98\\x20"
+    return (b"\\x89PNG\\r\\n\\x1a\\n"+
+            chunk(b"IHDR",struct.pack(">IIBBBBB",1,1,8,2,0,0,0))+
+            chunk(b"IDAT",zlib.compress(raw))+
+            chunk(b"IEND",b""))
+
+
+def finding():
+    return {"layer":"F.Cu","roi":[0.1,0.1,0.9,0.9],
+            "ref":"R1","problem":"pad escape detour near R1",
+            "reason":"confirmed ref exists; image diagnosis still hypothesis",
+            "expected_change":"reduce unconnected / shorten route"}
 
 
 class ValidatedActions(unittest.TestCase):
@@ -82,9 +102,14 @@ class FakeLocalKiCadLoop(unittest.TestCase):
         images={}
         for layer in ("F.Cu","B.Cu"):
             png=out/(layer.replace(".","_")+".png")
-            png.write_bytes(b"\x89PNG\r\n\x1a\nMOCK")
+            png.write_bytes(valid_png())
             images[layer]=str(png)
-        return {"board_sha256":hashlib.sha256(board.read_bytes()).hexdigest(),
+        board_sha=hashlib.sha256(board.read_bytes()).hexdigest()
+        proof={layer: {"layer":layer,"board_sha256":board_sha,
+                       "png_sha256":hashlib.sha256(Path(images[layer]).read_bytes()).hexdigest(),
+                       "export_command":["kicad-cli","pcb","export","png","--layers",layer],
+                       "export_exit_code":0} for layer in ("F.Cu","B.Cu")}
+        return {"board_sha256":board_sha,"image_evidence":proof,
                 "drc_errors":int("BAD" in data),
                 "unconnected":3 if "GOOD" in data else 4,
                 "audit_fail":0,"keepout_fail":0,
@@ -109,7 +134,7 @@ class FakeLocalKiCadLoop(unittest.TestCase):
         contexts=[]
         def decider(ctx):
             contexts.append(ctx)
-            return {"rationale":next(plans),"actions":[
+            return {"rationale":next(plans),"findings":[finding()],"actions":[
                 {"op":"move","ref":"R1","x_mm":6.0,"y_mm":7.0}]}
         result=self.exercise_loop(decider,iterations=2)
         self.assertEqual([r["state"] for r in result["iterations"]],["KEEP","ROLLBACK"])
@@ -133,7 +158,7 @@ class FakeLocalKiCadLoop(unittest.TestCase):
 
     def test_two_nonimproving_tries_end_session(self):
         def decider(ctx):
-            return {"rationale":"UNCHANGED","actions":[
+            return {"rationale":"UNCHANGED","findings":[finding()],"actions":[
                 {"op":"rotate","ref":"R1","degrees":0}]}
         result=self.exercise_loop(decider,iterations=10)
         self.assertEqual(len(result["iterations"]),2)
