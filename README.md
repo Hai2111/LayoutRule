@@ -19,6 +19,9 @@
 - [rules/owner_decisions.json](rules/owner_decisions.json) — **dữ liệu gốc Q01–Q35**: 32 lựa chọn A/B/C, Q22 xác nhận bằng lời, Q14/Q35 chưa chọn; các quyết định mới thay thế được đánh dấu rõ để agent không áp dụng rule cũ.
 - [REVIEW_LEARNING_LOOP.md](REVIEW_LEARNING_LOOP.md) — **owner chỉ review bản cuối sau báo cáo**, agent giữ nguyên văn góp ý, đọc lại ở phiên sau; không khóa vùng/linh kiện trừ neo cơ khí và không tự công nhận rule.\n- [SESSION_PIPELINE.md](SESSION_PIPELINE.md) — **ONE SESSION = ONE OWNER REVIEW**: reference phải đủ bằng chứng trước routing, thiếu là GLOBAL STOP; hai candidate trên branch riêng; 1 ảnh tổng hợp và tối đa 5 dòng để chủ duyệt cuối phiên.
 
+## Autolayout đã học (PROPOSED 2026-11-26)
+- [AUTOLAYOUT_LEARNED.md](AUTOLAYOUT_LEARNED.md) — tổng hợp 20 bài học, quy trình tác tử quan sát (nhìn ảnh → sửa đúng chỗ → DRC), so sánh với Vector; mã trong [autolayout/](autolayout/).
+
 ## Routing engine (bổ sung 2026-11-15)
 - [ROUTING_ENGINE_INTEGRATION.md](ROUTING_ENGINE_INTEGRATION.md) — so sánh Freerouting DSN/SES và PCBWorld/CADET, luật routing + cách kiểm tra native DRC. Code thử nghiệm đã commit trong [Hai2111/Training/routing](https://github.com/Hai2111/Training/tree/main/routing).
 - [tools/route_pipeline.ps1](tools/route_pipeline.ps1) — cổng reference bắt buộc; nhận CandidateBoard do agent tạo hoặc FreeroutingProposal thử nghiệm; native KiCad DRC + geometry audit. Xem [setup/SMOKE_TEST.md](setup/SMOKE_TEST.md) cho giới hạn đã xác minh.
