@@ -3,6 +3,26 @@
 **Hard contract:** ONE SESSION = ONE OWNER REVIEW OF THE FINAL CANDIDATE, AFTER REPORT. No region-level/G1/G3/G5 approval prompts and no layout locking beyond required mechanical anchors. The owner decides acceptance through exactly TWO final outcomes: PASS (ĐẠT) or FAIL (KHÔNG ĐẠT). Internal gate statuses are not owner outcomes. See REVIEW_LEARNING_LOOP.md.
 This implementation does not edit canonical rules or merge a branch.
 
+## Step 0: whole-board review before any edit
+
+Run at the start of every session, on a board that has its `.kicad_pro` and schematics beside it:
+
+~~~powershell
+<kicad-python> tools\session_start.py review projectoard.kicad_pcb project\layout_intent.json --out project\session_start
+python tools\session_start.py check project\session_start\SESSION_START.md
+~~~
+
+1. `review` records the baseline (KiCad DRC with the project's own rules + schematic parity), renders the board and a zoom
+   per hot loop / IC / connector, and measures power-net widths, necks at IC pins, loop size, thermal pads, switch-node
+   proximity on both layers, board-edge/radio-module exposure, and runs the existing checkers. It never edits the board.
+2. The agent opens every image, replaces each `TODO` with what it sees, adds the findings only visible there, and writes
+   the fix order with a reason.
+3. `check` exits 3 until no `TODO` is left. **No placement or routing edit before it exits 0.**
+4. Do not relax a project DRC rule to make a check pass.
+
+Limits: geometry screening only (no field solver, no thermal or EMC proof); pad currents are taken as the whole net current;
+`drc_body_keepout.py` does not currently parse KiCad 10 boards and the report says so when it crashes.
+
 ## Work flow
 
 1. Agent writes session.json before changing PCB, with references for every region
