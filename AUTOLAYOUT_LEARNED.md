@@ -21,17 +21,46 @@ làm tốt hơn hẳn trên cùng placement đầu vào:
 2 via chênh với Vector đều ở PWM_R; Vector bỏ được nhờ đoạn +5V dưới mép thân U1, việc mà owner từng đánh giá là lỗi.
 **Chờ owner quyết:** có cho phép đoạn nguồn ngắn dưới mép thân IC hay không.
 
-## 2. Quy trình đề xuất
+## 2. Quy trình đề xuất (ghép với SESSION_PIPELINE.md trên main)
 
-1. **Rà schematic** (`tools/sch_check.py`): chỉ cảnh báo (tụ reset, giá trị tụ theo datasheet, mã TVS chung chung). Người quyết sửa.
-2. **Bản nháp tự động** (`autolayout.py`): suy ý đồ từ netlist, hoán vị cụm linh kiện giống nhau và route thật từng hoán vị
-   (`tools/swap_blocks.py`), đi dây theo tầng USB → nguồn → CC → tụ/GND → gate → tín hiệu chậm.
-3. **Tác tử quan sát** (`tools/agent_edit.py`): `show` (ảnh có tên net, crop 60 px/mm) → nhận xét theo vị trí tương đối →
-   `move/swap/nudge` linh kiện, `rip/ripnear` + `route` vài net → `check` (DRC + via) → `undo` nếu xấu hơn.
-   Mỗi bước là một file `stepNN_*.kicad_pcb` + dòng nhật ký `log.jsonl`.
-4. **Chất lượng GND** (`agent_edit.py pour`): đổ đồng GND mặt trên (SMD nối đặc, THT thermal), via khâu lưới 3 mm ở chỗ trống cả 2 lớp.
-5. **Tự kiểm quan hệ** (`tools/self_review.py`): R1 dây dưới thân, R2 dây kẹp giữa pad 2 linh kiện, R3 thứ tự cấp nguồn.
-6. Báo cáo cuối: 1 ảnh + ĐẠT/KHÔNG ĐẠT.
+Tác tử quan sát chạy **bên trong** các cổng đã có của repo, không thay chúng:
+
+1. **Rà schematic** (`autolayout/tools/sch_check.py`): chỉ cảnh báo (tụ reset, giá trị tụ theo datasheet, mã TVS chung chung). Người quyết sửa.
+2. **Bản nháp tự động** (`autolayout/autolayout.py`): suy ý đồ từ netlist, hoán vị cụm linh kiện giống nhau và route thật từng hoán vị,
+   đi dây theo tầng USB → nguồn → CC → tụ/GND → gate → tín hiệu chậm.
+3. **Cổng bắt buộc** (`agent_edit.py WORK start`):
+   - **Bước 0** = `tools/session_start.py review` của repo trên bản nháp. Tác tử mở từng ảnh và thay hết `TODO` trong `SESSION_START.md`.
+   - **Cổng reference** = `tools/session_gate.py preflight session.json`. Thiếu reference → BLOCKED toàn board (đúng `reference_missing_behavior: GLOBAL_STOP`).
+     `--training` bỏ qua cổng này **chỉ cho bài luyện tập**, ghi vào nhật ký; không dùng cho dự án thật.
+   - Mọi lệnh sửa (`move/swap/nudge/rip/ripnear/route/pour/padconn/cleanvias`) tự gọi `gate` và thoát mã 3 khi một trong hai cổng chưa qua.
+4. **Tác tử quan sát** (`agent_edit.py`): `show` (ảnh có tên net, crop 60 px/mm) → nhận xét theo vị trí tương đối →
+   sửa một chỗ → `check` (DRC + via + self_review R1/R2/R3) → `undo` nếu xấu hơn. Mỗi bước là `stepNN_*.kicad_pcb` + một dòng `log.jsonl`.
+5. **Chất lượng GND** (`agent_edit.py pour`): đổ đồng GND mặt trên (SMD nối đặc, THT thermal), via khâu lưới 3 mm ở chỗ trống cả 2 lớp.
+6. Báo cáo cuối theo REVIEW_LEARNING_LOOP.md: 1 ảnh + ≤5 dòng, owner chỉ chọn ĐẠT / KHÔNG ĐẠT.
+
+**Tiêu chí giữ hay bỏ một bản sửa (thứ tự ưu tiên):** DRC không xấu hơn → không thêm lỗi vị trí tương đối (dây dưới thân, dây kẹp giữa pad,
+sai thứ tự nguồn) → nguồn không bị đẩy xuống lớp dưới → **sau cùng** mới xét số via / chiều dài.
+
+## 2b. Khác biệt với pipeline Freerouting trên main (cần owner chọn)
+
+| | `FREEROUTING_VISUAL_LOOP.md` (main) | Đề xuất này |
+|---|---|---|
+| Ai đi dây | Freerouting; tác tử chỉ đề xuất MOVE/ROTATE/REROUTE_NET | `pyroute` do tác tử điều khiển từng net |
+| Giữ/bỏ bản sửa | "Không có cải thiện kỹ thuật thì giảm via hoặc chiều dài là được nhận" | Theo thứ tự ở trên; via là tiêu chí cuối |
+| Ảnh | KiCad SVG → PNG (cần CairoSVG hoặc Inkscape) | pcbnew + PIL, có tên net; ảnh render KiCad lấy từ bước 0 |
+| Số phương án | REF + OPT | Một bản, hoàn tác theo bước |
+
+Bằng chứng cho dòng "giữ/bỏ": tối ưu theo số via (`tools/improve.py`, 1 giờ) đẩy +5V xuống B.Cu qua 2 via; tác tử theo vị trí tương đối không mắc lỗi đó.
+Trên máy owner hiện **không có CairoSVG lẫn Inkscape**, nên vòng Freerouting chưa chạy được ở bước ảnh.
+
+**Lỗi công cụ repo phát hiện khi chạy bước 0 thật (2026-11-27):** `session_start.py` cắt zoom lệch trên board vuong 30×30 mm vì render 2000×2600
+không giữ tỉ lệ và khung ảnh được coi là viền board (zoom_J3 thực tế hiện U1, J4 nằm ngoài khung); `drc_body_keepout.py` vẫn crash trên KiCad 10.
+
+## 2c. Phạm vi — owner cần quyết
+
+`rules/owner_decisions.json` ghi: chưa giao board chuẩn (`OVR-NO-ASSIGNED-BOARD`), không tự chọn board Training, demo USB-C không đưa vào
+LayoutRule (`OVR-USB-C-OUT-OF-SCOPE`). Bằng chứng chính ở đây là board STM8 RGB USB-C, do owner giao trong chat ngày 2026-11-22
+("Thử board STM8 trước"). Đề xuất: coi STM8 là **bài luyện tập**, chỉ đưa vào repo phần quy trình và công cụ; owner quyết có giữ số liệu STM8 trong file này không.
 
 ## 3. Bài học (20 mục, đầy đủ trong `autolayout/learn/lessons.jsonl`)
 

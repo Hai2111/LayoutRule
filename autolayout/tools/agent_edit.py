@@ -1,5 +1,11 @@
 """agent_edit.py - cong cu cho TAC TU QUAN SAT: moi lenh tao 1 buoc moi (stepNN.kicad_pcb) + ghi nhat ky, hoan tac duoc.
-  KP agent_edit.py WORK init BOARD.kicad_pcb PROJECT.kicad_pro INTENT.json
+  KP agent_edit.py WORK init BOARD.kicad_pcb PROJECT.kicad_pro INTENT.json [SCHEMATIC.kicad_sch]
+  KP agent_edit.py WORK start [layout_intent.json] [session.json | --training]
+        CONG BAT BUOC truoc moi lenh sua (LayoutRule SESSION_PIPELINE):
+        (1) buoc 0 session_start.py review -> WORK/session_start/SESSION_START.md; tac tu mo tung anh, thay het TODO
+        (2) cong reference session_gate.py preflight session.json; thieu reference = BLOCKED toan board.
+            --training: bo qua cong (2) cho bai luyen tap, ghi ro vao nhat ky; khong dung cho du an that.
+  KP agent_edit.py WORK gate                        kiem lai 2 cong (lenh sua tu goi)
   KP agent_edit.py WORK move REF X Y [ROT]          dat linh kien (mm, do)
   KP agent_edit.py WORK nudge REF DX DY [DROT]      dich tuong doi
   KP agent_edit.py WORK rip NET[,NET...]            go day + via cua net
@@ -7,6 +13,8 @@
   KP agent_edit.py WORK check                       DRC + via tin hieu + net ho cua buoc hien tai
   KP agent_edit.py WORK undo                        quay ve buoc truoc
   KP agent_edit.py WORK show OUT.png [x0,y0,x1,y1]  anh (co ten net) toan board hoac vung (mm, toa do board)
+Giu hay bo mot ban sua (thu tu uu tien): DRC khong xau hon -> khong them loi vi tri tuong doi (self_review R1 duoi than,
+R2 kep giua pad, R3 thu tu nguon) -> nguon khong bi day xuong lop duoi -> SAU CUNG moi xet via/chieu dai.
 Buoc hien tai = WORK/cur.txt. Nhat ky = WORK/log.jsonl. Loi route (FAIL) van luu buoc nhung bao ro.
 """
 import json, os, shutil, subprocess, sys, time
@@ -35,6 +43,29 @@ def commit(path, what, extra=None):
     print("buoc moi:", os.path.basename(path))
 
 
+def layoutrule_tools():
+    """thu muc tools/ cua LayoutRule: trong repo (autolayout/ nam trong repo) hoac ban clone o ../rule"""
+    for c in (os.environ.get("LAYOUTRULE_TOOLS", ""), os.path.join(HERE, "..", "..", "tools"), os.path.join(HERE, "..", "..", "rule", "tools")):
+        if c and os.path.isfile(os.path.join(c, "session_start.py")):
+            return os.path.abspath(c)
+    sys.exit("khong tim thay LayoutRule tools/session_start.py (dat LAYOUTRULE_TOOLS)")
+
+
+def gate():
+    """True khi ca 2 cong da qua; in ly do neu chua"""
+    st = os.path.join(W, "gate.json")
+    if not os.path.exists(st):
+        print("BLOCKED: chua chay 'start' (buoc 0 + cong reference)"); return False
+    g = json.load(open(st, encoding="utf-8"))
+    r = subprocess.run([sys.executable, os.path.join(layoutrule_tools(), "session_start.py"), "check", os.path.join(W, "session_start", "SESSION_START.md")],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        print("BLOCKED buoc 0:", (r.stdout + r.stderr).strip().splitlines()[-1]); return False
+    if g["reference"] not in ("READY", "TRAINING_SKIP"):
+        print("BLOCKED cong reference:", g["reference"]); return False
+    return True
+
+
 def stats(path):
     import pcbnew
     t = list(pcbnew.LoadBoard(path).GetTracks()); v = {}
@@ -47,7 +78,41 @@ def stats(path):
 if CMD == "init":
     os.makedirs(W, exist_ok=True)
     shutil.copy(A[1], os.path.join(W, "project.kicad_pro")); shutil.copy(A[2], os.path.join(W, "intent.json"))
+    if len(A) > 3:
+        shutil.copy(A[3], os.path.join(W, "schematic.kicad_sch"))
     p = new_step("init"); shutil.copy(A[0], p); commit(p, f"init tu {A[0]}")
+
+elif CMD == "start":
+    lt = layoutrule_tools(); out = os.path.join(W, "session_start"); os.makedirs(out, exist_ok=True)
+    rb = os.path.join(out, "review_board.kicad_pcb"); shutil.copy(cur(), rb)
+    shutil.copy(os.path.join(W, "project.kicad_pro"), rb[:-10] + ".kicad_pro")
+    if os.path.exists(os.path.join(W, "schematic.kicad_sch")):
+        shutil.copy(os.path.join(W, "schematic.kicad_sch"), rb[:-10] + ".kicad_sch")
+    li = A[0] if A and A[0].endswith(".json") and "session" not in os.path.basename(A[0]) else None
+    if not li:
+        li = os.path.join(out, "layout_intent.json")
+        json.dump({"nets": {}, "hot_loops": [], "note": "ASSUMED: chua co layout_intent cua du an"}, open(li, "w"))
+    r = subprocess.run([KP, os.path.join(lt, "session_start.py"), "review", rb, li, "--out", out], capture_output=True, text=True)
+    print((r.stdout + r.stderr).strip()[-600:])
+    man = next((a for a in A if os.path.basename(a).startswith("session") and a.endswith(".json")), None)
+    if "--training" in A:
+        ref = "TRAINING_SKIP"
+    elif man:
+        rr = subprocess.run([sys.executable, os.path.join(lt, "session_gate.py"), "preflight", man, "--output-dir", os.path.join(W, "session_review")], capture_output=True, text=True)
+        ref = "READY" if rr.returncode == 0 else "BLOCKED"
+        print((rr.stdout + rr.stderr).strip()[-600:])
+    else:
+        ref = "BLOCKED (khong co session.json reference manifest)"
+    json.dump({"board": os.path.basename(cur()), "reference": ref}, open(os.path.join(W, "gate.json"), "w"))
+    with open(os.path.join(W, "log.jsonl"), "a", encoding="utf-8") as f:
+        f.write(json.dumps(dict(ts=time.strftime("%H:%M:%S"), step=os.path.basename(cur()), prev=os.path.basename(cur()), what=f"start: buoc 0 + reference={ref}"), ensure_ascii=False) + "\n")
+    print("reference:", ref, "| mo tung anh trong", out, "va thay het TODO trong SESSION_START.md, roi chay 'gate'")
+
+elif CMD == "gate":
+    print("GATE OK" if gate() else "")
+
+elif CMD in ("move", "nudge", "swap", "rip", "ripnear", "route", "cleanvias", "pour", "padconn") and not gate():
+    sys.exit(3)
 
 elif CMD in ("move", "nudge"):
     import pcbnew
@@ -177,6 +242,9 @@ elif CMD == "check":
     for u in j["unconnected_items"][:8]:
         print("  ho", " / ".join(i["description"][:60] for i in u["items"]))
     v, L = stats(c); print("via tin hieu", sum(v.values()), v, "| dai", L, "mm")
+    sr = subprocess.run([KP, os.path.join(HERE, "self_review.py"), c, os.path.join(W, "intent.json")], capture_output=True, text=True).stdout
+    blk = [l for l in sr.splitlines() if l.startswith(("R1", "R2", "R3")) or l.startswith("    ")]
+    print("tu kiem vi tri tuong doi:"); print("\n".join(blk[:16]))
 
 elif CMD == "undo":
     log = [json.loads(l) for l in open(os.path.join(W, "log.jsonl"), encoding="utf-8")]
