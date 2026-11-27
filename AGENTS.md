@@ -36,6 +36,8 @@ When the task is to **produce** a layout rather than review one, follow **`ITERA
 
 **Before each new session**, execute `python tools/review_feedback.py context --history PROJECT/reviews/owner_feedback.jsonl` (or read the ledger directly) and explicitly translate unresolved owner feedback into candidate experiments. **After each owner review**, store verbatim feedback using `review_feedback.py record`; do not promote a global rule just because owner accepted a layout. See REVIEW_LEARNING_LOOP.md.
 
+**Step 0 (before any edit):** run `tools/session_start.py review`, open the images, fill the report, and pass `tools/session_start.py check` (see SESSION_PIPELINE.md).
+
 ## Before acting on a PCB
 - Read current schematic/board, datasheets, manufacturability, stackup and **project-local** constraints.
 - **Reference-gated candidate:** see SESSION_PIPELINE.md and REVIEW_LEARNING_LOOP.md. Before ANY placement/routing mutation, run session_gate.py preflight for ALL reference regions/layers; missing reference = GLOBAL STOP. Validate an independently generated agent candidate by running route_pipeline.ps1 with -Board, -SessionManifest, -CandidateBoard and -IntentPath. The script runs KiCad native DRC plus geometry/keepout audits and never approves or merges anything. -FreeroutingProposal is an explicit experiment, NOT evidence of INV-3 agent-owned routing. Generate one Reference / Candidate REF / Candidate OPT montage and ≤5-line summary **only when the final candidate of the session is ready**. Owner reviews once after the report, not at G1/G3/G5. Capture owner feedback verbatim with board hash and region markers; next session must read it, attempt an evidence-backed repair, and log lessons and counterexamples.
