@@ -6,9 +6,9 @@ import glob, json, os, re, shutil, subprocess, sys, time
 from multiprocessing import Pool
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KP = r"C:\Program Files\KiCad\10.0\bin\python.exe"
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "tools")); from kenv import KP, CLI, FP  # KiCad tim tu dong (tools/kenv.py)
 TOOLS = os.path.join(HERE, "tools")
-REF = os.path.join(HERE, "..", "ref", "Kicad")
+REF = os.environ.get("LAYOUTRULE_REF") or os.path.join(HERE, "..", "ref", "Kicad")   # ref board cua owner, khong nam trong repo
 BOARDS = ["1908_Lora_Externder/Lora_Externder/LoraExt.kicad_pcb", "Bike Track/Bike Track.kicad_pcb", "LTE Network card/BLE2LTE.kicad_pcb",
           "RA01_SCH_PCB/RA-01SCH_SMOKE.kicad_pcb", "SR01/0722_SR01.kicad_pcb", "DaLogg/BUTTON.kicad_pcb"]
 DEFPRO = os.path.join(HERE, "default.kicad_pro")

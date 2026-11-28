@@ -20,7 +20,7 @@ Buoc hien tai = WORK/cur.txt. Nhat ky = WORK/log.jsonl. Loi route (FAIL) van luu
 import json, os, shutil, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KP = r"C:\Program Files\KiCad\10.0\bin\python.exe"; CLI = r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__))); from kenv import KP, CLI, FP  # KiCad tim tu dong (kenv.py)
 W = os.path.abspath(sys.argv[1]); CMD = sys.argv[2]; A = sys.argv[3:]
 ENV = dict(os.environ, PYROUTE_RES="0.05", MSYS_NO_PATHCONV="1")
 

@@ -19,7 +19,7 @@ import subprocess
 import sys
 import time
 
-KP = r"C:/Program Files/KiCad/10.0/bin/python.exe"
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__))); from kenv import KP, CLI, FP  # KiCad tim tu dong (kenv.py)
 TOOLS = os.path.dirname(os.path.abspath(__file__))
 NOISE = ("assert", "image handler")
 

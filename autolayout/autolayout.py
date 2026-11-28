@@ -12,7 +12,7 @@ import json, math, os, re, subprocess, sys, shutil, hashlib, time
 import pcbnew
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KP = r"C:\Program Files\KiCad\10.0\bin\python.exe"; CLI = r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "tools")); from kenv import KP, CLI, FP  # KiCad tim tu dong (tools/kenv.py)
 T = os.path.join(HERE, "tools")
 sys.path.insert(0, T)
 import sch_check

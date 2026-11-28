@@ -11,8 +11,8 @@ import glob, json, os, re, shutil, subprocess, sys, time
 from multiprocessing import Pool
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KP = r"C:\Program Files\KiCad\10.0\bin\python.exe"
-FP = r"C:\Program Files\KiCad\10.0\share\kicad\footprints"
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), "tools")); from kenv import KP, CLI, FP  # KiCad tim tu dong (tools/kenv.py)
+# FP: tu kenv
 PRO = os.path.join(HERE, "default.kicad_pro")
 
 

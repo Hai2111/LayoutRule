@@ -8,7 +8,7 @@ import json, os, shutil, subprocess, sys, time
 from concurrent.futures import ThreadPoolExecutor
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-KP = r"C:\Program Files\KiCad\10.0\bin\python.exe"; CLI = r"C:\Program Files\KiCad\10.0\bin\kicad-cli.exe"
+import os as _os, sys as _sys; _sys.path.insert(0, _os.path.dirname(_os.path.abspath(__file__))); from kenv import KP, CLI, FP  # KiCad tim tu dong (kenv.py)
 RIP = "import pcbnew,sys\nb=pcbnew.LoadBoard(sys.argv[1]); ns=set(sys.argv[3].split(','))\n" \
       "[b.Remove(t) for t in list(b.GetTracks()) if t.GetNetname() in ns]\nb.Save(sys.argv[2])\n"
 STAT = "import pcbnew,sys,json\nt=list(pcbnew.LoadBoard(sys.argv[1]).GetTracks()); v={}\n" \

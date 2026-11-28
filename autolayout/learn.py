@@ -8,8 +8,8 @@ Trang thai: CANDIDATE -> TRIED (da thu tren 1 board) -> IMPLEMENTED (co trong co
 """
 import hashlib, json, os, subprocess, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__)); L = os.path.join(HERE, "learn")
-KP = r"C:\Program Files\KiCad\10.0\bin\python.exe"; TOOLS = os.path.join(HERE, "tools")
-REFROOT = os.path.join(HERE, "..", "ref", "Kicad")
+TOOLS = os.path.join(HERE, "tools"); sys.path.insert(0, TOOLS); from kenv import KP  # KiCad tim tu dong (tools/kenv.py)
+REFROOT = os.environ.get("LAYOUTRULE_REF") or os.path.join(HERE, "..", "ref", "Kicad")   # ref board cua owner, khong nam trong repo
 
 def sha(p):
     return hashlib.sha256(open(p, "rb").read()).hexdigest()[:16]
