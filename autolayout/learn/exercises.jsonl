@@ -1,0 +1,12 @@
+{"exercise": "bus2ic", "rot": 0, "dy": 0.0, "vias": 8, "length": 107.8, "fail": 0, "drc": 100, "unconnected": 0, "secs": 113, "dir": "exercises/bus2ic\\bus2ic_rot0_dy00", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 0, "dy": 1.0, "vias": 8, "length": 109.2, "fail": 0, "drc": 100, "unconnected": 0, "secs": 81, "dir": "exercises/bus2ic\\bus2ic_rot0_dy10", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 0, "dy": 2.0, "vias": 0, "length": 48.2, "fail": 4, "drc": 94, "unconnected": 4, "secs": 674, "dir": "exercises/bus2ic\\bus2ic_rot0_dy20", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 0, "dy": 3.0, "vias": 8, "length": 114.4, "fail": 0, "drc": 98, "unconnected": 0, "secs": 114, "dir": "exercises/bus2ic\\bus2ic_rot0_dy30", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 0, "dy": 4.0, "vias": 8, "length": 117.0, "fail": 0, "drc": 100, "unconnected": 0, "secs": 113, "dir": "exercises/bus2ic\\bus2ic_rot0_dy40", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 0, "dy": 6.0, "vias": 8, "length": 122.6, "fail": 0, "drc": 100, "unconnected": 0, "secs": 81, "dir": "exercises/bus2ic\\bus2ic_rot0_dy60", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 180, "dy": 0.0, "vias": 0, "length": 42.4, "fail": 5, "drc": 96, "unconnected": 5, "secs": 745, "dir": "exercises/bus2ic\\bus2ic_rot180_dy00", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 180, "dy": 1.0, "vias": 2, "length": 57.9, "fail": 4, "drc": 94, "unconnected": 4, "secs": 704, "dir": "exercises/bus2ic\\bus2ic_rot180_dy10", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 180, "dy": 2.0, "vias": 0, "length": 42.4, "fail": 5, "drc": 92, "unconnected": 5, "secs": 755, "dir": "exercises/bus2ic\\bus2ic_rot180_dy20", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 180, "dy": 3.0, "vias": 0, "length": 42.4, "fail": 5, "drc": 92, "unconnected": 5, "secs": 721, "dir": "exercises/bus2ic\\bus2ic_rot180_dy30", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 180, "dy": 4.0, "vias": 0, "length": 42.4, "fail": 5, "drc": 94, "unconnected": 5, "secs": 732, "dir": "exercises/bus2ic\\bus2ic_rot180_dy40", "ts": "2026-11-23 17:26"}
+{"exercise": "bus2ic", "rot": 180, "dy": 6.0, "vias": 0, "length": 42.4, "fail": 5, "drc": 94, "unconnected": 5, "secs": 691, "dir": "exercises/bus2ic\\bus2ic_rot180_dy60", "ts": "2026-11-23 17:26"}

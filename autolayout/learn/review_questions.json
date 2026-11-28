@@ -1,0 +1,359 @@
+{
+ "version": "2026-11-27",
+ "how_to_use": "Moi lan review chay tools/review_run.py: cau 'auto' do may tra loi (PASS/FAIL + bang chung); cau 'image' agent PHAI mo anh close-up cua tung khoi va tra loi tung cau, ghi bang chung (toa do / ten linh kien). Khong duoc bo cau nao. Cau moi duoc THEM vao cuoi, khong xoa (knowledge-is-cumulative). Moi cau phai co rule/lesson goc. Thu tu giai doan (owner 2026-11-27): chi xet cac cau stage='finish' (silkscreen, nhan) SAU KHI moi cau stage='place_route' da PASS; truoc do chung la DEFERRED.",
+ "questions": [
+  {
+   "id": "Q01",
+   "mode": "auto",
+   "check": "drc_errors",
+   "rules": [
+    "R01",
+    "R13",
+    "A02"
+   ],
+   "q": "DRC co 0 loi (clearance, hole, edge, courtyard)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q02",
+   "mode": "auto",
+   "check": "unconnected",
+   "rules": [
+    "R01"
+   ],
+   "q": "Khong con net ho (airwire)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q03",
+   "mode": "auto",
+   "check": "power_order",
+   "rules": [
+    "L03",
+    "L15",
+    "L56",
+    "P06"
+   ],
+   "q": "Moi tai nguon nhan dong theo thu tu nguon -> TVS -> bulk -> tai, tu decap truoc chan IC?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q04",
+   "mode": "auto",
+   "check": "decap_distance",
+   "rules": [
+    "P04",
+    "L19",
+    "D-DECAP"
+   ],
+   "q": "Moi tu decap cach chan no phuc vu <= 2.0 mm (mep pad - mep pad), toi da 4.0 mm?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q05",
+   "mode": "auto",
+   "check": "power_width",
+   "rules": [
+    "L31",
+    "L54",
+    "R04"
+   ],
+   "q": "Be rong nguon khong no ra doc duong (doan o pad nguon rong nhat)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q06",
+   "mode": "auto",
+   "check": "via_pad",
+   "rules": [
+    "L34",
+    "L52",
+    "P09"
+   ],
+   "q": "Khong via nao trong/sat pad SMD (< 0.2 mm sai, < 0.25 mm can xem)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q07",
+   "mode": "auto",
+   "check": "hug",
+   "rules": [
+    "L57"
+   ],
+   "q": "Khong track nao chay doc hang chan cua linh kien khac?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q08",
+   "mode": "auto",
+   "check": "angle45",
+   "rules": [
+    "L61",
+    "R09"
+   ],
+   "q": "Moi doan nhin thay duoc deu 0/45/90 do?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q09",
+   "mode": "auto",
+   "check": "power_under_ic",
+   "rules": [
+    "owner: khong di nguon duoi than IC"
+   ],
+   "q": "Khong track nguon nao chay duoi than IC?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q10",
+   "mode": "auto",
+   "check": "gnd_solid",
+   "rules": [
+    "L59",
+    "G02"
+   ],
+   "q": "GND la zone solid ca 2 lop, khong con doan day GND?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q11",
+   "mode": "auto",
+   "check": "usb_vias",
+   "rules": [
+    "R02",
+    "L33",
+    "L63"
+   ],
+   "q": "Cap USB D+/D- khong co via; neu co thi da co chung minh bat buoc (L63)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q12",
+   "mode": "auto",
+   "check": "power_transition_vias",
+   "rules": [
+    "D-VIA",
+    "R04"
+   ],
+   "q": "Moi cho doi lop cua net nguon co du via theo dong (>= 2 cho nhanh tai that; 1 chap nhan cho chan cam bien/ESD khong mang dong)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q13",
+   "mode": "auto",
+   "check": "route_audit",
+   "rules": [
+    "L58"
+   ],
+   "q": "Chi so gon (sat chan, duoi than IC, vao chan tu phia than, via/net) nam trong khoang ref? (gap khuc/10mm chi de tham khao: ban owner sua co bend cao hon do cap vi sai doi xung va bus deu)",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q14",
+   "mode": "auto",
+   "check": "signal_vias",
+   "rules": [
+    "R08",
+    "L20",
+    "L47"
+   ],
+   "q": "Net tin hieu nao > 2 via (dau hieu phai quay ve placement)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q15",
+   "mode": "auto",
+   "check": "sch_changes",
+   "rules": [
+    "L50",
+    "L26"
+   ],
+   "q": "Moi thay doi netlist tren board (setnet) da ghi SCHEMATIC_CHANGES.md va can sua schematic theo?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q16",
+   "mode": "auto",
+   "check": "edge_clear",
+   "rules": [
+    "L53",
+    "R13"
+   ],
+   "q": "Moi via/track cach mep board >= min_copper_edge_clearance cua LUAT DU AN (khong tu dat nguong rieng)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q19",
+   "mode": "auto",
+   "check": "corner45",
+   "stage": "place_route",
+   "rules": [
+    "L68",
+    "R09"
+   ],
+   "q": "Khong co goc gap > 45 do giua 2 doan lien nhau (ke ca goc 'an' sau doan vat < 0.3 mm), tru vong cau D+/D- trong courtyard connector buoc pad 0.5 mm?"
+  },
+  {
+   "id": "Q17",
+   "mode": "auto",
+   "check": "silk_refs",
+   "rules": [
+    "G05",
+    "L64"
+   ],
+   "q": "Moi linh kien co ky hieu IN tren silkscreen (khong nam o F.Fab/an), khong de len pad, via, chu khac, khong ra ngoai board?",
+   "stage": "finish"
+  },
+  {
+   "id": "Q18",
+   "mode": "auto",
+   "check": "silk_near_own",
+   "rules": [
+    "G05",
+    "L64"
+   ],
+   "q": "Moi ky hieu nam gan linh kien CUA NO nhat (khong gan nham sang linh kien ben canh)?",
+   "stage": "finish"
+  },
+  {
+   "id": "I01",
+   "mode": "image",
+   "rules": [
+    "L30",
+    "L09",
+    "L06"
+   ],
+   "q": "Tung khoi (USB, nguon, MCU, tai) co cung vai tro + vi tri tuong doi voi khoi tuong ung trong ref khong? Lech o dau, co ly do khong?",
+   "stage": "place_route"
+  },
+  {
+   "id": "I02",
+   "mode": "image",
+   "rules": [
+    "L60",
+    "L31"
+   ],
+   "q": "Trunk nguon co di thang/chu L ngan nhat, TVS/tu nam TREN trunk (trunk qua tam pad), tai lay bang nhanh ngan?",
+   "stage": "place_route"
+  },
+  {
+   "id": "I03",
+   "mode": "image",
+   "rules": [
+    "L62",
+    "P04"
+   ],
+   "q": "Co duong nao vong/khep quanh chan hoac linh kien khac ma khong can (dau hieu dat sai linh kien)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "I04",
+   "mode": "image",
+   "rules": [
+    "P04",
+    "G03"
+   ],
+   "q": "Moi tu decap: pad GND cua no co via/mat dong GND ngay canh (vong hoi ngan)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "I05",
+   "mode": "image",
+   "rules": [
+    "R08",
+    "L47"
+   ],
+   "q": "Via nao co the bo neu doi/xoay mot linh kien? Da kiem kha thi hinh hoc chua (L63)?",
+   "stage": "place_route"
+  },
+  {
+   "id": "I06",
+   "mode": "image",
+   "rules": [
+    "L08",
+    "R05"
+   ],
+   "q": "Track tin hieu di duoi than connector/IC co ly do, khong cat ngang mat GND duoi cap USB?",
+   "stage": "place_route"
+  },
+  {
+   "id": "I07",
+   "mode": "image",
+   "rules": [
+    "P02",
+    "L35",
+    "A05"
+   ],
+   "q": "Dong tin hieu va nguon chay mot chieu qua board, khoi dat theo do nhay, khong co khoi bi day ra xa khien day dai?",
+   "stage": "place_route"
+  },
+  {
+   "id": "I08",
+   "mode": "image",
+   "rules": [
+    "L33",
+    "G05"
+   ],
+   "q": "Silkscreen: nhan chan header/connector dung thu tu, ky hieu doc duoc, khong de len pad?",
+   "stage": "finish"
+  },
+  {
+   "id": "I09",
+   "mode": "image",
+   "rules": [
+    "L62"
+   ],
+   "q": "Nhin toan board nhu nguoi review khac: con cho nao xau ma cac cau tren chua hoi? (them cau moi vao ngan hang neu co)",
+   "stage": "place_route"
+  },
+  {
+   "id": "Q22",
+   "mode": "auto",
+   "check": "decap_gnd_via",
+   "stage": "place_route",
+   "rules": [
+    "L71",
+    "P04"
+   ],
+   "q": "Moi tu decap co via GND trong 1.5 mm quanh pad GND cua no?"
+  },
+  {
+   "id": "I10",
+   "mode": "image",
+   "stage": "place_route",
+   "rules": [
+    "L69",
+    "R07"
+   ],
+   "q": "Cap vi sai (USB D+/D-) co di thanh CAP: song song, khoang cach deu, fan-in/fan-out doi xung vao chan IC va connector?"
+  },
+  {
+   "id": "I11",
+   "mode": "image",
+   "stage": "place_route",
+   "rules": [
+    "L70"
+   ],
+   "q": "Cac nhom day cung chuc nang (UART TX/RX, kenh LED, PWM) co di thanh BUS: khoang cach deu, cac diem gap thang hang?"
+  },
+  {
+   "id": "I12",
+   "mode": "image",
+   "stage": "place_route",
+   "rules": [
+    "L71",
+    "G03"
+   ],
+   "q": "Via khau GND co phu deu moi vung dong GND (moi dao, quanh IC, giua cac nhom day, doc mep), khong chi luoi thua?"
+  },
+  {
+   "id": "I13",
+   "mode": "image",
+   "stage": "place_route",
+   "rules": [
+    "L73"
+   ],
+   "q": "Nhanh nguon co di vong ra ngoai (mep board) de nhuong cho cho chan IC, thay vi ep sat chan?"
+  }
+ ]
+}

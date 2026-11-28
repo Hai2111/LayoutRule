@@ -153,7 +153,15 @@ def load_board(path):
             ay = fy + px*math.sin(cr) + py*math.cos(cr)
             size_node = kid(pad, 'size') or ['size', 1, 1]
             net_id = kid(pad, 'net')
-            pnet = net_map.get(int(net_id[1]) if net_id else -1, '')
+            # KiCad <=9: (net 5 "NAME"); KiCad 10: (net "NAME") -> no numeric id (crashed with ValueError before)
+            if net_id and len(net_id) > 1:
+                v = net_id[1]
+                if isinstance(v, (int, float)) or str(v).lstrip('-').isdigit():
+                    pnet = net_map.get(int(v), net_id[2] if len(net_id) > 2 else '')
+                else:
+                    pnet = str(v)
+            else:
+                pnet = ''
             pad_type = pad[2] if len(pad) > 2 else ''
             pads.append({'x': ax, 'y': ay,
                          'w': flt(size_node,1), 'h': flt(size_node,2),

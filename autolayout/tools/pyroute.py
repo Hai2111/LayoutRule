@@ -31,6 +31,8 @@ NECK_W = 0.25            # nhanh vao pad pitch min: thu hep xuong 0.25 mm (owner
 GRID_SAFETY = 0.02      # mm: bu sai so lam tron luoi 0.05 (pad khong nam tren luoi)
 GND_VIA_B_EXTRA = 0.45  # mm: track B.Cu khong sat via GND (de thermal relief noi duoc voi plane)
 VIA_EXTRA = 0.15        # track/via cua net khac khong duoc sat via: clearance + 0.15 mm (yeu cau owner)
+HUG_GAP = 0.45      # mm: mep track cach mep pad SMD khac net <= gia tri nay = "sat hang chan" (owner 2026-11-27: trace qua roi)
+VIA_PAD_GAP = 0.25   # Eurocircuits: >=0.25 mm mep pad SMD -> mep via (L52)
 GND_NEAR = 1.5          # mm: via GND cua tu decoupling cach pad GND <= 1.5 (D-DECAP)
 KEEP_LOOP_DEPTH = 1.5     # mm: vung duoc phep vong quanh dau pad connector (cau D+/D-, cau VBUS) tren F.Cu
 BRIDGE_VIA = (0.5, 0.3)  # via nho nhat (min_via_diameter) cho cau noi pad o hang pad 0.5 mm
@@ -44,6 +46,7 @@ COST = {
     "bcu_mult": 2.0,
     "bcu_p12": 3.5,     # B.Cu cho net P1/P2 dat hon (D-2L: khong cat plane GND)
     "via_p12": 14.0,    # via tren net P1/P2: dat ngang ~14 mm duong di, tuc la chi khi het cach khac
+    "hug": 3.0,          # he so nhan chieu dai khi di sat (<= HUG_GAP) pad SMD cua net khac: chong chay doc hang chan IC (L57)
     "couple_out": 1.35,  # he so nhan chieu dai khi KHONG di song song voi net doi tac (cap vi sai)     # he so nhan chieu dai tren B.Cu (plane GND, D-2L)
 }
 
@@ -293,6 +296,7 @@ class Router:
         self.cur_via_cost = COST["via"]
         self.cur_bcu = COST["bcu_mult"]
         self.segs = {}      # net -> [(layer, (x1,y1), (x2,y2), w)]  de ghep cap + do do dai
+        self.preconn = self._existing_clusters(b)     # (ref,num) -> id cum: pad DA noi san bang dong co san (L79)
         self.virt = {}
         self._make_virtual()
         # dong da co (khi khong --strip)
@@ -304,6 +308,56 @@ class Router:
                 a_, c_ = pt_mm(t.GetStart()), pt_mm(t.GetEnd())
                 self.items.append(Item("seg", (a_[0], a_[1], c_[0], c_[1], t.GetWidth() / 2e6),
                                        {0 if t.GetLayer() == pcbnew.F_Cu else 1}, t.GetNetname()))
+
+    @staticmethod
+    def _existing_clusters(b):
+        """Union-find hinh hoc: pad + doan + via cung net cham nhau -> cung cum. Tra ve {(ref,num): (net, id)}.
+        Khong co buoc nay, route lai net da co day tay se coi moi pad la mot nhom va di THEM duong moi (L79)."""
+        tr = [t for t in b.GetTracks() if t.GetNetname()]
+        if not tr:
+            return {}
+        pads = [p for f in b.GetFootprints() for p in f.Pads() if p.GetNetname()]
+        nodes = [("pad", p) for p in pads] + [("trk", t) for t in tr]
+        par = list(range(len(nodes)))
+        def find(i):
+            while par[i] != i:
+                par[i] = par[par[i]]; i = par[i]
+            return i
+        def uni(i, j):
+            par[find(i)] = find(j)
+        bynet = {}
+        for i, (k, o) in enumerate(nodes):
+            bynet.setdefault(o.GetNetname(), []).append(i)
+        TOL = 2000                                    # 2 um
+        def ends(t):
+            return [t.GetPosition()] if t.GetClass() == "PCB_VIA" else [t.GetStart(), t.GetEnd()]
+        def layers(t):
+            return {pcbnew.F_Cu, pcbnew.B_Cu} if t.GetClass() == "PCB_VIA" else {t.GetLayer()}
+        for net, idx in bynet.items():
+            ts = [i for i in idx if nodes[i][0] == "trk"]
+            ps = [i for i in idx if nodes[i][0] == "pad"]
+            if not ts:
+                continue
+            for a in range(len(ts)):
+                ta = nodes[ts[a]][1]
+                for c in range(a + 1, len(ts)):
+                    tc = nodes[ts[c]][1]
+                    if not (layers(ta) & layers(tc)):
+                        continue
+                    if any((e1 - e2).EuclideanNorm() <= TOL for e1 in ends(ta) for e2 in ends(tc)) or \
+                       any(ta.HitTest(e, 0) for e in ends(tc)) or any(tc.HitTest(e, 0) for e in ends(ta)):   # ca noi chu T (dau doan nam giua doan kia)
+                        uni(ts[a], ts[c])
+                for pi in ps:
+                    p = nodes[pi][1]
+                    pl = {pcbnew.F_Cu, pcbnew.B_Cu} if p.GetAttribute() == pcbnew.PAD_ATTRIB_PTH else {pcbnew.B_Cu if p.IsOnLayer(pcbnew.B_Cu) and not p.IsOnLayer(pcbnew.F_Cu) else pcbnew.F_Cu}
+                    if (layers(ta) & pl) and (any(p.HitTest(e) for e in ends(ta)) or
+                                              (ta.GetClass() != "PCB_VIA" and ta.HitTest(p.GetPosition(), 0))):   # doan chay XUYEN qua pad (vd U2 3->4)
+                        uni(ts[a], pi)
+        out = {}
+        for i, (k, o) in enumerate(nodes):
+            if k == "pad":
+                out[(o.GetParentFootprint().GetReference(), o.GetNumber())] = (o.GetNetname(), find(i))
+        return out
 
     ESC_LEN = 1.2
     ESC_LEN_FINE = 2.6
@@ -339,9 +393,19 @@ class Router:
             vd = vd_override
         mt = [bytearray(g.n), bytearray(g.n)]      # track
         mv = [bytearray(g.n), bytearray(g.n)]      # via
+        hug = [bytearray(g.n), bytearray(g.n)]     # vung "sat pad khac net": khong cam, chi dat hon (COST hug)
         virt = [v for n, vs in self.virt.items() if n != net for v in vs]
         for it in self.items + virt:
+            if it.net != net and it.net != "#HOLE" and it.kind == "rect" and len(it.layers) == 1:
+                x0, y0, x1, y1 = it.data; e = max(clr, nc(it.net)[0]) + w / 2 + HUG_GAP
+                for l in it.layers:
+                    g.rect(hug[l], x0 - e, y0 - e, x1 + e, y1 + e)
             if it.net == net:
+                # V1: via KHONG duoc nam trong / sat pad SMD, ke ca pad cua chinh net (thiec chay xuong lo khi reflow)
+                if it.kind == "rect" and len(it.layers) == 1:
+                    x0, y0, x1, y1 = it.data; e = VIA_PAD_GAP + vd / 2
+                    for l in (0, 1):
+                        g.rect(mv[l], x0 - e, y0 - e, x1 + e, y1 + e)
                 continue
             c0 = 0.0 if it.net == "#HOLE" else max(clr, nc(it.net)[0]) + it.margin + GRID_SAFETY
             for m, half in ((mt, w / 2), (mv, vd / 2)):
@@ -384,6 +448,8 @@ class Router:
                 e_ = w / 2 + 0.06
                 self._clear_rect(kp0, x0 - e_, y0 - e_, x1 + e_, y1 + e_, net)     # loi vao pad cua chinh net xuyen qua vung dem keepout
         mt[0] = bytearray((int.from_bytes(mt[0], "little") | int.from_bytes(kp0, "little")).to_bytes(g.n, "little"))
+        if clr_override is None and w_override is None:
+            self.cur_hug = hug
         return mt, mv
 
     def _clear_rect(self, m, x0, y0, x1, y1, net):
@@ -402,6 +468,7 @@ class Router:
     def astar(self, sources, goals, mt, mv, via_ok, padcells, max_exp=MAX_EXP, goal_fn=None, window=None, near=None):
         g = self.g
         nx, N = g.nx, g.n
+        hugm = getattr(self, "cur_hug", None)
         goals = set(goals)
         gl = [(k % N) % nx for k in goals], [(k % N) // nx for k in goals]
         gcoords = [((k % N) % nx, (k % N) // nx) for k in goals]
@@ -455,6 +522,8 @@ class Router:
                 if dx and dy and (m[iy * nx + jx] or m[jy * nx + ix]):
                     continue
                 c = step[(dx, dy)] * (self.cur_bcu if l == 1 else 1.0)
+                if hugm is not None and hugm[l][jdx]:
+                    c *= COST["hug"]
                 if near is not None and not near[l][jdx]:
                     c *= COST["couple_out"]      # ghep cap: ra ngoai vung bam sat net doi tac thi dat hon
                 if d != 8:
@@ -533,11 +602,20 @@ class Router:
                     ix_, iy_ = g.cell(v_[0], v_[1]); ext.add(iy_ * g.nx + ix_)
                 px_, py_ = p["x"], p["y"]
                 near_ok = lambda l, idx: math.hypot(g.ox + (idx % g.nx) * RES - px_, g.oy + (idx // g.nx) * RES - py_) <= GND_NEAR
+                # V1: via GND khong lan/sat pad (thiec chay xuong lo khi reflow). Canh via cach MOI pad SMD >= VIA_PAD_GAP
+                def off_pads(idx, _r=self.cfg_via_r(net) if hasattr(self, "cfg_via_r") else 0.3):
+                    cx_, cy_ = g.ox + (idx % g.nx) * RES, g.oy + (idx // g.nx) * RES
+                    for q_ in self.pads:
+                        if q_["tht"]: continue
+                        x0_, y0_, x1_, y1_ = q_["rect"]
+                        if math.hypot(max(x0_ - cx_, 0, cx_ - x1_), max(y0_ - cy_, 0, cy_ - y1_)) < _r + VIA_PAD_GAP:
+                            return False
+                    return True
                 path, ex = self.astar(src, [], mt, mv, via_ok, padcells,
-                                      goal_fn=lambda l, idx: l == 0 and ((via_ok(l, idx, mv) and idx not in padcells and near_ok(l, idx)) or idx in ext))
+                                      goal_fn=lambda l, idx: l == 0 and ((via_ok(l, idx, mv) and idx not in padcells and near_ok(l, idx) and off_pads(idx)) or (idx in ext and off_pads(idx))))
                 if not path:                                 # khong co cho trong <= GND_NEAR: cho phep xa hon
                     path, ex = self.astar(src, [], mt, mv, via_ok, padcells,
-                                          goal_fn=lambda l, idx: l == 0 and via_ok(l, idx, mv) and idx not in padcells)
+                                          goal_fn=lambda l, idx: l == 0 and via_ok(l, idx, mv) and idx not in padcells and off_pads(idx))
                 if not path:
                     res["fail"].append(f'{p["ref"]}.{p["num"]}')
                     continue
@@ -564,6 +642,19 @@ class Router:
             for s_ in pcells(p):
                 mt[s_ // N][s_ % N] = 0
         groups = [{"pads": [p], "cells": set(pcells(p)), "pcells": set(pcells(p))} for p in pads]
+        # pad da noi san bang dong co san (ve tay / buoc truoc) -> gop thanh 1 nhom, khong di them duong (L79)
+        _cid = {}
+        for i_ in range(len(groups)):
+            k_ = self.preconn.get((groups[i_]["pads"][0]["ref"], groups[i_]["pads"][0]["num"]))
+            if k_ is None:
+                continue
+            if k_ in _cid:
+                ga_ = groups[_cid[k_]]
+                if ga_ is not groups[i_]:
+                    ga_["pads"] += groups[i_]["pads"]; ga_["cells"] |= groups[i_]["cells"]; ga_["pcells"] |= groups[i_]["pcells"]
+                    groups[i_] = ga_
+            else:
+                _cid[k_] = i_
         bridge_mv = None
         # --- cau noi pad cung linh kien (vd 2 pad VBUS cua USB-C): tim kiem trong cua so hep ------
         for i in range(len(groups)):

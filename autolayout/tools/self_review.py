@@ -136,6 +136,7 @@ def main():
                 if 0 < t < 1 and math.hypot(u[0] - (a[0] + t * dx), u[1] - (a[1] + t * dy)) < 0.03:
                     add(u, ka, math.hypot(u[0] - a[0], u[1] - a[1])); add(u, kc, math.hypot(c[0] - u[0], c[1] - u[1]))
         padnode = {}
+        vpads = {}      # dinh nam trong pad -> pad do (trunk di XUYEN tam pad: dinh noi pad bang canh 0, Dijkstra co the bo qua nut PAD)
         for ref, num, pnet, rect, tht, cen in pads:
             if pnet != net:
                 continue
@@ -144,6 +145,7 @@ def main():
                 if (u[2] == 0 or tht) and rect[0] - 0.02 <= u[0] <= rect[2] + 0.02 and rect[1] - 0.02 <= u[1] <= rect[3] + 0.02:
                     add(("PAD", pid), u, 0.0)
                     padnode[pid] = ("PAD", pid)
+                    vpads.setdefault(u, []).append(pid)
         src = chs[0]["from"]
         if ("PAD", src) not in adj:
             print(f"    {net}: pad nguon {src} chua co dong nao ({'chua route' })")
@@ -166,7 +168,12 @@ def main():
             seq = []
             while u in prev or u == ("PAD", src):
                 if u[0] == "PAD":
-                    seq.append(u[1])
+                    if u[1] not in seq:
+                        seq.append(u[1])
+                else:
+                    for q in vpads.get(u, []):
+                        if q not in seq:
+                            seq.append(q)
                 if u == ("PAD", src):
                     break
                 u = prev[u]
