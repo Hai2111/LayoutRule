@@ -66,8 +66,9 @@ def load_config(board_path, pro_override=None):
         return
     d = json.load(open(pro, encoding="utf-8"))
     ns = d.get("net_settings", {})
-    for c in ns.get("classes", []):
-        CLASSES[c["name"]] = (c.get("clearance", 0.2), c.get("track_width", 0.2), c.get("via_diameter", 0.6), c.get("via_drill", 0.3))
+    for c in ns.get("classes", []):      # ca dinh dang cu/tay viet: khong co "name", trace_width / via_hole_size
+        CLASSES[c.get("name", "Default")] = (c.get("clearance", 0.2), c.get("track_width", c.get("trace_width", 0.2)),
+                                             c.get("via_diameter", 0.6), c.get("via_drill", c.get("via_hole_size", 0.3)))
     for p in ns.get("netclass_patterns", []) or []:
         PATTERNS.append((p["pattern"], p["netclass"]))
     r = d.get("board", {}).get("design_settings", {}).get("rules", {}) or d.get("board_design_settings", {}).get("rules", {})
@@ -1072,7 +1073,8 @@ def main():
             print("     cau noi pad:", res["bridges"])
         sys.stdout.flush()
     r.finalize()
-    b.Save(outp)
+    from ksave import save_board        # ghi nguyen tu, khong sinh .kicad_pro/.kicad_prl rac (L76)
+    save_board(b, outp)
     print("saved", outp, "total", round(time.time() - t0, 1), "s")
 
 

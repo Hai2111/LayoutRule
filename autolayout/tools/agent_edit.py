@@ -53,6 +53,8 @@ def drop_step(name):
 
 def commit(path, what, extra=None):
     shutil.copy(os.path.join(W, "project.kicad_pro"), path[:-10] + ".kicad_pro")
+    try: os.remove(path[:-10] + ".kicad_prl")         # pcbnew Save() sinh .kicad_prl (trang thai UI) = file rac (L76)
+    except OSError: pass
     if os.path.exists(os.path.join(W, "project.kicad_dru")):   # luat rieng (vd ngoai le land pattern) di theo moi buoc
         shutil.copy(os.path.join(W, "project.kicad_dru"), path[:-10] + ".kicad_dru")
     prev = open(os.path.join(W, "cur.txt")).read().strip() if os.path.exists(os.path.join(W, "cur.txt")) else ""
@@ -700,6 +702,9 @@ elif CMD == "check":
     c = cur(); chk = os.path.join(W, "_chk.kicad_pcb"); shutil.copy(c, chk); shutil.copy(os.path.join(W, "project.kicad_pro"), os.path.join(W, "_chk.kicad_pro"))
     if os.path.exists(os.path.join(W, "project.kicad_dru")): shutil.copy(os.path.join(W, "project.kicad_dru"), os.path.join(W, "_chk.kicad_dru"))
     subprocess.run([CLI, "pcb", "drc", chk, "-o", os.path.join(W, "_drc.json"), "--format", "json", "--severity-all", "--refill-zones"], capture_output=True)
+    for ext in (".kicad_pcb", ".kicad_pro", ".kicad_prl", ".kicad_dru"):      # ban sao kiem tra la rac sau khi co _drc.json (L76)
+        try: os.remove(chk[:-10] + ext)
+        except OSError: pass
     j = json.load(open(os.path.join(W, "_drc.json"), encoding="utf-8"))
     errs = [v for v in j["violations"] if v["severity"] == "error"]
     print("buoc", os.path.basename(c))
